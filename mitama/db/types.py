@@ -10,14 +10,14 @@
 
 from sqlalchemy.types import TypeDecorator, INT
 
-class User(types.TypeDecorator):
+class User(TypeDecorator):
     impl = INT
     def process_bind_param(self, value, dialect):
         return value.id
     def process_result_value(self, value, dialect):
         return User.get(value)
 
-class Group(types.TypeDecorator):
+class Group(TypeDecorator):
     impl = INT
     def process_bind_param(self, value, dialect):
         return value.id
