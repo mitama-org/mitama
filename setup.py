@@ -6,6 +6,9 @@ setup(
     name = 'mitama',
     version = '1.0.0',
     install_requires = ['sqlalchemy', 'aiohttp'],
+    extra_requires = {
+        'develop': ['pytest']
+    },
     packages = find_packages(),
     entry_points = {
         'console_scripts': [
