@@ -8,12 +8,13 @@ Todo:
     * コマンドから生成するmitama.jsonの値はconfigのデフォルト値を使うので、mitama.conf.Configにエクスポート関数を用意したい
 '''
 
+import os
 from pathlib import Path
 import json
 
 class Config:
-    project_dir = os.dirname(__file__)
-    sqlite_db_path = Path(self.project_dir) / 'db.sqlite3'
+    project_dir = os.path.dirname(__file__)
+    sqlite_db_path = Path(project_dir) / 'db.sqlite3'
     apps = dict()
     def __init__(self, dic):
         for k in dic:
