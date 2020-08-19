@@ -9,23 +9,19 @@ Todo:
     * sqlalchemy用にUser型とGroup型を作って、↓のクラスをそのまま使ってDB呼び出しできるようにしたい
 '''
 
-from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from mitama.db import types
+from mitama.db import _CoreDatabase, Column, Integer, String
 
-Base = declarative_base()
+db = _CoreDatabase()
 
-class Node:
-    pass
-
-class User(Base, Node):
+class User(db.Model):
     __tablename__ = 'mitama_user'
     id = Column(Integer, primary_key = True)
     name = Column(String(255))
     screen_name = Column(String(255))
     password = Column(String(255))
 
-class Group(Base, Node):
+class Group(db.Model):
     __tablename__ = 'mitama_group'
     id = Column(Integer, primary_key = True)
     name = Column(String(255))
