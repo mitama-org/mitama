@@ -24,7 +24,7 @@ class Config:
                 continue
     def to_dict(self):
         # dictに変換する
-        return {}
+        return { }
 
 
 def get_from_project_dir():
