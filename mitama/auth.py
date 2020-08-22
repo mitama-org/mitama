@@ -14,7 +14,7 @@ class AuthorizationError(Exception):
 
 def password_auth(screen_name, password):
     user = User.query.filter(User.screen_name == screen_name).first()
-    if checkpw(password, user.password):
+    if bcrypt.checkpw(password.encode(), user.password):
         return user
     else:
         raise AuthorizationError('Wrong password')
