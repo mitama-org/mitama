@@ -17,16 +17,18 @@ class StreamResponse(web.StreamResponse):
 class Request(web.Request):
     pass
 
-class Controller:
+class Controller(metaclass = ABCMeta):
     @abstractmethod
     async def handle(self, req: Request):
         pass
 
 class Server:
     routing = []
-    def add_routes(self, routes: list):
+    def __init__(self, port=8080):
+        self.port = port
+    def add_routes(self, routes: list, _path):
         for path, ctrl in routes:
-            self.add_route(path, ctrl)
+            self.add_route(_path+path, ctrl)
     def add_route(self, path, ctrl):
         if type(ctrl) is str:
             handler = eval(ctrl)
@@ -40,8 +42,8 @@ class Server:
                 'Controller must be function, class which extends mitama.http.server.Controller,'
                 'or a string whose name of the callable thing.'
             )
-        self.routing.append(web.get(path, ctrl.handle))
+        self.routing.append(web.get(path, handler))
     def run(self):
         app = web.Application()
         app.add_routes(self.routing)
-        web.run_app(app)
+        web.run_app(app, port=self.port)
