@@ -10,7 +10,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import DeclarativeMeta
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm.exc import UnmappedClassError
-from sqlalchemy import *
 from sqlalchemy import orm
 from .model import Model
 from .driver.sqlite3 import get_engine
@@ -21,7 +20,6 @@ class _Singleton:
     def __new__(cls, *args, **kwargs):
         if cls._instance == None:
             cls._instance = super(_Singleton, cls).__new__(cls)
-            print(cls,'instance was generated')
         return cls._instance
 
 class _QueryProperty:
