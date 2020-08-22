@@ -13,7 +13,7 @@ from pathlib import Path
 import json
 
 class Config:
-    apps = dict()
+    apps = list()
     def __init__(self, path, dic):
         self.__project_dir = path;
         self.__sqlite_db_path = Path(self.__project_dir) / 'db.sqlite3'
