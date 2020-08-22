@@ -13,10 +13,10 @@ from pathlib import Path
 import json
 
 class Config:
-    project_dir = os.path.dirname(__file__)
-    sqlite_db_path = Path(project_dir) / 'db.sqlite3'
     apps = dict()
-    def __init__(self, dic):
+    def __init__(self, path, dic):
+        self.__project_dir = path;
+        self.__sqlite_db_path = Path(self.__project_dir) / 'db.sqlite3'
         for k in dic:
             try:
                 setattr(self, k, dic[k])
@@ -24,11 +24,15 @@ class Config:
                 continue
     def to_dict(self):
         # dictに変換する
-        return {}
+        dic = dict()
+        for k in self.__dict__:
+            if k[7:9] != '__':  #__dict__では_Configプレフィクスがつくので、その文字数を避けてる
+                dic[k] = self.__dict__[k]
+        return dic
 
 
 def get_from_project_dir():
-    path = Path(os.path.dirname(__file__))
-    with open(path / 'mitama.conf') as f:
+    path = Path(os.getcwd())
+    with open(path / 'mitama.json') as f:
         data = f.read()
-    return Config(json.loads(data))
+    return Config(path, json.loads(data))
