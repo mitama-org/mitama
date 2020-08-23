@@ -34,3 +34,33 @@ def test_nodes():
     assert test_group.id == 456
     assert test_group.name == 'test_group'
     assert test_group.screen_name == 'test_group_screen'
+
+def test_relation():
+    db = _CoreDatabase()
+    from mitama.nodes import User,Group,Relation
+    db.create_all()
+    test_user = User()
+    test_user.name = 'test_user_'
+    test_user.screen_name = 'test_user_screen_'
+    test_user.password = 'test_pass_'
+    db.session.add(test_user)
+    test_group = Group()
+    test_group.name = 'test_group_'
+    test_group.screen_name = 'test_group_screen_'
+    test_group2 = Group()
+    test_group2.name = 'test_group_2'
+    test_group2.screen_name = 'test_group_screen_2'
+    db.session.add(test_group)
+    db.session.add(test_group2)
+    db.session.commit()
+    test_group.append_all([
+        test_user,
+        test_group2
+    ])
+    test_children = test_group.children()
+    assert test_children[0] == test_user
+    assert test_children[1] == test_group2
+    test_group.remove(test_user)
+    test_group.remove(test_group2)
+    test_children = test_group.children()
+    assert len(test_children) == 0
