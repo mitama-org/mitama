@@ -13,10 +13,10 @@ from pathlib import Path
 import json
 
 class Config:
-    apps = list()
+    apps = dict()
     def __init__(self, path, dic):
-        self.__project_dir = path;
-        self.__sqlite_db_path = Path(self.__project_dir) / 'db.sqlite3'
+        self._project_dir = path;
+        self._sqlite_db_path = Path(self._project_dir) / 'db.sqlite3'
         for k in dic:
             try:
                 setattr(self, k, dic[k])
@@ -26,7 +26,7 @@ class Config:
         # dictに変換する
         dic = dict()
         for k in self.__dict__:
-            if k[7:9] != '__':  #__dict__では_Configプレフィクスがつくので、その文字数を避けてる
+            if k[0] != '_':  #__dict__では_Configプレフィクスがつくので、その文字数を避けてる
                 dic[k] = self.__dict__[k]
         return dic
 

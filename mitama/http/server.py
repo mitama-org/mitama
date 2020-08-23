@@ -8,19 +8,7 @@
 '''
 
 from aiohttp import web
-from abc import ABCMeta, abstractmethod
-
-class Response(web.Response):
-    pass
-class StreamResponse(web.StreamResponse):
-    pass
-class Request(web.Request):
-    pass
-
-class Controller(metaclass = ABCMeta):
-    @abstractmethod
-    async def handle(self, req: Request):
-        pass
+from . import Controller
 
 class Server:
     routing = []
