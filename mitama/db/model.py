@@ -12,4 +12,11 @@ from sqlalchemy.orm import class_mapper
 from sqlalchemy.ext.declarative import declarative_base
 
 class Model:
-    pass
+    def create(self):
+        self.query.session.add(self)
+        self.query.session.commit()
+    def update(self):
+        self.query.session.commit()
+    def delete(self):
+        self.query.session.delete(self)
+        self.query.session.commit()
