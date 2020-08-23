@@ -44,6 +44,8 @@ class Server:
             )
         self.routing.append(web.get(path, handler))
     def run(self):
-        app = web.Application()
+        app = web.Application(middlewares = [
+            web.normalize_path_middleware(append_slash = True)
+        ])
         app.add_routes(self.routing)
         web.run_app(app, port=self.port)
