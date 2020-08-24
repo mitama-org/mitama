@@ -1,4 +1,5 @@
-from mitama.http import Response, App
+from mitama.app import App
+from mitama.http import Response
 from . import Metadata
 from mitama.db.types import *
 

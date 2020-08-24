@@ -1,6 +1,7 @@
-from mitama.http import create_app_metadata
+from mitama.app import BaseMetadata
 
-Metadata = create_app_metadata()
+class Metadata(BaseMetadata):
+    pass
 
 def init_app(name):
     meta = Metadata()
