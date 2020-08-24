@@ -1,9 +1,9 @@
 {
-    "apps": [
-        {
+    "apps": {
+        "app1": {
             "include": "app1",
             "path": "/home"
         }
-    ]
+    }
 
 }

@@ -21,8 +21,11 @@ class Command:
             port = '8080'
         server = Server(port)
         config = get_from_project_dir()
-        sys.path.append(str(config.project_dir))
-        for _app in config.apps:
-            app = importlib.__import__(_app['include'] + '.urls')
-            server.add_routes(app.urls.urls, _app['path'])
+        sys.path.append(str(config._project_dir))
+        for app_name in config.apps:
+            _app = config.apps[app_name]
+            init = importlib.__import__(_app['include'])
+            init.init_app(app_name)
+            app = importlib.__import__(_app['include'] + '.main')
+            server.add_routes(app.main.app.routing, _app['path'])
         server.run()

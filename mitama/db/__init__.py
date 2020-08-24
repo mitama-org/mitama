@@ -12,15 +12,8 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm.exc import UnmappedClassError
 from sqlalchemy import orm
 from .model import Model
-from .driver.sqlite3 import get_engine
-
-
-class _Singleton:
-    _instance = None
-    def __new__(cls, *args, **kwargs):
-        if cls._instance == None:
-            cls._instance = super(_Singleton, cls).__new__(cls)
-        return cls._instance
+from .driver.sqlite3 import get_engine, get_app_engine
+from mitama.extra import _Singleton
 
 class _QueryProperty:
     def __init__(self, db):

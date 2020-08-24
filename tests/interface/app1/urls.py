@@ -1,11 +1,6 @@
-from mitama.http.server import Response
-async def home(request):
-    return Response(text = 'this is home')
-
-async def about(request):
-    return Response(text = 'this is about')
+from . import views
 
 urls = [
-    ('/', home),
-    ('/about', about)
+    ('/', views.home),
+    ('/about', views.about)
 ]
