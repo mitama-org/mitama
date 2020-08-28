@@ -15,6 +15,12 @@ from mitama.db.types import Column, Integer, String, Node, Group
 
 db = _CoreDatabase()
 
+class Relation(db.Model):
+    __tablename__ = 'mitama_relation'
+    id = Column(Integer, primary_key = True)
+    parent = Column(Group)
+    child = Column(Node)
+
 class User(db.Model):
     __tablename__ = 'mitama_user'
     id = Column(Integer, primary_key = True)
@@ -30,12 +36,6 @@ class User(db.Model):
         else:
             raise Exception()
         return user
-
-class Relation(db.Model):
-    __tablename__ = 'mitama_relation'
-    id = Column(Integer, primary_key = True)
-    parent = Column(Group)
-    child = Column(Node)
 
 class Group(db.Model):
     __tablename__ = 'mitama_group'
@@ -89,6 +89,6 @@ class Group(db.Model):
         return children
     def is_in(self, node):
         if node.__class__ != 'Group' and node.__class__ != 'User':
-            raise TypeError('Removing object must be Group or User instance')
+            raise TypeError('Checking object must be Group or User instance')
         rels = Relation.query.filter(Relation.parent == self and Relation.node == node).all()
         return rels.len()!=0
