@@ -36,6 +36,26 @@ class User(db.Model):
         else:
             raise Exception()
         return user
+    def is_ancester(self, node):
+        if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
+            raise TypeError('Checking object must be Group or User instance')
+        layer = self.parents()
+        while len(layer) > 0:
+            if node in layer:
+                return True
+            layer_ = list()
+            for node_ in layer:
+                layer_.extend(
+                    node_.parents()
+                )
+            layer = layer_
+        return False
+    def parent(self):
+        rels = Relation.query.filter(Relation.child == self).all()
+        parent = list()
+        for rel in rels:
+            parent.append(rel.parent)
+        return parent
 
 class Group(db.Model):
     __tablename__ = 'mitama_group'
@@ -57,8 +77,7 @@ class Group(db.Model):
         rel = Relation()
         rel.parent = self
         rel.child = node
-        db.session.add(rel)
-        db.session.commit()
+        rel.create()
     def append_all(self, nodes):
         for node in nodes:
             if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
@@ -81,12 +100,47 @@ class Group(db.Model):
         rels = Relation.query.filter(Relation.parent == self and Relation.child in nodes).all()
         db.session.delete(rels)
         db.session.commit()
+    def parents(self):
+        rels = Relation.query.filter(Relation.child == self).all()
+        parent = list()
+        for rel in rels:
+            parent.append(rel.parent)
+        return parent
     def children(self):
         rels = Relation.query.filter(Relation.parent == self).all()
         children = list()
         for rel in rels:
             children.append(rel.child)
         return children
+    def is_ancester(self, node):
+        if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
+            raise TypeError('Checking object must be Group or User instance')
+        layer = self.parents()
+        while len(layer) > 0:
+            if node in layer:
+                return True
+            layer_ = list()
+            for node_ in layer:
+                layer_.extend(
+                    node_.parents()
+                )
+            layer = layer_
+        return False
+    def is_descendant(self, node):
+        if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
+            raise TypeError('Checking object must be Group or User instance')
+        layer = self.children()
+        while len(layer) > 0:
+            if node in layer:
+                return True
+            layer_ = list()
+            for node_ in layer:
+                if node_.__class__.__name__ == 'Group':
+                    layer_.extend(
+                        node_.children()
+                    )
+            layer = layer_
+        return False
     def is_in(self, node):
         if node.__class__ != 'Group' and node.__class__ != 'User':
             raise TypeError('Checking object must be Group or User instance')

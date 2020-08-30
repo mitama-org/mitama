@@ -37,7 +37,7 @@ class Node(TypeDecorator):
         elif value.__class__.__name__ == 'User':
             return value.id * 2 - 1
         else:
-            raise TypeError('appending object must be Group or User instance')
+            raise TypeError('Appending object must be Group or User instance')
     def process_result_value(self, value, dialect):
         if value % 2 == 1:
             from mitama.nodes import User
