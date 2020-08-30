@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 setup(
     name = 'mitama',
     version = '1.0.0',
-    install_requires = ['sqlalchemy', 'aiohttp', 'bcrypt'],
+    install_requires = ['sqlalchemy', 'aiohttp', 'bcrypt', 'aiohttp_session[secure]'],
     extra_requires = {
         'develop': ['pytest']
     },

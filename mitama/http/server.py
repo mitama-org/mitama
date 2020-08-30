@@ -7,7 +7,11 @@
     * ここではわりとしっかり目のMVC2のControllerを定義してやって、そのインターフェースをアプリに強制させる方式をとりたい
 '''
 
+from cryptography import fernet
+import base64
 from aiohttp import web
+from aiohttp_session import setup
+from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from . import Controller
 
 class Server:
@@ -35,5 +39,8 @@ class Server:
         app = web.Application(middlewares = [
             web.normalize_path_middleware(append_slash = True)
         ])
+        fernet_key = fernet.Fernet.generate_key()
+        secret_key = base64.urlsafe_b64decode(fernet_key)
+        setup(app, EncryptedCookieStorage(secret_key))
         app.add_routes(self.routing)
         web.run_app(app, port=self.port)
