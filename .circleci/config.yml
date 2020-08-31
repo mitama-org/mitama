@@ -8,12 +8,12 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
       - run:
           name: Install Pytest
           command: pip install pytest
+      - run:
+          name: Install Dependencies
+          command: python setup.py develop
       - run:
           command: pytest ./
           name: Test
