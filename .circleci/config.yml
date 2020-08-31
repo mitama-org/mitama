@@ -16,7 +16,10 @@ jobs:
           command: pip install --user ./
       - run:
           name: Test
-          command: pytest ./tests/unit/*
+          command: |
+            for f in ./tests/unit/*; do
+              pytest $f
+            done
 
 workflows:
   main:
