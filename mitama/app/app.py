@@ -1,11 +1,8 @@
-from mitama.extra import _Singleton
-
-class BaseMetadata(_Singleton):
-    pass
+#!/usr/bin/python
 
 class App:
-    routing = []
     def __init__(self, meta):
+        self.routing = []
         self.meta = meta
         self.name = meta.name
     def add_routes(self, routes: list):
@@ -13,4 +10,3 @@ class App:
             self.add_route(path, ctrl)
     def add_route(self, path, ctrl):
         self.routing.append((path, ctrl))
-

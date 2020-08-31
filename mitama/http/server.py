@@ -20,7 +20,7 @@ class Server:
         self.port = port
     def add_routes(self, routes: list, _path):
         for path, ctrl in routes:
-            self.add_route(_path+path, ctrl)
+            self.add_route(_path+path if _path != '/' else path, ctrl)
     def add_route(self, path, ctrl):
         if type(ctrl) is str:
             handler = eval(ctrl)
@@ -43,4 +43,4 @@ class Server:
         secret_key = base64.urlsafe_b64decode(fernet_key)
         setup(app, EncryptedCookieStorage(secret_key))
         app.add_routes(self.routing)
-        web.run_app(app, port=self.port)
+        web.run_app(app, port=self.port, access_log = None)
