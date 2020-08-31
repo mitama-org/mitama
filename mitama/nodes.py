@@ -50,7 +50,7 @@ class User(db.Model):
                 )
             layer = layer_
         return False
-    def parent(self):
+    def parents(self):
         rels = Relation.query.filter(Relation.child == self).all()
         parent = list()
         for rel in rels:

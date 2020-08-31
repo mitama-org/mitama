@@ -6,6 +6,7 @@ class BaseMetadata(_Singleton):
 class App:
     routing = []
     def __init__(self, meta):
+        self.meta = meta
         self.name = meta.name
     def add_routes(self, routes: list):
         for path, ctrl in routes:
