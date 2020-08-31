@@ -17,4 +17,3 @@ class Database(BaseDatabase):
 def init_app(name):
     meta = Metadata()
     meta.name = name
-
