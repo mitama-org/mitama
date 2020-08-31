@@ -15,8 +15,8 @@ jobs:
           name: Install Dependencies
           command: pip install --user ./
       - run:
-          command: pytest ./
           name: Test
+          command: pytest ./tests/unit/*
 
 workflows:
   main:
