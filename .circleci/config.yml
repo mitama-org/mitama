@@ -13,7 +13,7 @@ jobs:
           command: pip install pytest
       - run:
           name: Install Dependencies
-          command: python setup.py develop
+          command: pip install --user ./
       - run:
           command: pytest ./
           name: Test
