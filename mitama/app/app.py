@@ -1,12 +1,12 @@
 #!/usr/bin/python
+from aiohttp import web
 
-class App:
+class App(web.Application):
     def __init__(self, meta):
-        self.routing = []
+        super().__init__(
+            middlewares = [
+                web.normalize_path_middleware(append_slash = True)
+            ]
+        )
         self.meta = meta
         self.name = meta.name
-    def add_routes(self, routes: list):
-        for path, ctrl in routes:
-            self.add_route(path, ctrl)
-    def add_route(self, path, ctrl):
-        self.routing.append((path, ctrl))

@@ -4,4 +4,4 @@ from mitama.app import App
 meta = Metadata()
 app = App(meta)
 
-app.add_routes(urls.urls)
+app.router.add_routes(urls.urls)

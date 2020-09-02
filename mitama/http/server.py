@@ -15,32 +15,23 @@ from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from . import Controller
 
 class Server:
-    routing = []
+    apps = dict()
     def __init__(self, port=8080):
         self.port = port
-    def add_routes(self, routes: list, _path):
-        for path, ctrl in routes:
-            self.add_route(_path+path if _path != '/' else path, ctrl)
-    def add_route(self, path, ctrl):
-        if type(ctrl) is str:
-            handler = eval(ctrl)
-        elif isinstance(ctrl, Controller):
-            handler = ctrl.handle
-        elif callable(ctrl):
-            handler = ctrl
-        else:
-            raise TypeError(
-                'Given controller is not correct type.'
-                'Controller must be function, class which extends mitama.http.server.Controller,'
-                'or a string whose name of the callable thing.'
-            )
-        self.routing.append(web.get(path, handler))
+    def add_app(self, app, _path):
+        self.apps[_path] = app
     def run(self):
-        app = web.Application(middlewares = [
-            web.normalize_path_middleware(append_slash = True)
-        ])
+        if '/' in self.apps:
+            app = self.apps['/']
+        else:
+            app = web.Application(middlewares = [
+                web.normalize_path_middleware(append_slash = True)
+            ])
         fernet_key = fernet.Fernet.generate_key()
         secret_key = base64.urlsafe_b64decode(fernet_key)
         setup(app, EncryptedCookieStorage(secret_key))
-        app.add_routes(self.routing)
+        for k in self.apps:
+            if k == '/':
+                continue
+            app.add_subapp(k, self.apps[k])
         web.run_app(app, port=self.port, access_log = None)

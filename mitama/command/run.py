@@ -27,5 +27,5 @@ class Command:
             init = importlib.__import__(_app['include'])
             init.init_app(app_name)
             app = importlib.__import__(_app['include'] + '.main')
-            server.add_routes(app.main.app.routing, _app['path'])
+            server.add_app(app.main.app, _app['path'])
         server.run()

@@ -1,5 +1,6 @@
+from mitama.http.method import *
 from . import views
 
 urls = [
-    ('/', views.welcome)
+    view('/', views.welcome)
 ]
