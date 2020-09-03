@@ -24,8 +24,8 @@ class Command:
         sys.path.append(str(config._project_dir))
         for app_name in config.apps:
             _app = config.apps[app_name]
-            init = importlib.__import__(_app['include'])
+            init = importlib.__import__(_app['include'], fromlist = ['init_app'])
             init.init_app(app_name)
-            app = importlib.__import__(_app['include'] + '.main')
-            server.add_app(app.main.app, _app['path'])
+            app = importlib.__import__(_app['include'] + '.main', fromlist=['app'])
+            server.add_app(app.app, _app['path'])
         server.run()
