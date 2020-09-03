@@ -146,3 +146,5 @@ class Group(db.Model):
             raise TypeError('Checking object must be Group or User instance')
         rels = Relation.query.filter(Relation.parent == self and Relation.node == node).all()
         return rels.len()!=0
+
+db.create_all()
