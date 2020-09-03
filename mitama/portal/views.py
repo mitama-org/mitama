@@ -19,15 +19,16 @@ async def login(request):
         try:
             result = password_auth(screen_name, password)
             sess = await get_session(request)
-            sess['jwt_token'] = get_jwt(result).decode()
+            sess['jwt_token'] = get_jwt(result)
             redirect_to = request.query.get('redirect_to', '')
             return Response(
                 headers={
                     'Location': redirect_to
-                }
+                },
+                status = 200
             )
         except AuthorizationError as err:
             data['error'] = 'パスワード、またはログイン名が間違っています'
     template = env.get_template('login.html')
-    return Response.render(template, data)
+    return Response.render(template, data, status = 401)
 

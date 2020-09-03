@@ -7,14 +7,55 @@
 '''
 
 import bcrypt
+import jwt
+import random
+import secrets
+import hashlib
+import base64
 from mitama.nodes import User
+
+secret = secrets.token_hex(32)
 
 class AuthorizationError(Exception):
     pass
 
 def password_auth(screen_name, password):
     user = User.query.filter(User.screen_name == screen_name).first()
-    if bcrypt.checkpw(password.encode(), user.password):
+    password = base64.b64encode(
+        hashlib.sha256(
+            password.encode() * 10
+        ).digest()
+    )
+    if bcrypt.checkpw(password, user.password):
         return user
     else:
         raise AuthorizationError('Wrong password')
+
+def password_hash(password):
+    salt = bcrypt.gensalt()
+    password = base64.b64encode(
+        hashlib.sha256(
+            password.encode() * 10
+        ).digest()
+    )
+    return bcrypt.hashpw(password, salt)
+
+def get_jwt(user):
+    nonce = ''.join([str(random.randint(0,9)) for i in range(16)])
+    result = jwt.encode(
+        {
+            'id': user.id,
+            'nonce': nonce
+        },
+        secret,
+        algorithm='HS256'
+    )
+    return result.decode()
+
+def check_jwt(token):
+    result = jwt.decode(
+        token,
+        secret,
+        algorithm='HS256'
+    )
+    return User.query.filter(User.id == result['id']).first()

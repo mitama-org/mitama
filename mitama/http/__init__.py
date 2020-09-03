@@ -9,8 +9,10 @@ from abc import ABCMeta, abstractmethod
 
 class Response(web.Response):
     @classmethod
-    def render(cls, template, values = {}, content_type = 'text/html'):
-        return cls(text = template.render(values), content_type = content_type)
+    def render(cls, template, values = {}, **kwargs):
+        if 'content_type' not in kwargs:
+            kwargs['content_type'] = 'text/html'
+        return cls(text = template.render(values), **kwargs)
     pass
 
 class StreamResponse(web.StreamResponse):
