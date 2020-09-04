@@ -28,5 +28,5 @@ class Command:
             init = importlib.__import__(_app['include'], fromlist = ['init_app'])
             init.init_app(app_name)
             app = importlib.__import__(_app['include'] + '.main', fromlist=['app'])
-            server.add_app(app.app, _app['path'])
+            server.add_app(app.app.app, _app['path'])
         server.run()
