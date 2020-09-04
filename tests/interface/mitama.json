@@ -4,8 +4,8 @@
             "include": "app1",
             "path": "/home"
         },
-        "skeleton": {
-            "include": "skeleton",
+        "portal": {
+            "include": "mitama.portal",
             "path": "/"
         }
     }

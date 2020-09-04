@@ -9,6 +9,7 @@ Todo:
 '''
 from mitama.conf import get_from_project_dir
 from mitama.http.server import Server
+import mitama.nodes
 import os
 import sys
 import importlib
@@ -27,5 +28,5 @@ class Command:
             init = importlib.__import__(_app['include'], fromlist = ['init_app'])
             init.init_app(app_name)
             app = importlib.__import__(_app['include'] + '.main', fromlist=['app'])
-            server.add_app(app.app, _app['path'])
+            server.add_app(app.app.app, _app['path'])
         server.run()
