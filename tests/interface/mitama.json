@@ -5,7 +5,7 @@
             "path": "/home"
         },
         "skeleton": {
-            "include": "skeleton",
+            "include": "bone",
             "path": "/"
         }
     }

@@ -2,6 +2,7 @@ from mitama.http import get_session, Response
 from .model import *
 
 async def home(request):
+    print('home')
     sess = await get_session(request)
     if 'count' not in sess:
         sess['count'] = 0
