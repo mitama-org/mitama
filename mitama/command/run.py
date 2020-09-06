@@ -25,7 +25,7 @@ class Command:
         for app_name in config.apps:
             _app = config.apps[app_name]
             init = importlib.__import__(_app['include'])
-            init.init_app(app_name)
+            init.init_app(app_name, **_app)
             app = importlib.__import__(_app['include'] + '.main')
             server.add_routes(app.main.app.routing, _app['path'])
         server.run()
