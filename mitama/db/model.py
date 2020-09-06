@@ -20,3 +20,6 @@ class Model:
     def delete(self):
         self.query.session.delete(self)
         self.query.session.commit()
+    @classmethod
+    def list(cond):
+        return self.query.filter(cond).all(self)

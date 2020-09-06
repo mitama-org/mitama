@@ -21,21 +21,25 @@ class Relation(db.Model):
     parent = Column(Group)
     child = Column(Node)
 
-class User(db.Model):
-    __tablename__ = 'mitama_user'
+class Node(object):
     id = Column(Integer, primary_key = True)
     name = Column(String(255))
     screen_name = Column(String(255))
-    password = Column(String(255))
-    @staticmethod
-    def retrieve(id = None, screen_name = None):
+    @classmethod
+    def retrieve(cls, id = None, screen_name = None):
         if id != None:
-            user = User.query.filter(User.id == id).first()
+            node = cls.query.filter(cls.id == id).first()
         elif screen_name != None:
-            user = User.query.filter(User.screen_name == screen_name).first()
+            node = cls.query.filter(cls.screen_name == screen_name).first()
         else:
-            raise Exception()
-        return user
+            raise Exception('')
+        return node
+    def parents(self):
+        rels = Relation.query.filter(Relation.child == self).all()
+        parent = list()
+        for rel in rels:
+            parent.append(rel.parent)
+        return parent
     def is_ancester(self, node):
         if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
             raise TypeError('Checking object must be Group or User instance')
@@ -50,27 +54,13 @@ class User(db.Model):
                 )
             layer = layer_
         return False
-    def parents(self):
-        rels = Relation.query.filter(Relation.child == self).all()
-        parent = list()
-        for rel in rels:
-            parent.append(rel.parent)
-        return parent
 
-class Group(db.Model):
+class User(db.Model, Node):
+    __tablename__ = 'mitama_user'
+    password = Column(String(255))
+
+class Group(db.Model, Node):
     __tablename__ = 'mitama_group'
-    id = Column(Integer, primary_key = True)
-    name = Column(String(255))
-    screen_name = Column(String(255))
-    @staticmethod
-    def retrieve(id = None, screen_name = None):
-        if id != None:
-            group = Group.query.filter(Group.id == id).first()
-        elif screen_name != None:
-            group = Group.query.filter(Group.screen_name == screen_name).first()
-        else:
-            raise Exception('')
-        return group
     def append(self, node):
         if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
             raise TypeError('Appending object must be Group or User instance')
@@ -100,32 +90,12 @@ class Group(db.Model):
         rels = Relation.query.filter(Relation.parent == self and Relation.child in nodes).all()
         db.session.delete(rels)
         db.session.commit()
-    def parents(self):
-        rels = Relation.query.filter(Relation.child == self).all()
-        parent = list()
-        for rel in rels:
-            parent.append(rel.parent)
-        return parent
     def children(self):
         rels = Relation.query.filter(Relation.parent == self).all()
         children = list()
         for rel in rels:
             children.append(rel.child)
         return children
-    def is_ancester(self, node):
-        if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
-            raise TypeError('Checking object must be Group or User instance')
-        layer = self.parents()
-        while len(layer) > 0:
-            if node in layer:
-                return True
-            layer_ = list()
-            for node_ in layer:
-                layer_.extend(
-                    node_.parents()
-                )
-            layer = layer_
-        return False
     def is_descendant(self, node):
         if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
             raise TypeError('Checking object must be Group or User instance')
