@@ -53,9 +53,20 @@ def get_jwt(user):
     return result.decode()
 
 def check_jwt(token):
+<<<<<<< HEAD
     result = jwt.decode(
         token,
         secret,
         algorithm='HS256'
     )
+=======
+    try:
+        result = jwt.decode(
+            token,
+            secret,
+            algorithm='HS256'
+        )
+    except InvalidTokenError as err:
+        raise AuthorizationError('Invalid token.')
+>>>>>>> frature/template
     return User.query.filter(User.id == result['id']).first()

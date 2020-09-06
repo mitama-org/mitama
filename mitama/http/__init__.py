@@ -6,6 +6,7 @@
 from aiohttp import web
 from aiohttp_session import get_session
 from abc import ABCMeta, abstractmethod
+from aiohttp.web import middleware
 
 class Response(web.Response):
     @classmethod
