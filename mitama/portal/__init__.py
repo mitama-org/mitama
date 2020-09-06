@@ -14,6 +14,9 @@ class Database(BaseDatabase):
             else:
                 self.set_engine(engine)
 
-def init_app(name):
+def init_app(name, path, include, **kwargs):
     meta = Metadata()
     meta.name = name
+    meta.path = path
+    for k in kwargs.keys():
+        meta.setattr(k, kwargs[k])
