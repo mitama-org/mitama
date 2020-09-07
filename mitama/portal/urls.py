@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 from mitama.http.method import *
 from . import views
-from views import user
-from views import group
+from .views import user
+from .views import group
 
 project_dir = Path(os.path.dirname(__file__))
 
@@ -13,7 +13,7 @@ urls = [
     view('/login', views.login),
     view('/signup', views.signup),
     view('/users', user.list),
-    view('/users/invite', user.invite),
+    view('/users/invite', user.create),
     view('/users/{id}', user.retrieve),
     view('/users/{id}/settings', user.update),
     view('/users/{id}/delete', user.delete),
