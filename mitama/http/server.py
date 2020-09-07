@@ -10,7 +10,7 @@
 from cryptography import fernet
 import base64
 from aiohttp import web
-from aiohttp_session import setup
+from aiohttp_session import session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from . import Controller
 
@@ -29,7 +29,7 @@ class Server:
             ])
         fernet_key = fernet.Fernet.generate_key()
         secret_key = base64.urlsafe_b64decode(fernet_key)
-        setup(app, EncryptedCookieStorage(secret_key))
+        app.middlewares.insert(0, session_middleware(EncryptedCookieStorage(secret_key)))
         for k in self.apps:
             if k == '/':
                 continue

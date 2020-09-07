@@ -26,7 +26,7 @@ class Command:
         for app_name in config.apps:
             _app = config.apps[app_name]
             init = importlib.__import__(_app['include'], fromlist = ['init_app'])
-            init.init_app(app_name)
+            init.init_app(app_name, **_app)
             app = importlib.__import__(_app['include'] + '.main', fromlist=['app'])
             server.add_app(app.app.app, _app['path'])
         server.run()

@@ -14,7 +14,11 @@ class Response(web.Response):
         if 'content_type' not in kwargs:
             kwargs['content_type'] = 'text/html'
         return cls(text = template.render(values), **kwargs)
-    pass
+    @classmethod
+    def redirect(cls, uri, status=301):
+        return cls(headers = {
+            'Location': uri
+        }, status = status)
 
 class StreamResponse(web.StreamResponse):
     pass

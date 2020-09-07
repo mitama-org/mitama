@@ -1,7 +1,9 @@
-
+from mitama.auth import AuthorizationError
 from mitama.http import get_session
 
 async def get_login_state(request):
     sess = await get_session(request)
-    return check_jwt(sess['jwt_token'])
-
+    if 'jwt_token' in sess:
+        user = check_jwt(sess['jwt_token'])
+    else:
+        raise AuthorizationError('Unauthorized')
