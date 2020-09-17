@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block header %}
+{% endblock %}
+{% block content %}
+<div id='content'>
+    <form method='post' action=''>
+        <input type='text' name='screen_name' placeholder='ログイン名' value='{{ screen_name }}'/>
+        <input type='password' name='password' placeholder='パスワード' value='{{ password }}'/>
+        <button>ログイン</button>
+        <p class='error'>{{ error }}</p>
+    </form>
+</div>
+{% endblock %}

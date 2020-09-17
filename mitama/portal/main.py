@@ -1,30 +1,50 @@
-from . import Metadata, urls
-from mitama.app import App
-from mitama.http import middleware, get_session, Response
-from mitama.http.auth import get_login_state
-from mitama.auth import AuthorizationError
-from mitama.nodes import User
+import os
+from pathlib import Path
+from .controller import *
+from .middleware import *
+from mitama.app import App, Router
+from mitama.app.method import *
+from mitama.app.middlewares import SessionMiddleware
+
 import urllib
 
-meta = Metadata()
+home = HomeController()
+reg = RegisterController()
+users = UsersController()
+groups = GroupsController()
+init_mid = InitializeMiddleware()
+sess_mid = SessionMiddleware()
 
-@middleware
-async def initialize_middleware(request, handler):
-    if User.query.count() == 0:
-        return Response(headers = {
-            'Location': app.convert_uri('/setup')
-        })
-    else:
-        return await handler(request)
+class App(App):
+    instances = [
+        home,
+        reg,
+        users,
+        groups,
+        init_mid,
+        sess_mid
+    ]
+    def router(self):
+        return Router([
+            static('/assets', self.project_dir / 'static'),
+            view('/setup', reg.setup),
+            view('/signup', reg.signup),
+            Router([
+                view('/', home),
+                view('/users', users.list),
+                view('/users/invite', users.create),
+                view('/users/{id}', users.retrieve),
+                view('/users/{id}/settings', users.update),
+                view('/users/{id}/delete', users.delete),
+                view('/groups', groups.list),
+                view('/groups/create', groups.create),
+                view('/groups/{id}', groups.retrieve),
+                view('/groups/{id}/settings', groups.update),
+                view('/groups/{id}/delete', groups.delete),
+            ], middlewares = [
+                init_mid,
+                sess_mid
+            ])
+        ])
+    pass
 
-@middleware
-async def session_middleware(request, handler):
-    try:
-        await get_login_state(request)
-    except AuthorizationError:
-        if app.revert_uri(request.url).path != '/login':
-            return Response.redirect(app.convert_uri('/login?'+urllib.parse.quote(str(request.url))), status = 301)
-    return await handler(request)
-
-app = App(meta, middlewares = [initialize_middleware, session_middleware])
-app.router.add_routes(urls.urls)

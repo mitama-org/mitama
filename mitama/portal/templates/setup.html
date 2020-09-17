@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block header %}
+{% endblock %}
+{% block content %}
+<div id='content'>
+    <h1>ようこそ</h1>
+    <p>さっそく最初のユーザーを作り、Mitamaを始めましょう</p>
+    <form method='post' action='' enctype='multipart/form-data'>
+        <label id='image-form'>
+            <input type='file' name='icon' accept='image/*' />
+            <img />
+        </label>
+        <input type='text' name='screen_name' placeholder='ログイン名' value='{{ screen_name }}'/>
+        <input type='text' name='name' placeholder='名前' value='{{ name }}'/>
+        <input type='password' name='password' placeholder='パスワード' value='{{ password }}'/>
+        <button>はじめる</button>
+        <p class='error'>{{ error }}</p>
+    </form>
+</div>
+{% endblock %}

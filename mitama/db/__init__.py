@@ -14,6 +14,7 @@ from sqlalchemy import orm
 from .model import Model
 from .driver.sqlite3 import get_engine, get_app_engine
 from mitama.extra import _Singleton
+import inspect
 
 class _QueryProperty:
     def __init__(self, db):
@@ -29,7 +30,7 @@ class _QueryProperty:
         except UnmappedClassError:
             return None
 
-class Database(_Singleton):
+class _Database(_Singleton):
     engine = None
     session = None
     def __init__(self, model = None, metadata = None, query_class = orm.Query):
@@ -64,7 +65,7 @@ class Database(_Singleton):
     def create_all(self):
         self.Model.metadata.create_all(self.engine)
 
-class _CoreDatabase(Database):
+class _CoreDatabase(_Database):
     def __init__(self, engine = None):
         super().__init__()
         if self.engine == None:
@@ -73,3 +74,12 @@ class _CoreDatabase(Database):
             else:
                 self.set_engine(engine)
 
+class BaseDatabase(_Database):
+    def __init__(self, engine = None):
+        super().__init__()
+        if self.engine == None:
+            if engine == None:
+                package_name = inspect.getmodule(self.__class__).__package__
+                self.set_engine(get_app_engine(package_name))
+            else:
+                self.set_engine(engine)

@@ -11,7 +11,8 @@ Todo:
 
 from sqlalchemy.ext.declarative import declarative_base
 from mitama.db import _CoreDatabase
-from mitama.db.types import Column, Integer, String, Node, Group
+from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
+from base64 import b64encode
 
 db = _CoreDatabase()
 
@@ -23,6 +24,7 @@ class Relation(db.Model):
 
 class Node(object):
     id = Column(Integer, primary_key = True)
+    icon = Column(LargeBinary)
     name = Column(String(255))
     screen_name = Column(String(255))
     @classmethod
@@ -34,6 +36,8 @@ class Node(object):
         else:
             raise Exception('')
         return node
+    def icon_to_b64(self):
+        return b64encode(self.icon)
     def parents(self):
         rels = Relation.query.filter(Relation.child == self).all()
         parent = list()

@@ -1,5 +1,8 @@
 from mitama.db.types import *
-from . import Database
+from mitama.db import BaseDatabase
+
+class Database(BaseDatabase):
+    pass
 
 db = Database()
 
