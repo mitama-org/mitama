@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from .controller import *
 from .middleware import *
-from mitama.app import App, Router
+from mitama.app import App, Router, StaticFileController
 from mitama.app.method import *
 from mitama.app.middlewares import SessionMiddleware
 
@@ -14,6 +14,7 @@ users = UsersController()
 groups = GroupsController()
 init_mid = InitializeMiddleware()
 sess_mid = SessionMiddleware()
+static = StaticFileController()
 
 class App(App):
     instances = [
@@ -21,26 +22,27 @@ class App(App):
         reg,
         users,
         groups,
+        static,
         init_mid,
         sess_mid
     ]
     def router(self):
         return Router([
-            static('/assets', self.project_dir / 'static'),
+            view('/static/<path:path>', static),
             view('/setup', reg.setup),
             view('/signup', reg.signup),
             Router([
                 view('/', home),
                 view('/users', users.list),
                 view('/users/invite', users.create),
-                view('/users/{id}', users.retrieve),
-                view('/users/{id}/settings', users.update),
-                view('/users/{id}/delete', users.delete),
+                view('/users/<id>', users.retrieve),
+                view('/users/<id>/settings', users.update),
+                view('/users/<id>/delete', users.delete),
                 view('/groups', groups.list),
                 view('/groups/create', groups.create),
-                view('/groups/{id}', groups.retrieve),
-                view('/groups/{id}/settings', groups.update),
-                view('/groups/{id}/delete', groups.delete),
+                view('/groups/<id>', groups.retrieve),
+                view('/groups/<id>/settings', groups.update),
+                view('/groups/<id>/delete', groups.delete),
             ], middlewares = [
                 init_mid,
                 sess_mid

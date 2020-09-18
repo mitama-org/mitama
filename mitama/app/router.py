@@ -1,4 +1,6 @@
-from mitama.http import Response
+from mitama.http import Request, Response
+from typing import cast
+import re
 
 class RoutingError(Exception):
     pass
@@ -23,11 +25,12 @@ class Router():
                     i = 0
                     async def handle(request):
                         nonlocal i
+                        request = cast(Request, request)
                         if i>=len(self.middlewares) or len(self.middlewares) == 0:
                             if callable(result):
                                 return await result(request)
-                            elif callable(getattr(result, 'handler')):
-                                return await result.handler(request)
+                            elif callable(getattr(result, 'handle')):
+                                return await result.handle(request)
                             else:
                                 raise RoutingError('Unsupported interface object. Only callables and Controller instances are supported.')
                         else:
@@ -48,36 +51,99 @@ class Route():
     async def match(self, request):
         method = request.method
         path = request.path
-        if method in self.methods and self.path.match(path) != False:
+        args = self.path.match(path)
+        if method in self.methods and args != False:
+            request.params = args
             return self.handler
         else:
             return False
 
+def _re_flatten(p):
+    if '(' not in p:
+        return p
+    return re.sub(
+        r'(\\*)(\(\?P<[^>]+>|\((?!\?))',
+        lambda m: m.group(0) if len(m.group(1)) % 2 else m.group(1) + '(?:',
+        p
+    )
+
 class Path():
+    rule_syntax = re.compile('(\\\\*)(?:(?:<([a-zA-Z_][a-zA-Z_0-9]*)?(?::([a-zA-Z_]*)(?::((?:\\\\.|[^\\\\>])+)?)?)?>))')
+    filters = {
+        're': lambda conf: (_re_flatten(conf or '[^/]+'), None, None),
+        'int': lambda conf: (r'-?\d+', int, lambda x: str(int(x))),
+        'float': lambda conf: (r'-?[\d.]+', float, lambda x: str(float(x))),
+        'path': lambda conf: (r'.+?', None, None)
+    }
+    default_filter = 're'
     def __init__(self, path):
         self.raw = path
-        dirs = str(path).split('/')
-        self.dirs = list()
-        for d in dirs: 
-            if len(d) > 0 and d[0] == '{' and d[-1] == '}':
-                self.dirs.append({
-                    'type': 'arg',
-                    'name': d[1:-2]
-                })
-            else:
-                self.dirs.append({
-                    'type': 'fs',
-                    'name': d
-                })
-    def match(self, path):
-        dirs = str(path).split('/')
-        if len(dirs) != len(self.dirs):
-            return False
+        self.builder = []
+        anons = 0
+        pattern = ''
+        keys = []
+        filters = []
+        is_static = True
+        for key, mode, conf in self._itertoken(path):
+            if mode:
+                is_static = False
+                if mode == 'default':
+                    mode = self.default_filter
+                mask, in_filter, out_filter = self.filters[mode](conf)
+                if not key:
+                    pattern+='(?:%s)' % mask
+                    key = 'anon%d' % anons
+                    anons += 1
+                else:
+                    pattern += '(?P<%s>%s)' % (key, mask)
+                    keys.append(key)
+                if in_filter:
+                    filters.append((key, in_filter))
+            elif key:
+                pattern += re.escape(key)
+
+        try:
+            re_pattern = re.compile('^(%s)$' % pattern)
+            re_match = re_pattern.match
+        except re.error as e:
+            raise RouteSyntaxError('')
+
+        if filters:
+            def getargs(path):
+                url_args = re_match(path).groupdict()
+                for name, wildcard_filter in filters:
+                    try:
+                        url_args[name] = wildcard_filter(url_args[name])
+                    except ValueError:
+                        raise RoutingError()
+                return url_args
+        elif re_pattern.groupindex:
+            def getargs(path):
+                return re_match(path).groupdict()
         else:
-            args = dict()
-            for i in range(len(self.dirs)):
-                if self.dirs[i]['type'] == 'arg':
-                    args[self.dirs[i]['name']] = dirs[i]
-                elif self.dirs[i]['name'] != dirs[i]:
-                    return False
-            return args
+            getargs = None
+        flatpat = _re_flatten(pattern)
+        self.rule = (path, re.compile('(^%s$)' % flatpat), getargs)
+    def _itertoken(self, path):
+        offset = 0
+        prefix = ''
+        for match in self.rule_syntax.finditer(path):
+            prefix += path[offset:match.start()]
+            g = match.groups()
+            if len(g[0]) % 2:
+                prefix += match.group(0)[len(g[0]):]
+                offset = match.end()
+                continue
+            if prefix:
+                yield prefix, None, None
+            name, filtr, conf = g[1:4]
+            yield name, filtr or 'default', conf or None
+            offset, prefix = match.end(), ''
+        if offset<=len(path) or prefix:
+            yield prefix + path[offset:], None, None
+    def match(self, target):
+        path, flatpat, getargs = self.rule
+        if flatpat.match(target) != None:
+            return getargs(target) if getargs else {}
+        else:
+            return False

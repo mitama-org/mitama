@@ -1,17 +1,12 @@
 from mitama.app import Controller
-from mitama.http import get_session, Response
+from mitama.http import Response
 from mitama.nodes import User, Group
 from mitama.auth import password_hash, password_auth, get_jwt
-from . import model
-
-class HomeController(Controller):
-    async def handler(self, request):
-        template = self.view.get_template('home.html')
-        return await Response.render(template, request)
+from .model import Invite
 
 class RegisterController(Controller):
     async def signup(request):
-        sess = await get_session(request)
+        sess = await request.session()
         template = self.view.get_template('signup.html')
         if request.method == "POST":
             try:
@@ -34,7 +29,7 @@ class RegisterController(Controller):
                 })
         return await Response.render(template, request)
     async def setup(self, request):
-        sess = await get_session(request)
+        sess = await request.session()
         template = self.app.view.get_template('setup.html')
         if request.method == 'POST':
             try:
@@ -55,6 +50,11 @@ class RegisterController(Controller):
                 return await Response.render(template, request, {
                     'error': error
                 })
+        return await Response.render(template, request)
+
+class HomeController(Controller):
+    async def handle(self, request):
+        template = self.view.get_template('home.html')
         return await Response.render(template, request)
 
 class UsersController(Controller):

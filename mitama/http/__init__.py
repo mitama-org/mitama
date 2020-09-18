@@ -24,5 +24,6 @@ class StreamResponse(web.StreamResponse):
     pass
 
 class Request(web.Request):
-    pass
+    async def session(self):
+        return await get_session(self)
 

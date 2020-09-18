@@ -13,12 +13,15 @@ class App:
         self.app = web.Application()
         self.name = kwargs['name']
         self.path = kwargs['path']
-        self.project_dir = kwargs['project_dir']
-        self.install_dir = kwargs['install_dir']
-        self.view= Environment(loader = FileSystemLoader(Path(self.install_dir) / self.template_dir))
+        self.project_dir = Path(kwargs['project_dir'])
+        self.install_dir = Path(kwargs['install_dir'])
+        self.view= Environment(loader = FileSystemLoader(self.install_dir / self.template_dir))
+        self.view.globals.update(convert_uri = self.convert_uri)
         for instance in self.instances:
             instance.app = self
             instance.view = self.view
+            if hasattr(instance,  '__connected__'):
+                instance.__connected__()
         if callable(self.router):
             router = self.router()
         else:

@@ -17,6 +17,7 @@ from mitama.conf import get_from_project_dir
 from pathlib import Path
 from mitama.http import Response, get_session
 import os
+import typing
 
 from mitama.auth import AuthorizationError
 from mitama.auth import password_hash, password_auth, get_jwt
