@@ -4,6 +4,9 @@ from mitama.app import StaticFileController
 def view(path, handler):
     return Route(['GET', 'POST'], path, handler)
 
+def any(path, handler):
+    return Route(['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTION', 'HEAD'], path, handler)
+
 def post(path, handler):
     return Route(['POST'], path, handler)
 
