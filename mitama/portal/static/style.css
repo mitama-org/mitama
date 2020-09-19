@@ -3,36 +3,97 @@
  * 色定義
 */
 :root {
-  --mtm-blue: #89c3eb;
+  --mtm-blue: #49a3e0;
+  --base-background: #efefef;
   --header-text: #fff;
   --header-background: var(--mtm-blue);
-  --main-text: #444;
+  --main-background: #ffffff;
+  --main-text: #444444;
+  --main-text-lighter: #777777;
+  --accent-text: #b33e5c;
+  --accent-background: #b33e5c;
 }
 
+/*
+ * 共通スタイル
+ */
 body {
   margin: 0;
+  background: var(--base-background);
+  color: var(--main-text);
   font-size: 14px;
 }
 
+a {
+  color: var(--accent-text);
+}
+
+button {
+  display: flex;
+  background: var(--accent-background);
+  color: var(--main-background);
+  font-weight: bold;
+  height: 32px;
+  width: auto;
+  padding: 0 8px;
+  border: none;
+  border-radius: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+.user-icon {
+  border-radius: 50%;
+}
+
+/*
+ * レスポンシブ
+ */
 header {
-  height: 40px;
-  padding: 8px 16px;
+  height: 56px;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr auto;
   background: var(--header-background);
   position: sticky;
   top: 0;
+  color: var(--header-text);
 }
 header #logo {
   height: 40px;
   display: block;
 }
+header > div {
+  padding: 8px 16px;
+}
+header #user-menu {
+  display: grid;
+  grid-gap: 8px;
+  grid-template-columns: 32px 1fr;
+  align-items: center;
+  height: 40px;
+  font-weight: bold;
+  background: #0001;
+  width: 160px;
+}
+header #user-menu .user-icon {
+  width: 32px;
+  height: 32px;
+}
 header menu {
   display: flex;
+  opacity: 0;
   flex-direction: row;
   justify-content: flex-end;
+  position: absolute;
+  top: 40px;
+  pointer-events: none;
+  width: 200px;
+  right: 0;
+  display: block;
   margin: 0;
-  padding: 0;
+  padding: 16px;
+  transition: all 0.2s;
+  background: var(--main-background);
 }
 header menu a {
   display: inline-flex;
@@ -40,9 +101,218 @@ header menu a {
   justify-content: center;
   align-items: center;
   text-decoration: none;
-  color: var(--header-text);
   padding: 0 8px;
   font-weight: bold;
+}
+header #user-menu:hover > menu {
+  opacity: 1;
+  pointer-events: all;
+  top: 56px;
+}
+
+#content {
+  margin-top: 16px;
+  margin-left: auto;
+  margin-right: auto;
+  background: var(--main-background);
+}
+#content .mini-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  height: 40px;
+  line-height: 40px;
+  margin: 0;
+  padding: 8px 16px;
+}
+#content .mini-title.dark {
+  border-bottom: 1px solid #eee;
+  background-color: #00000005;
+}
+#content .thin-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+#content .tab-container {
+  display: grid;
+}
+#content .tab-container .tab-header a {
+  height: 32px;
+  box-sizing: border-box;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+#content form #image-form {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  grid-gap: 16px;
+  align-items: center;
+}
+#content form #image-form input {
+  display: none;
+}
+#content form #image-form img {
+  display: block;
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+}
+#content form #image-form .button {
+  display: flex;
+  background: var(--accent-background);
+  color: var(--main-background);
+  font-weight: bold;
+  height: 32px;
+  width: 160px;
+  border-radius: 4px;
+  justify-content: center;
+  align-items: center;
+}
+#content form input[type=text],
+#content form input[type=password],
+#content form input[type=email] {
+  height: 32px;
+  line-height: 32px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  display: block;
+  border: none;
+  border-bottom: 2px solid #0000;
+  outline: none;
+  transition: border-bottom 0.2s;
+}
+#content form input[type=text]:focus,
+#content form input[type=password]:focus,
+#content form input[type=email]:focus {
+  border-bottom: 2px solid var(--accent-background);
+}
+@media screen and (min-width: 1201px) {
+  #content form input[type=text],
+#content form input[type=password],
+#content form input[type=email] {
+    width: 200px;
+  }
+}
+@media screen and (max-width: 1200px) {
+  #content form input[type=text],
+#content form input[type=password],
+#content form input[type=email] {
+    width: 100%;
+  }
+}
+#content form dl dt {
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+#content form dl dd {
+  margin: 0;
+  padding: 16px 24px 32px;
+}
+#content form button[type=submit] {
+  width: 160px;
+}
+@media screen and (min-width: 1201px) {
+  #content form {
+    padding: 32px;
+  }
+}
+#content .invite-list .item {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  grid-gap: 8px;
+}
+#content .invite-list .item .icon {
+  display: block;
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+}
+#content .invite-list .item .detail {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  padding: 4px 0;
+}
+#content .invite-list .item .detail .name {
+  font-size: 1rem;
+  font-weight: bold;
+}
+#content .invite-list .item .detail .screen_name {
+  font-size: 0.85rem;
+  color: var(--main-text-lighter);
+}
+#content .invite-list .item .detail .buttons {
+  text-align: right;
+  font-size: 0.8rem;
+}
+#content .invite-list .item .detail .buttons a {
+  display: inline-block;
+}
+#content .invite-list .item .detail .buttons input {
+  display: block;
+  position: absolute;
+  overflow: hidden;
+  opacity: 0;
+}
+@media screen and (min-width: 1201px) {
+  #content {
+    width: 1200px;
+  }
+  #content section {
+    padding: 32px;
+  }
+  #content .tab-container {
+    grid-template-columns: 240px 1fr;
+  }
+  #content .tab-container .tab-header {
+    padding: 32px 16px;
+  }
+  #content .tab-container .tab-header a {
+    height: 32px;
+    line-height: 32px;
+    padding: 0 16px;
+    display: block;
+    background: var(--main-background);
+    color: var(--accent-text);
+    font-weight: bold;
+    border-left-width: 4px;
+    border-left-style: solid;
+    border-left-color: #0000;
+  }
+  #content .tab-container .tab-header a.focus {
+    border-left-color: var(--accent-background);
+  }
+  #content .left-main {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+  }
+}
+@media screen and (max-width: 1200px) {
+  #content {
+    max-width: 900px;
+    width: 100%;
+  }
+  #content .tab-container {
+    grid-template-rows: 32px 1fr;
+    grid-gap: 8px;
+  }
+  #content .tab-header {
+    height: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  #content .tab-header a {
+    display: flex;
+    border-top-width: 4px;
+    border-top-style: solid;
+    border-top-color: var(--main-background);
+    color: var(--main-text);
+    justify-content: center;
+    align-items: center;
+  }
+  #content .tab-header a.focus {
+    border-top-color: var(--accent-background);
+  }
 }
 
 /*# sourceMappingURL=style.css.map */

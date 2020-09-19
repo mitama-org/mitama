@@ -1,0 +1,40 @@
+.invite-list{
+    .item {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        grid-gap: 8px;
+        .icon{
+            display: block;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+        }
+        .detail {
+            display: flex;
+            justify-content: space-between;
+            flex-direction: column;
+            padding: 4px 0;
+            .name{
+                font-size: 1rem;
+                font-weight: bold;
+            }
+            .screen_name{ 
+                font-size: 0.85rem;
+                color: var(--main-text-lighter);
+            }
+            .buttons{
+                text-align: right;
+                font-size: 0.8rem;
+                a{
+                    display: inline-block;
+                }
+                input{
+                    display: block;
+                    position: absolute;
+                    overflow: hidden;
+                    opacity: 0
+                }
+            }
+        }
+    }
+}

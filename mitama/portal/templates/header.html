@@ -4,11 +4,11 @@
             <img src='{{ uri('/static/white-logo.svg') }}' alt='Mitama' id='logo'/>
         </a>
     </div>
-    <div>
+    <div id='user-menu'>
+        <img src="{{ request.user.icon_to_dataurl() }}" class='user-icon'/>
+        {{ request.user.name }}
         <menu>
-            <a href='{{ uri('/users') }}'>ユーザー</a>
-            <a href='{{ uri('/groups') }}'>グループ</a>
-            <a href='{{ uri('/users/' + request.user.screen_name) }}'>{{ request.user.name }}</a>
+            <a href='{{ uri('/users/' + request.user.screen_name) }}'>マイページ</a>
         </menu>
     </div>
 </header>

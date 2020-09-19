@@ -21,5 +21,8 @@ class Model:
         self.query.session.delete(self)
         self.query.session.commit()
     @classmethod
-    def list(cond):
-        return self.query.filter(cond).all(self)
+    def list(cls, cond = None):
+        if cond != None:
+            return cls.query.filter(cond).all()
+        else:
+            return cls.query.filter().all()

@@ -2,6 +2,7 @@ from jinja2 import *
 from .app import App
 from .router import Router
 from .builder import Builder
+from .registry import AppRegistry
 from mitama.http import Request, Response
 from pathlib import Path
 from mimetypes import add_type, guess_type

@@ -8,20 +8,22 @@ from mitama.app.middlewares import SessionMiddleware
 
 import urllib
 
-home = HomeController()
+#home = HomeController()
 reg = RegisterController()
 users = UsersController()
 groups = GroupsController()
+apps = AppsController()
 init_mid = InitializeMiddleware()
 sess_mid = SessionMiddleware()
 static = StaticFileController()
 
 class App(App):
     instances = [
-        home,
+        #home,
         reg,
         users,
         groups,
+        apps,
         static,
         init_mid,
         sess_mid
@@ -32,9 +34,10 @@ class App(App):
             view('/setup', reg.setup),
             view('/signup', reg.signup),
             Router([
-                view('/', home),
+                view('/', groups.list),
                 view('/users', users.list),
                 view('/users/invite', users.create),
+                view('/users/invite/<id>/delete', users.cancel),
                 view('/users/<id>', users.retrieve),
                 view('/users/<id>/settings', users.update),
                 view('/users/<id>/delete', users.delete),
@@ -43,6 +46,8 @@ class App(App):
                 view('/groups/<id>', groups.retrieve),
                 view('/groups/<id>/settings', groups.update),
                 view('/groups/<id>/delete', groups.delete),
+                view('/apps', apps.list),
+                view('/apps/update', apps.update),
             ], middlewares = [
                 init_mid,
                 sess_mid

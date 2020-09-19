@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+<div id='content'>
+    <div class='tab-header'>
+        <a href='{{ uri('/groups') }}' class='focus'>グループ</a>
+        <a href='{{ uri('/users') }}'>ユーザー</a>
+        <a href='{{ uri('/apps') }}' class='focus'>アプリ</a>
+    </div>
+</div>
+{% endblock %}

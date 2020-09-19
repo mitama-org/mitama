@@ -2,7 +2,7 @@
 {% block header %}
 {% endblock %}
 {% block content %}
-{{ post = request.post() }}
+{% set post = request.post() %}
 <div id='content'>
     <h1>ようこそ</h1>
     <p>さっそく最初のユーザーを作り、Mitamaを始めましょう</p>

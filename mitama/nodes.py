@@ -10,9 +10,10 @@ Todo:
 '''
 
 from sqlalchemy.ext.declarative import declarative_base
-from mitama.db import _CoreDatabase
+from mitama.db import _CoreDatabase, func, orm
 from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
 from mitama.hook import HookRegistry
+import magic
 from base64 import b64encode
 
 db = _CoreDatabase()
@@ -38,8 +39,10 @@ class Node(object):
         else:
             raise Exception('')
         return node
-    def icon_to_b64(self):
-        return b64encode(self.icon)
+    def icon_to_dataurl(self):
+        f = magic.Magic(mime = True, uncompress = True)
+        mime = f.from_buffer(self.icon)
+        return 'data:'+mime+';base64,'+b64encode(self.icon).decode()
     def parents(self):
         rels = Relation.query.filter(Relation.child == self).all()
         parent = list()
@@ -76,6 +79,12 @@ class User(db.Model, Node):
 
 class Group(db.Model, Node):
     __tablename__ = 'mitama_group'
+    @classmethod
+    def tree(cls):
+        parent_count = Relation.query.group_by(Relation.parent).having(func.count(Relation.parent) == 0).subquery('noparents')
+        noparents = orm.aliased(Relation, parent_count)
+        groups = Group.query.join(noparents, Group.id == noparents.parent).all()
+        return groups
     def append(self, node):
         if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
             raise TypeError('Appending object must be Group or User instance')

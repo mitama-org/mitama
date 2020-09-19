@@ -10,6 +10,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import DeclarativeMeta
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm.exc import UnmappedClassError
+from sqlalchemy.sql import func
 from sqlalchemy import orm
 from .model import Model
 from .driver.sqlite3 import get_engine, get_app_engine
