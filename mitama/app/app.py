@@ -25,6 +25,18 @@ class App:
             instance.view = self.view
             if hasattr(instance,  '__connected__'):
                 instance.__connected__()
+        if hasattr(self, 'create_user'):
+            hook_registry.add_create_user_hook(self.create_user)
+        if hasattr(self, 'create_group'):
+            hook_registry.add_create_group_hook(self.create_group)
+        if hasattr(self, 'update_user'):
+            hook_registry.add_update_user_hook(self.update_user)
+        if hasattr(self, 'update_group'):
+            hook_registry.add_update_group_hook(self.update_group)
+        if hasattr(self, 'delete_user'):
+            hook_registry.add_delete_user_hook(self.delete_user)
+        if hasattr(self, 'delete_group'):
+            hook_registry.add_delete_group_hook(self.delete_group)
         if callable(self.router):
             router = self.router()
         else:

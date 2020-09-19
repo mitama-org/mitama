@@ -12,9 +12,11 @@ Todo:
 from sqlalchemy.ext.declarative import declarative_base
 from mitama.db import _CoreDatabase
 from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
+from mitama.hook import HookRegistry
 from base64 import b64encode
 
 db = _CoreDatabase()
+hook_registry = HookRegistry()
 
 class Relation(db.Model):
     __tablename__ = 'mitama_relation'
@@ -62,6 +64,15 @@ class Node(object):
 class User(db.Model, Node):
     __tablename__ = 'mitama_user'
     password = Column(String(255))
+    def delete(self):
+        hook_registry.delete_user(self)
+        super().delete()
+    def update(self):
+        super().update()
+        hook_registry.update_user(self)
+    def create(self):
+        super().create()
+        hook_registry.create_user(self)
 
 class Group(db.Model, Node):
     __tablename__ = 'mitama_group'
@@ -120,5 +131,16 @@ class Group(db.Model, Node):
             raise TypeError('Checking object must be Group or User instance')
         rels = Relation.query.filter(Relation.parent == self and Relation.node == node).all()
         return rels.len()!=0
+    def delete(self):
+        hook_registry.delete_group(self)
+        super().delete()
+    def update(self):
+        super().update()
+        hook_registry.update_group(self)
+    def create(self):
+        super().create()
+        hook_registry.create_group(self)
+
+
 
 db.create_all()
