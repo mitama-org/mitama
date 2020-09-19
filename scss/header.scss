@@ -1,0 +1,30 @@
+header{
+    height: 40px;
+    padding: 8px 16px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    background: var(--header-background);
+    position: sticky;
+    top: 0;
+    #logo{
+        height: 40px;
+        display: block;
+    }
+    menu {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        margin: 0;
+        padding: 0;
+        a {
+            display: inline-flex;
+            height:40px;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: var(--header-text);
+            padding: 0 8px;
+            font-weight: bold;
+        }
+    }
+}

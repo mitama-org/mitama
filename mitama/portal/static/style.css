@@ -1,0 +1,48 @@
+@charset "UTF-8";
+/*
+ * 色定義
+*/
+:root {
+  --mtm-blue: #89c3eb;
+  --header-text: #fff;
+  --header-background: var(--mtm-blue);
+  --main-text: #444;
+}
+
+body {
+  margin: 0;
+  font-size: 14px;
+}
+
+header {
+  height: 40px;
+  padding: 8px 16px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  background: var(--header-background);
+  position: sticky;
+  top: 0;
+}
+header #logo {
+  height: 40px;
+  display: block;
+}
+header menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 0;
+}
+header menu a {
+  display: inline-flex;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: var(--header-text);
+  padding: 0 8px;
+  font-weight: bold;
+}
+
+/*# sourceMappingURL=style.css.map */

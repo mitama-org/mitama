@@ -4,8 +4,10 @@ from .router import Router
 from .builder import Builder
 from mitama.http import Request, Response
 from pathlib import Path
-from mimetypes import guess_type
+from mimetypes import add_type, guess_type
 import os
+
+add_type('application/json', '.map')
 
 class Controller():
     app = None
@@ -22,6 +24,15 @@ class StaticFileController(Controller):
         super().__init__()
         self.paths = list(paths)
     def __connected__(self):
+        app_mod_dir = Path(os.path.dirname(__file__))
+        self.view = Environment(
+            enable_async=True,
+            loader = FileSystemLoader([
+                self.app.project_dir,
+                app_mod_dir / 'templates',
+                app_mod_dir / '../http/templates'
+            ])
+        )
         if len(self.paths) == 0:
             self.paths.append(self.app.install_dir / 'static')
         else:
@@ -31,7 +42,7 @@ class StaticFileController(Controller):
         for path in self.paths:
             filename = path / req.params['path']
             if filename.is_file():
-                mime = guess_type(filename)
+                mime = guess_type(filename) or 'application/octet-stream'
                 with open(filename) as f:
                     return Response(body = f.read(), headers={
                         'content-type': mime[0]
@@ -43,5 +54,5 @@ class StaticFileController(Controller):
                     return await Response(text = f.read(), status = 404, headers = {
                         'content-type': 'text/html'
                     })
-        template = self._view.get_template('404.html')
+        template = self.view.get_template('404.html')
         return await Response.render(template, req, status = 404)

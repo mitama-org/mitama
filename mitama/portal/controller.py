@@ -59,24 +59,34 @@ class HomeController(Controller):
 
 class UsersController(Controller):
     async def create(self, req):
-        return Response()
+        template = self.view.get_template('user/create.html')
+        return await Response.render(template, req)
     async def retrieve(self, req):
-        return Response()
+        template = self.view.get_template('user/retrieve.html')
+        return await Response.render(template, req)
     async def update(self, req):
-        return Response()
+        template = self.view.get_template('user/update.html')
+        return await Response.render(template, req)
     async def delete(self, req):
-        return Response()
+        template = self.view.get_template('user/delete.html')
+        return await Response.render(template, req)
     async def list(self, req):
-        return Response()
+        template = self.view.get_template('user/list.html')
+        return await Response.render(template, req)
 
 class GroupsController(Controller):
     async def create(self, req):
-        return Response()
+        template = self.view.get_template('group/create.html')
+        return await Response.render(template, req)
     async def retrieve(self, req):
-        return Response()
+        template = self.view.get_template('group/retrieve.html')
+        return await Response.render(template, req)
     async def update(self, req):
-        return Response()
+        template = self.view.get_template('group/update.html')
+        return await Response.render(template, req)
     async def delete(self, req):
-        return Response()
+        template = self.view.get_template('group/delete.html')
+        return await Response.render(template, req)
     async def list(self, req):
-        return Response()
+        template = self.view.get_template('group/list.html')
+        return await Response.render(template, req)

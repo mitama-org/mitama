@@ -1,7 +1,14 @@
 <header id='header'>
     <div>
-        <img src='{{ convert_uri('/static/logo.svg') }}' alt='Mitama' id='logo'/>
+        <a href='{{ uri('/') }}'>
+            <img src='{{ uri('/static/white-logo.svg') }}' alt='Mitama' id='logo'/>
+        </a>
     </div>
     <div>
+        <menu>
+            <a href='{{ uri('/users') }}'>ユーザー</a>
+            <a href='{{ uri('/groups') }}'>グループ</a>
+            <a href='{{ uri('/users/' + request.user.screen_name) }}'>{{ request.user.name }}</a>
+        </menu>
     </div>
 </header>

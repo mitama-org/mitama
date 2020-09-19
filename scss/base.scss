@@ -1,0 +1,14 @@
+/*
+ * 色定義
+*/
+:root{
+    --mtm-blue: #89c3eb;
+    --header-text: #fff;
+    --header-background: var(--mtm-blue);
+    --main-text: #444;
+}
+
+body{
+    margin: 0;
+    font-size: 14px;
+}

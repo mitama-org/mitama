@@ -15,8 +15,11 @@ class App:
         self.path = kwargs['path']
         self.project_dir = Path(kwargs['project_dir'])
         self.install_dir = Path(kwargs['install_dir'])
-        self.view= Environment(loader = FileSystemLoader(self.install_dir / self.template_dir))
-        self.view.globals.update(convert_uri = self.convert_uri)
+        self.view= Environment(
+            enable_async = True,
+            loader = FileSystemLoader(self.install_dir / self.template_dir)
+        )
+        self.view.globals.update(uri = self.convert_uri)
         for instance in self.instances:
             instance.app = self
             instance.view = self.view

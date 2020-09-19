@@ -1,5 +1,4 @@
 from mitama.http import Request, Response
-from typing import cast
 import re
 
 class RoutingError(Exception):
@@ -14,6 +13,7 @@ class Router():
             self.middlewares.append(middleware)
         self.i = 0
     async def match(self, request):
+        request = Request.from_request(request)
         method = request.method
         path = request.path
         for route in self.routes:
@@ -25,7 +25,6 @@ class Router():
                     i = 0
                     async def handle(request):
                         nonlocal i
-                        request = cast(Request, request)
                         if i>=len(self.middlewares) or len(self.middlewares) == 0:
                             if callable(result):
                                 return await result(request)

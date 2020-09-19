@@ -24,11 +24,15 @@ from mitama.auth import password_hash, password_auth, get_jwt
 
 config = get_from_project_dir()
 
-async def login(request):
-    view = Environment(loader = FileSystemLoader([
+view = Environment(
+    enable_async=True,
+    loader = FileSystemLoader([
         config._project_dir,
         Path(os.path.dirname(__file__)) / 'templates'
-    ]))
+    ])
+)
+
+async def login(request):
     template = view.get_template('login.html')
     if request.method == 'POST':
         try:

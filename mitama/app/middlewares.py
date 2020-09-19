@@ -1,15 +1,15 @@
 from mitama.http import Response
-from mitama.http.auth import get_login_state
-from mitama.auth import AuthorizationError
+from mitama.auth import AuthorizationError, check_jwt
 #from mitama.nodes import User
 from mitama.app import Middleware
 import urllib
 
 class SessionMiddleware(Middleware):
     async def process(self, request, handler):
-        try:
-            request.user = await get_login_state(request)
-        except AuthorizationError:
+        sess = await request.session()
+        if 'jwt_token' in sess:
+            request.user = check_jwt(sess['jwt_token'])
+        else:
             return Response.redirect('/login?redirect_to='+urllib.parse.quote(str(request.url), safe=''))
         return await handler(request)
 

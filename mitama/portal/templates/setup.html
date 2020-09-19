@@ -2,6 +2,7 @@
 {% block header %}
 {% endblock %}
 {% block content %}
+{{ post = request.post() }}
 <div id='content'>
     <h1>ようこそ</h1>
     <p>さっそく最初のユーザーを作り、Mitamaを始めましょう</p>
@@ -10,9 +11,9 @@
             <input type='file' name='icon' accept='image/*' />
             <img />
         </label>
-        <input type='text' name='screen_name' placeholder='ログイン名' value='{{ screen_name }}'/>
-        <input type='text' name='name' placeholder='名前' value='{{ name }}'/>
-        <input type='password' name='password' placeholder='パスワード' value='{{ password }}'/>
+        <input type='text' name='screen_name' placeholder='ログイン名' value='{{ post.screen_name }}'/>
+        <input type='text' name='name' placeholder='名前' value='{{ post.name }}'/>
+        <input type='password' name='password' placeholder='パスワード' value='{{ post.password }}'/>
         <button>はじめる</button>
         <p class='error'>{{ error }}</p>
     </form>
