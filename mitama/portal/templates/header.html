@@ -5,7 +5,7 @@
         </a>
     </div>
     <div id='user-menu'>
-        <img src="{{ request.user.icon_to_dataurl() }}" class='user-icon'/>
+        <img src="{{ dataurl(request.user.icon) }}" class='user-icon'/>
         {{ request.user.name }}
         <menu>
             <a href='{{ uri('/users/' + request.user.screen_name) }}'>マイページ</a>

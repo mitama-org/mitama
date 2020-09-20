@@ -14,25 +14,27 @@
             <div class='tool-box'>
                 <a href='{{ uri('/groups/create') }}'><button>チームを作成</button></a>
             </div>
-            <div class='group-list'>
-            {% for group in groups recursive %}
-                <div class='item'>
-                    <div class='branch'><div>
-                    <div class='profile'>
-                        <img src='{{ group.icon_to_dataurl() }}' class='icon' />
-                        <div class='detail'>
-                            <div class='name'>{{ group.name }}</div>
-                            <div class='screen_name'>{{ group.screen_name }}</div>
+            <div class="inner">
+                <div class='group-list'>
+                {% for group in groups recursive %}
+                    <div class='item'>
+                        <div class='branch'></div>
+                        <a href="{{ uri("/groups/"+group.screen_name) }}" class="profile">
+                            <img src='{{ dataurl(group.icon) }}' class='icon' />
+                            <div class='detail'>
+                                <div class='name'>{{ group.name }}</div>
+                                <div class='screen-name'>{{ group.screen_name }}</div>
+                            </div>
+                        </a>
+                        {% set children = group.children()|group %}
+                        {% if children.length != 0: %}
+                        <div class='children'>
+                            {{ loop(children) }}
                         </div>
+                        {% endif %}
                     </div>
-                    {% set children = group.children() %}
-                    {% if children.length != 0: %}
-                    <div class='children'>
-                        {{ loop(children) }}
-                    </div>
-                    {% endif %}
+                {% endfor %}
                 </div>
-            {% endfor %}
             </div>
         </div>
     </div>

@@ -29,6 +29,7 @@
             <dt>所属グループ</dt>
             <dd>
                 <select name='parent'>
+                    <option value=''></option>
                     {% for group in groups %}
                         <option value='{{group.id}}'>{{ group.name }}</option>
                     {% endfor %}

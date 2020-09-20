@@ -79,8 +79,12 @@ class Server():
             app = web.Application(middlewares = [
                 web.normalize_path_middleware(append_slash = True)
             ])
-        app.router.add_route('*', '/login', login)
-        app.router.add_route('*', '/logout', logout)
+        static = Path(os.path.dirname(__file__)) / "static"
+        app.router.add_routes([
+            web.view('/login', login),
+            web.view('/logout', logout),
+            web.static('/mtm-static', static),
+        ])
         fernet_key = fernet.Fernet.generate_key()
         secret_key = base64.urlsafe_b64decode(fernet_key)
         app.middlewares.insert(0, session_middleware(EncryptedCookieStorage(secret_key)))

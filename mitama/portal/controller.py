@@ -6,9 +6,10 @@ from uuid import uuid4
 from .model import Invite
 
 class RegisterController(Controller):
-    async def signup(request):
+    async def signup(self, request):
         sess = await request.session()
         template = self.view.get_template('signup.html')
+        invite = Invite.query.filter(Invite.token == request.query["token"]).first()
         if request.method == "POST":
             try:
                 data = await request.post()
@@ -16,7 +17,7 @@ class RegisterController(Controller):
                 user.screen_name = data['screen_name']
                 user.name = data['name']
                 user.password = password_hash(data['password'])
-                user.icon = data['icon']
+                user.icon = data['icon'].file.read() if "icon" in data else invite.icon
                 user.create()
                 sess["jwt_token"] = get_jwt(user)
                 return Response.redirect(
@@ -25,9 +26,19 @@ class RegisterController(Controller):
             except Exception as err:
                 error = str(err)
                 return await Response.render(template, request, {
-                    'error': error
+                    "entrance": True,
+                    'error': error,
+                    "name": data["name"],
+                    "screen_name": data["screen_name"],
+                    "password": data["password"],
+                    "icon": data["icon"].file.read()
                 })
-        return await Response.render(template, request)
+        return await Response.render(template, request, {
+            "entrance": True,
+            "icon": invite.icon,
+            "name": invite.name,
+            "screen_name": invite.screen_name,
+        })
     async def setup(self, request):
         sess = await request.session()
         template = self.app.view.get_template('setup.html')
@@ -47,9 +58,12 @@ class RegisterController(Controller):
             except Exception as err:
                 error = str(err)
                 return await Response.render(template, request, {
+                    "entrance": True,
                     'error': error
                 })
-        return await Response.render(template, request)
+        return await Response.render(template, request, {
+            "entrance": True,
+        })
 # HomeControllerではユーザー定義のダッシュボード的なのを作れるようにしたいけど、時間的にパス
 '''
 class HomeController(Controller):
@@ -86,7 +100,10 @@ class UsersController(Controller):
         return Response.redirect(self.app.convert_uri('/users/invite'))
     async def retrieve(self, req):
         template = self.view.get_template('user/retrieve.html')
-        return await Response.render(template, req)
+        user = User.retrieve(screen_name = req.params["id"])
+        return await Response.render(template, req, {
+            "user": user
+        })
     async def update(self, req):
         template = self.view.get_template('user/update.html')
         return await Response.render(template, req)
@@ -103,10 +120,34 @@ class UsersController(Controller):
 class GroupsController(Controller):
     async def create(self, req):
         template = self.view.get_template('group/create.html')
-        return await Response.render(template, req)
+        groups = Group.list()
+        if req.method == 'POST':
+            post = await req.post()
+            try:
+                group = Group()
+                group.name = post['name']
+                group.screen_name = post['screen_name']
+                group.icon = post['icon'].file.read()
+                group.create()
+                if "parent" in post:
+                    Group.query.filter(Group.id == post['parent']).first().append(group)
+                group.append(req.user)
+                return Response.redirect(self.app.convert_uri("/groups"))
+            except Exception as err:
+                error = str(err)
+                return await Response.render(template, req, {
+                    'groups': groups,
+                    'error': error
+                })
+        return await Response.render(template, req, {
+            'groups': groups,
+        })
     async def retrieve(self, req):
         template = self.view.get_template('group/retrieve.html')
-        return await Response.render(template, req)
+        group = Group.retrieve(screen_name = req.params["id"])
+        return await Response.render(template, req, {
+            "group": group
+        })
     async def update(self, req):
         template = self.view.get_template('group/update.html')
         return await Response.render(template, req)

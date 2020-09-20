@@ -81,9 +81,8 @@ class Group(db.Model, Node):
     __tablename__ = 'mitama_group'
     @classmethod
     def tree(cls):
-        parent_count = Relation.query.group_by(Relation.parent).having(func.count(Relation.parent) == 0).subquery('noparents')
-        noparents = orm.aliased(Relation, parent_count)
-        groups = Group.query.join(noparents, Group.id == noparents.parent).all()
+        noparent = [rel.child.id for rel in db.session.query(Relation.child).group_by(Relation.child) if rel.child.__class__.__name__ == "Group"]
+        groups = [group for group in Group.query.filter().all() if group.id not in noparent and group.__class__.__name__ == "Group"]
         return groups
     def append(self, node):
         if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':

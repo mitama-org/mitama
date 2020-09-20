@@ -5,7 +5,8 @@
     --mtm-blue: #49a3e0;
     --base-background: #efefef;
     --header-text: #fff;
-    --header-background: var(--mtm-blue);
+    --main-color: var(--mtm-blue);;
+    --header-background: var(--main-color);
     --main-background: #ffffff;
     --main-text: #444444;
     --main-text-lighter: #777777;

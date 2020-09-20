@@ -4,3 +4,4 @@ node_modules/
 *.egg-info/
 *.egg
 .installed.cfg
+db.sqlite3

@@ -19,6 +19,11 @@
         font-size: 0.8rem;
         font-weight: bold;
     }
+    .tool-box{
+        display: flex;
+        padding: 16px;
+        justify-content: flex-end;
+    }
     .tab-container{
         display: grid;
         .tab-header{
@@ -31,12 +36,51 @@
             }
         }
     }
+    .profile-container{
+        display:grid;
+        grid-template-columns: 80px 1fr;
+        grid-gap: 8px;
+        padding: 24px;
+        max-width: 800px;
+        margin: 0 auto;
+        .icon {
+            width: 80px;
+            height:80px;
+            border-radius: 8px;
+            border: 4px solid #0001;
+            box-sizing:border-box;
+        }
+        .detail {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            .name {
+                font-size: 1.1rem;
+                color: var(--main-text);
+                margin: 0;
+            }
+            .screen-name {
+                font-size: 1rem;
+                color: var(--main-text-lighter);
+            }
+        }
+        .group-list {
+            grid-column: 1/3;
+        }
+    }
     @import './form.scss';
     @import './list.scss';
     @include pc{
         width: 1200px;
         section{
             padding: 32px;
+        }
+        .inner {
+            padding: 32px 0;
+        }
+        .tight {
+            padding: 0 32px;
         }
         .tab-container{
             grid-template-columns: 240px 1fr;
@@ -48,13 +92,13 @@
                     padding: 0 16px;
                     display: block;
                     background: var(--main-background);
-                    color: var(--accent-text);
+                    color: var(--main-color);
                     font-weight: bold;
                     border-left-width: 4px;
                     border-left-style: solid;
                     border-left-color: #0000;
                     &.focus {
-                        border-left-color: var(--accent-background);
+                        border-left-color: var(--main-color);
                     }
                 }
             }
@@ -67,6 +111,9 @@
     @include sp {
         max-width: 900px;
         width: 100%;
+        .inner {
+            padding: 8px;
+        }
         .tab-container{
             grid-template-rows: 32px 1fr;
             grid-gap: 8px;
@@ -84,7 +131,7 @@
                 justify-content: center;
                 align-items: center;
                 &.focus{
-                    border-top-color: var(--accent-background);
+                    border-top-color: var(--main-color);
                 }
             }
         }

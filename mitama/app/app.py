@@ -3,6 +3,8 @@ from aiohttp import web
 from yarl import URL
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
+import magic
+from base64 import b64encode
 
 class App:
     template_dir = 'templates';
@@ -19,7 +21,21 @@ class App:
             enable_async = True,
             loader = FileSystemLoader(self.install_dir / self.template_dir)
         )
-        self.view.globals.update(uri = self.convert_uri)
+        def dataurl(blob):
+            f = magic.Magic(mime = True, uncompress = True)
+            mime = f.from_buffer(blob)
+            return 'data:'+mime+';base64,'+b64encode(blob).decode()
+        def filter_user(arg):
+            return [user for user in arg if user.__class__.__name__ == "User"]
+        def filter_group(arg):
+            return [group for group in arg if group.__class__.__name__ == "Group"]
+        self.view.filters["user"] = filter_user
+        self.view.filters["group"] = filter_group
+        self.view.globals.update(
+            uri = self.convert_uri,
+            fulluri = self.convert_fulluri,
+            dataurl = dataurl
+        )
         for instance in self.instances:
             instance.app = self
             instance.view = self.view
@@ -46,6 +62,17 @@ class App:
         return getattr(self.app, name)
     def set_middleware(self, middlewares):
         self.app.middlewares.extend(middlewares)
+    def convert_fulluri(self, req, uri):
+        scheme= req.scheme
+        hostname = req.host
+        path = self.path
+        if path[0] != '/':
+            path = '/' + path
+        if path[-1] == '/':
+            path = path[0:-2]
+        if uri[0] != '/':
+            uri = '/' + uri
+        return scheme + "://" + hostname + path + uri
     def convert_uri(self, uri):
         path = self.path
         if path[0] != '/':
