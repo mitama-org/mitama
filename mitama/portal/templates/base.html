@@ -4,9 +4,9 @@
         <meta charset='utf-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         {% if entrance == True %}
-            <link rel='stylesheet' href='{{ uri('/static/entrance-style.css') }}' />
+            <link rel='stylesheet' href='{{ url('/static/entrance-style.css') }}' />
         {% else %}
-            <link rel='stylesheet' href='{{ uri('/static/style.css') }}' />
+            <link rel='stylesheet' href='{{ url('/static/style.css') }}' />
         {% endif %}
         <title>{{ title }} | Mitama</title>
     </head>

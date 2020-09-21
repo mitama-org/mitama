@@ -72,15 +72,20 @@
     @import './form.scss';
     @import './list.scss';
     @include pc{
-        width: 1200px;
+        max-width: 1200px;
+        width: calc(100% - 100px);
+        margin-left: auto;
+        margin-right: auto;
         section{
             padding: 32px;
         }
         .inner {
-            padding: 32px 0;
+            padding-top: 32px;
+            padding-bottom: 32px;
         }
         .tight {
-            padding: 0 32px;
+            padding-left: 32px;
+            padding-right: 32px;
         }
         .tab-container{
             grid-template-columns: 240px 1fr;

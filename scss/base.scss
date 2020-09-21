@@ -8,6 +8,7 @@
     --main-color: var(--mtm-blue);;
     --header-background: var(--main-color);
     --main-background: #ffffff;
+    --main-decoration: #cccccc;
     --main-text: #444444;
     --main-text-lighter: #777777;
     --accent-text: #b33e5c;
@@ -45,17 +46,20 @@ button {
 .user-icon{
     border-radius: 50%;
 }
+.icon {
+    object-fit: cover;
+}
 
 /*
  * レスポンシブ
  */
 @mixin pc{
-    @media screen and (min-width: 1201px) {
+    @media screen and (min-width: 901px) {
         @content
     }
 }
 @mixin sp {
-    @media screen and (max-width: 1200px) {
+    @media screen and (max-width: 900px) {
         @content
     }
 }

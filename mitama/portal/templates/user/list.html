@@ -6,18 +6,18 @@
 <div id='content'>
     <div class='tab-container'>
         <div class='tab-header'>
-            <a href='{{ uri('/groups') }}'>グループ</a>
-            <a href='{{ uri('/users') }}' class='focus'>ユーザー</a>
-            <a href='{{ uri('/apps') }}'>アプリ</a>
+            <a href='{{ url('/groups') }}'>グループ</a>
+            <a href='{{ url('/users') }}' class='focus'>ユーザー</a>
+            <a href='{{ url('/apps') }}'>アプリ</a>
         </div>
         <div class='tab-content'>
             <div class='tool-box'>
-                <a href='{{ uri('/users/invite') }}'><button>ユーザーを招待</button></a>
+                <a href='{{ url('/users/invite') }}'><button>ユーザーを招待</button></a>
             </div>
             <div class="inner">
                 <div class='user-list'>
                 {% for user in users %}
-                    <a href="{{ uri("/users/"+user.screen_name) }}" class="item">
+                    <a href="{{ url("/users/"+user.screen_name) }}" class="item">
                         <img src='{{ dataurl(user.icon) }}' class='icon' />
                         <div class='detail'>
                             <div class='name'>{{ user.name }}</div>

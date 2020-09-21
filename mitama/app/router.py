@@ -12,6 +12,10 @@ class Router():
         for middleware in middlewares:
             self.middlewares.append(middleware)
         self.i = 0
+    def add_route(self, route):
+        self.routes.append(route)
+    def add_routes(self, routes):
+        self.routes.extend(routes)
     async def match(self, request):
         request = Request.from_request(request)
         method = request.method

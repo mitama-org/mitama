@@ -6,33 +6,25 @@
 <div id='content'>
     <div class='tab-container'>
         <div class='tab-header'>
-            <a href='{{ uri('/groups') }}' class='focus'>グループ</a>
-            <a href='{{ uri('/users') }}'>ユーザー</a>
-            <a href='{{ uri('/apps') }}'>アプリ</a>
+            <a href='{{ url('/groups') }}'>グループ</a>
+            <a href='{{ url('/users') }}'>ユーザー</a>
+            <a href='{{ url('/apps') }}' class='focus'>アプリ</a>
         </div>
         <div class='tab-content'>
             <div class='tool-box'>
-                <a href='{{ uri('/groups/create') }}'><button>チームを作成</button></a>
+                <a href='{{ url('/apps/settings') }}'><button>アプリ設定</button></a>
             </div>
             <div class="inner">
-                <div class='group-list'>
-                {% for group in groups recursive %}
-                    <div class='item'>
-                        <div class='branch'></div>
-                        <a href="{{ uri("/groups/"+group.screen_name) }}" class="profile">
-                            <img src='{{ dataurl(group.icon) }}' class='icon' />
-                            <div class='detail'>
-                                <div class='name'>{{ group.name }}</div>
-                                <div class='screen-name'>{{ group.screen_name }}</div>
-                            </div>
-                        </a>
-                        {% set children = group.children()|group %}
-                        {% if children.length != 0: %}
-                        <div class='children'>
-                            {{ loop(children) }}
+                <div class='app-list'>
+                {% for app in apps %}
+                    <a href="{{ app.url }}" class="item">
+                        <img src='{{ dataurl(app.icon) }}' class='icon' />
+                        <div class='detail'>
+                            <div class='name'>{{ app.name }}</div>
+                            <div class='screen-name'>{{ app.screen_name }}</div>
+                            <p class='description'>{{ app.description }}</p>
                         </div>
-                        {% endif %}
-                    </div>
+                    </a>
                 {% endfor %}
                 </div>
             </div>

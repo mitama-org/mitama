@@ -13,8 +13,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from mitama.db import _CoreDatabase, func, orm
 from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
 from mitama.hook import HookRegistry
-import magic
-from base64 import b64encode
 
 db = _CoreDatabase()
 hook_registry = HookRegistry()
@@ -27,7 +25,7 @@ class Relation(db.Model):
 
 class Node(object):
     id = Column(Integer, primary_key = True)
-    icon = Column(LargeBinary)
+    _icon = Column(LargeBinary)
     name = Column(String(255))
     screen_name = Column(String(255))
     @classmethod
@@ -41,7 +39,7 @@ class Node(object):
         return node
     def icon_to_dataurl(self):
         f = magic.Magic(mime = True, uncompress = True)
-        mime = f.from_buffer(self.icon)
+        mime = f.from_buffer(self._icon)
         return 'data:'+mime+';base64,'+b64encode(self.icon).decode()
     def parents(self):
         rels = Relation.query.filter(Relation.child == self).all()
@@ -67,6 +65,15 @@ class Node(object):
 class User(db.Model, Node):
     __tablename__ = 'mitama_user'
     password = Column(String(255))
+    @property
+    def icon(self):
+        if self._icon != None:
+            return self._icon
+        else:
+            return noimage_user
+    @icon.setter
+    def icon(self, value):
+        self._icon = value
     def delete(self):
         hook_registry.delete_user(self)
         super().delete()
@@ -79,6 +86,15 @@ class User(db.Model, Node):
 
 class Group(db.Model, Node):
     __tablename__ = 'mitama_group'
+    @property
+    def icon(self):
+        if self._icon != None:
+            return self._icon
+        else:
+            return noimage_group
+    @icon.setter
+    def icon(self, value):
+        self._icon = value
     @classmethod
     def tree(cls):
         noparent = [rel.child.id for rel in db.session.query(Relation.child).group_by(Relation.child) if rel.child.__class__.__name__ == "Group"]

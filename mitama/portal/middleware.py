@@ -9,14 +9,14 @@ class SessionMiddleware(Middleware):
         try:
             request.user = await get_login_state(request)
         except AuthorizationError:
-            return Response.redirect(self.app.convert_uri('/login?redirect_to='+urllib.parse.quote(str(request.url), safe='')))
+            return Response.redirect(self.app.convert_url('/login?redirect_to='+urllib.parse.quote(str(request.url), safe='')))
         return await handler(request)
 '''
 
 class InitializeMiddleware(Middleware):
     async def process(self, request, handler):
         if User.query.count() == 0:
-            return Response.redirect(self.app.convert_uri('/setup'))
+            return Response.redirect(self.app.convert_url('/setup'))
         else:
             return await handler(request)
 

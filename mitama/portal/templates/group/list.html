@@ -6,20 +6,20 @@
 <div id='content'>
     <div class='tab-container'>
         <div class='tab-header'>
-            <a href='{{ uri('/groups') }}' class='focus'>グループ</a>
-            <a href='{{ uri('/users') }}'>ユーザー</a>
-            <a href='{{ uri('/apps') }}'>アプリ</a>
+            <a href='{{ url('/groups') }}' class='focus'>グループ</a>
+            <a href='{{ url('/users') }}'>ユーザー</a>
+            <a href='{{ url('/apps') }}'>アプリ</a>
         </div>
         <div class='tab-content'>
             <div class='tool-box'>
-                <a href='{{ uri('/groups/create') }}'><button>チームを作成</button></a>
+                <a href='{{ url('/groups/create') }}'><button>チームを作成</button></a>
             </div>
             <div class="inner">
                 <div class='group-list'>
                 {% for group in groups recursive %}
                     <div class='item'>
                         <div class='branch'></div>
-                        <a href="{{ uri("/groups/"+group.screen_name) }}" class="profile">
+                        <a href="{{ url("/groups/"+group.screen_name) }}" class="profile">
                             <img src='{{ dataurl(group.icon) }}' class='icon' />
                             <div class='detail'>
                                 <div class='name'>{{ group.name }}</div>

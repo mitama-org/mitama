@@ -18,7 +18,7 @@
             {% for g in user.parents() %}
                 <div class='item'>
                     <div class='branch'></div>
-                    <a href="{{ uri("/groups/"+g.screen_name) }}" class="profile">
+                    <a href="{{ url("/groups/"+g.screen_name) }}" class="profile">
                         <img src='{{ dataurl(g.icon) }}' class='icon' />
                         <div class='detail'>
                             <div class='name'>{{ g.name }}</div>

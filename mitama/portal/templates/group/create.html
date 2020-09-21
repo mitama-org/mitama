@@ -5,17 +5,22 @@
 {% block content %}
 {% set post = request.post() %}
 <div id='content'>
-    <h2 class='mini-title'>チームを作成</h2>
+    <h2 class='mini-title dark'>チームを作成</h2>
     <form method='post' action='' enctype='multipart/form-data'>
         <dl>
             <dt>アイコン</dt>
             <dd>
                 <div id='image-form'>
-                    <img />
+                    <img class="icon" src="{{ dataurl(icon) }}"/>
                     <label class='button'>
-                        <input type='file' name='icon' accept='image/*' />
+                        <input type='file' name='icon' accept='image/*' onchange="previewImage(this)" />
                         画像を選択
                     </label>
+                    <script>
+                        function previewImage(dom) {
+                            document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
+                        }
+                    </script>
                 </div>
             </dd>
             <dt>ドメイン名</dt>

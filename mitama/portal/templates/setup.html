@@ -1,5 +1,6 @@
-{% extends 'outside-base.html' %}
+{% extends 'base.html' %}
 {% block header %}
+    {% include "entrance-header.html" %}
 {% endblock %}
 {% block content %}
 {% set post = request.post() %}
@@ -12,7 +13,7 @@
             <dd>
                 <label id='image-form'>
                     <input type='file' name='icon' accept='image/*' />
-                    <img />
+                    <img class="icon" />
                 </label>
             </dd>
             <dt>ログイン名</dt>
@@ -27,7 +28,7 @@
             <dd>
                 <input type='password' name='password' placeholder='パスワード' value='{{ post.password }}'/>
             </dd>
-        <button>はじめる</button>
+        <button type="submit">はじめる</button>
         <p class='error'>{{ error }}</p>
     </form>
 </div>

@@ -5,15 +5,25 @@ from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 import magic
 from base64 import b64encode
+from mitama.app.noimage import noimage_app
+
+def dataurl(blob):
+    f = magic.Magic(mime = True, uncompress = True)
+    mime = f.from_buffer(blob)
+    return 'data:'+mime+';base64,'+b64encode(blob).decode()
+
 
 class App:
-    template_dir = 'templates';
+    template_dir = 'templates'
+    description = ""
+    name = ""
+    icon = noimage_app
     def __init__(self, **kwargs):
         kwargs['middlewares'] = [
             web.normalize_path_middleware(append_slash = True)
         ]
-        self.app = web.Application()
-        self.name = kwargs['name']
+        self.app = web.Application(client_max_size = kwargs["client_max_size"] if "client_max_size" in kwargs else 100*1024*1024)
+        self.screen_name = kwargs['name']
         self.path = kwargs['path']
         self.project_dir = Path(kwargs['project_dir'])
         self.install_dir = Path(kwargs['install_dir'])
@@ -21,10 +31,6 @@ class App:
             enable_async = True,
             loader = FileSystemLoader(self.install_dir / self.template_dir)
         )
-        def dataurl(blob):
-            f = magic.Magic(mime = True, uncompress = True)
-            mime = f.from_buffer(blob)
-            return 'data:'+mime+';base64,'+b64encode(blob).decode()
         def filter_user(arg):
             return [user for user in arg if user.__class__.__name__ == "User"]
         def filter_group(arg):
@@ -32,8 +38,8 @@ class App:
         self.view.filters["user"] = filter_user
         self.view.filters["group"] = filter_group
         self.view.globals.update(
-            uri = self.convert_uri,
-            fulluri = self.convert_fulluri,
+            url = self.convert_url,
+            fullurl = self.convert_fullurl,
             dataurl = dataurl
         )
         for instance in self.instances:
@@ -57,12 +63,12 @@ class App:
             router = self.router()
         else:
             router = self.router
-        self.app.router.add_route('*', '/{tail:(?!login|logout).*}', router.match)
+        self.app.router.add_route('*', '/{tail:.*}', router.match)
     def __getattr__(self, name):
         return getattr(self.app, name)
     def set_middleware(self, middlewares):
         self.app.middlewares.extend(middlewares)
-    def convert_fulluri(self, req, uri):
+    def convert_fullurl(self, req, url):
         scheme= req.scheme
         hostname = req.host
         path = self.path
@@ -70,24 +76,24 @@ class App:
             path = '/' + path
         if path[-1] == '/':
             path = path[0:-2]
-        if uri[0] != '/':
-            uri = '/' + uri
-        return scheme + "://" + hostname + path + uri
-    def convert_uri(self, uri):
+        if url[0] != '/':
+            url = '/' + url
+        return scheme + "://" + hostname + path + url
+    def convert_url(self, url):
         path = self.path
         if path[0] != '/':
             path = '/' + path
         if path[-1] == '/':
             path = path[0:-2]
-        if uri[0] != '/':
-            uri = '/' + uri
-        return path + uri
-    def revert_uri(self, uri):
+        if url[0] != '/':
+            url = '/' + url
+        return path + url
+    def revert_url(self, url):
         path = self.path
         if path[0] != '/':
             path = '/' + path
         if path[-1] == '/':
             path = path[0:-2]
-        uri = str(uri.path)
-        url = URL(uri[len(path):])
+        url = str(url.path)
+        url = URL(url[len(path):])
         return url

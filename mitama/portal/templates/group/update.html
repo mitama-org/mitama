@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+{% if error == None %}
+{% set post = request.post() %}
+{% else %}
+{% set post = {} %}
+{% endif %}
+<div id='content'>
+    <h2 class='mini-title dark'>{{ group.name }}の設定</h2>
+    <div class="left-main">
+        <form method='POST' action='' enctype='multipart/form-data' class="inner tight">
+            <dl>
+                <dt>アイコン</dt>
+                <dd>
+                    <div id='image-form'>
+                        <img src="{{ dataurl(icon) }}" class="icon"/>
+                        <label class='button'>
+                            <input type='file' name='icon' accept='image/*' onchange="previewImage(this)" />
+                            画像を選択
+                        </label>
+                        <script>
+                            function previewImage(dom) {
+                                document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
+                            }
+                        </script>
+                    </div>
+                </dd>
+                <dt>ドメイン名</dt>
+                <dd>
+                    <input type='text' name='screen_name' placeholder='ドメイン名' value='{{ screen_name }}'/>
+                </dd>
+                <dt>名前</dt>
+                <dd>
+                    <input type='text' name='name' placeholder='名前' value='{{ name }}'/>
+                </dd>
+            </dl>
+            <button type='submit'>設定を変更</button>
+            {% if error %}
+                <p class='error'>{{ error }}</p>
+            {% endif %}
+            {% if message %}
+                <p class='message'>{{ message}}</p>
+            {% endif %}
+        </form>
+        <section>
+            <h3 class="thin-title">参加中</h3>
+            <div></div>
+        </section>
+    </div>
+</div>
+{% endblock %}

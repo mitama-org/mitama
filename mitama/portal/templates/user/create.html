@@ -18,16 +18,21 @@
 <div id='content'>
     <h2 class='mini-title dark'>ユーザーを招待</h2>
     <div class='left-main'>
-        <form method='post' action='' enctype='multipart/form-data'>
+        <form method='post' action='' enctype='multipart/form-data' class="inner tight">
             <dl>
                 <dt>アイコン</dt>
                 <dd>
                     <div id='image-form'>
-                        <img />
+                        <img src="{{ dataurl(icon) }}"/>
                         <label class='button'>
-                            <input type='file' name='icon' accept='image/*' />
+                            <input type='file' name='icon' accept='image/*' onchange="previewImage(this)" />
                             画像を選択
                         </label>
+                        <script>
+                            function previewImage(dom) {
+                                document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
+                            }
+                        </script>
                     </div>
                 </dd>
                 <dt>ログイン名</dt>
@@ -40,7 +45,9 @@
                 </dd>
             </dl>
             <button type='submit'>ユーザーを招待</button>
+            {% if error %}
             <p class='error'>{{ error }}</p>
+            {% endif %}
         </form>
         <section>
             <h3 class='thin-title'>招待中ユーザー</h3>
@@ -54,8 +61,8 @@
                         <div class='buttons'>
                             <a href='javascript:copyToClipboard("invite-{{ invite.token }}")'>招待URLをコピー</a>
                             <a href=''>変更</a>
-                            <a href='{{ uri('/users/invite/'+invite.id|string+'/delete') }}'>キャンセル</a>
-                            <input id="invite-{{ invite.token }}" type="text" value="{{ fulluri(request, '/signup?token='+invite.token) }}" readonly>
+                            <a href='{{ url('/users/invite/'+invite.id|string+'/delete') }}'>キャンセル</a>
+                            <input id="invite-{{ invite.token }}" type="text" value="{{ fullurl(request, '/signup?token='+invite.token) }}" readonly>
                         </div>
                     </div>
                 </div>
