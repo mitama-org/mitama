@@ -274,7 +274,21 @@ class GroupsController(Controller):
 class AppsController(Controller):
     async def update(self, req):
         template = self.view.get_template('apps/update.html')
-        return await Response.render(template, req)
+        apps = AppRegistry()
+        if req.method == "POST":
+            post = await req.post()
+            prefix = post["prefix"]
+            data = dict()
+            data["apps"] = dict()
+            for package, path in prefix:
+                data["apps"][package] = {
+                    "path": path
+                }
+            with open(self.apps.project_root_dir / "mitama.json") as f:
+                f.write(json.dumps(data))
+        return await Response.render(template, req, {
+            "apps": apps
+        })
     async def list(self, req):
         template = self.view.get_template('apps/list.html')
         apps = AppRegistry()

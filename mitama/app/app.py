@@ -26,6 +26,7 @@ class App:
         self.screen_name = kwargs['name']
         self.path = kwargs['path']
         self.project_dir = Path(kwargs['project_dir'])
+        self.project_root_dir = Path(kwargs['project_root_dir'])
         self.install_dir = Path(kwargs['install_dir'])
         self.view= Environment(
             enable_async = True,
