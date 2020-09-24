@@ -1,4 +1,5 @@
 from mitama.http import Request, Response
+import copy
 import re
 
 class RoutingError(Exception):
@@ -6,9 +7,10 @@ class RoutingError(Exception):
 
 class Router():
     app = None
-    def __init__(self, routes, middlewares = []):
+    def __init__(self, routes = [], middlewares = [], prefix = ''):
         self.routes = routes
         self.middlewares = list()
+        self.prefix = prefix
         for middleware in middlewares:
             self.middlewares.append(middleware)
         self.i = 0
@@ -16,10 +18,22 @@ class Router():
         self.routes.append(route)
     def add_routes(self, routes):
         self.routes.extend(routes)
+    def add_middleware(self, middleware):
+        self.middlewares.append(middleware)
+    def add_middlewares(self, middlewares):
+        self.middlewares.extend(middlewares)
+    def clone(self, prefix = None):
+        return Router(routes = copy.copy(self.routes), prefix = self.prefix if prefix == None else prefix)
     async def match(self, request):
         request = Request.from_request(request)
         method = request.method
-        path = request.path
+        path = request._path if hasattr(request, '_path') else request.path
+        if self.prefix != '':
+            if path[:len(self.prefix) - 1] != self.prefix:
+                return False
+            else:
+                path = path[len(self.prefix) - 1:]
+                request._path = path
         for route in self.routes:
             result = await route.match(request)
             if result.__class__.__name__ == 'Response':
@@ -43,7 +57,7 @@ class Router():
                     return handle
                 handler = get_response_handler(result)
                 return await handler(request)
-        return Response(status = 404)
+        return False
 
 class Route():
     def __init__(self, methods, path, handler):

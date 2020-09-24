@@ -3,6 +3,7 @@ from mitama.http import Response
 from mitama.nodes import User, Group
 from mitama.auth import password_hash, password_auth, get_jwt, AuthorizationError
 from mitama.app.noimage import noimage_group, noimage_user
+import json
 from uuid import uuid4
 from .model import Invite
 
@@ -275,17 +276,29 @@ class AppsController(Controller):
     async def update(self, req):
         template = self.view.get_template('apps/update.html')
         apps = AppRegistry()
+        apps.reset()
         if req.method == "POST":
             post = await req.post()
-            prefix = post["prefix"]
-            data = dict()
-            data["apps"] = dict()
-            for package, path in prefix:
-                data["apps"][package] = {
-                    "path": path
-                }
-            with open(self.apps.project_root_dir / "mitama.json") as f:
-                f.write(json.dumps(data))
+            try:
+                prefix = post["prefix"]
+                data = dict()
+                data["apps"] = dict()
+                for package, path in prefix.items():
+                    data["apps"][package] = {
+                        "path": path
+                    }
+                with open(self.app.project_root_dir / "mitama.json", 'w') as f:
+                    f.write(json.dumps(data))
+                apps.load_config()
+                return await Response.render(template, req, {
+                    'message': '変更を保存しました',
+                    "apps": apps,
+                })
+            except Exception as err:
+                return await Response.render(template, req, {
+                    "apps": apps,
+                    'error': str(err)
+                })
         return await Response.render(template, req, {
             "apps": apps
         })

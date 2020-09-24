@@ -32,6 +32,7 @@ class App(App):
         init_mid,
         sess_mid
     ]
+    @property
     def router(self):
         return Router([
             view('/static/<path:path>', static),

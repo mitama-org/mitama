@@ -4,8 +4,8 @@
     * サーバーの実装です。
 '''
 from aiohttp import web
-from aiohttp_session import get_session
 from abc import ABCMeta, abstractmethod
+import re
 
 class Response(web.Response):
     @classmethod
@@ -25,8 +25,14 @@ class StreamResponse(web.StreamResponse):
     pass
 
 class Request(web.Request):
+    __dict_style = re.compile('([a-zA-Z0-9_\-.]+)\[([a-zA-Z0-9_\-.]*)\]')
     async def session(self):
-        return await get_session(self)
+        sess = self.get('mitama_session')
+        if sess is None:
+            storage = self.get('mitama_session_storage')
+            sess = await storage.load_session(self)
+            self['mitama_session_storage'] = sess
+        return sess
     @classmethod
     def from_request(cls, request):
         return cls(
@@ -41,3 +47,21 @@ class Request(web.Request):
             host = request.host,
             remote = request.remote
         )
+    async def post(self):
+        post = await super().post()
+        data = dict()
+        for k,v in post.items():
+            match = self.__dict_style.match(k)
+            if match!=None:
+                name, key = match.group(1,2)
+                if key == '':
+                    if name not in data:
+                        data[name] = list()
+                    data[name].append(v)
+                else:
+                    if name not in data:
+                        data[name] = dict()
+                    data[name][key] = v
+            else:
+                data[k] = v
+        return data

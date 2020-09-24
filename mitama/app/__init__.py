@@ -6,6 +6,7 @@ from .registry import AppRegistry
 from mitama.http import Request, Response
 from pathlib import Path
 from mimetypes import add_type, guess_type
+from abc import ABCMeta, abstractmethod
 import os
 
 add_type('application/json', '.map')
@@ -15,8 +16,9 @@ class Controller():
     async def handle(self, req: Request):
         pass
 
-class Middleware():
+class Middleware(metaclass = ABCMeta):
     app = None
+    @abstractmethod
     async def process(self, req: Request, handler):
         pass
 

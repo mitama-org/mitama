@@ -1,5 +1,4 @@
 from mitama.app.router import Route
-from mitama.app import StaticFileController
 
 def view(path, handler):
     return Route(['GET', 'POST'], path, handler)
@@ -27,3 +26,4 @@ def get(path, handler):
 
 def delete(path, handler):
     return Route(['DELETE'], path, handler)
+

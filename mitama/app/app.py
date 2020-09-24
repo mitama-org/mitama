@@ -4,6 +4,7 @@ from yarl import URL
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 import magic
+import os
 from base64 import b64encode
 from mitama.app.noimage import noimage_app
 
@@ -15,19 +16,17 @@ def dataurl(blob):
 
 class App:
     template_dir = 'templates'
+    instances = list()
     description = ""
     name = ""
     icon = noimage_app
     def __init__(self, **kwargs):
-        kwargs['middlewares'] = [
-            web.normalize_path_middleware(append_slash = True)
-        ]
         self.app = web.Application(client_max_size = kwargs["client_max_size"] if "client_max_size" in kwargs else 100*1024*1024)
         self.screen_name = kwargs['name']
         self.path = kwargs['path']
-        self.project_dir = Path(kwargs['project_dir'])
-        self.project_root_dir = Path(kwargs['project_root_dir'])
-        self.install_dir = Path(kwargs['install_dir'])
+        self.project_dir = Path(kwargs['project_dir']) if 'project_dir' in kwargs else None
+        self.project_root_dir = Path(kwargs['project_root_dir']) if 'project_dir' in kwargs else None
+        self.install_dir = Path(kwargs['install_dir']) if 'project_dir' in kwargs else Path(os.path.dirname(__file__)) / '../http/'
         self.view= Environment(
             enable_async = True,
             loader = FileSystemLoader(self.install_dir / self.template_dir)
@@ -60,11 +59,13 @@ class App:
             hook_registry.add_delete_user_hook(self.delete_user)
         if hasattr(self, 'delete_group'):
             hook_registry.add_delete_group_hook(self.delete_group)
-        if callable(self.router):
-            router = self.router()
-        else:
-            router = self.router
-        self.app.router.add_route('*', '/{tail:.*}', router.match)
+        def handle(request):
+            result = self.router.match(request)
+            if result:
+                return result
+            else:
+                return self.error(request, 404)
+        self.app.router.add_route('*', '/{tail:.*}', handle)
     def __getattr__(self, name):
         return getattr(self.app, name)
     def set_middleware(self, middlewares):
@@ -98,3 +99,6 @@ class App:
         url = str(url.path)
         url = URL(url[len(path):])
         return url
+    def error(self, request, code):
+        template = self.view.get_template(code + '.html')
+        return Response.render(template, request)
