@@ -7,12 +7,12 @@ import magic
 import os
 from base64 import b64encode
 from mitama.app.noimage import noimage_app
+from mitama.http import Request, Response
 
 def dataurl(blob):
     f = magic.Magic(mime = True, uncompress = True)
     mime = f.from_buffer(blob)
     return 'data:'+mime+';base64,'+b64encode(blob).decode()
-
 
 class App:
     template_dir = 'templates'
@@ -59,12 +59,15 @@ class App:
             hook_registry.add_delete_user_hook(self.delete_user)
         if hasattr(self, 'delete_group'):
             hook_registry.add_delete_group_hook(self.delete_group)
-        def handle(request):
-            result = self.router.match(request)
+        async def handle(request):
+            if not isinstance(request, Request):
+                request = Request.from_request(request)
+            result = await self.router.match(request)
             if result:
-                return result
+                request, handle = result
+                return await handle(request)
             else:
-                return self.error(request, 404)
+                return await self.error(request, 404)
         self.app.router.add_route('*', '/{tail:.*}', handle)
     def __getattr__(self, name):
         return getattr(self.app, name)
@@ -99,6 +102,6 @@ class App:
         url = str(url.path)
         url = URL(url[len(path):])
         return url
-    def error(self, request, code):
-        template = self.view.get_template(code + '.html')
-        return Response.render(template, request)
+    async def error(self, request, code):
+        template = self.view.get_template(str(code) + '.html')
+        return await Response.render(template, request)

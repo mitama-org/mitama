@@ -23,22 +23,23 @@ class Router():
     def add_middlewares(self, middlewares):
         self.middlewares.extend(middlewares)
     def clone(self, prefix = None):
-        return Router(routes = copy.copy(self.routes), prefix = self.prefix if prefix == None else prefix)
+        return Router(
+            routes = copy.copy(self.routes),
+            prefix = self.prefix if prefix == None else prefix
+        )
     async def match(self, request):
-        request = Request.from_request(request)
         method = request.method
-        path = request._path if hasattr(request, '_path') else request.path
-        if self.prefix != '':
-            if path[:len(self.prefix) - 1] != self.prefix:
+        path = request.subpath if hasattr(request, 'subpath') else request.path
+        if self.prefix != '' and self.prefix != '/':
+            if path[:len(self.prefix)] != self.prefix:
                 return False
             else:
-                path = path[len(self.prefix) - 1:]
-                request._path = path
+                path = path[len(self.prefix):]
+                request.subpath = path
         for route in self.routes:
             result = await route.match(request)
-            if result.__class__.__name__ == 'Response':
-                return result
             if result != False:
+                request, result = result
                 def get_response_handler(result):
                     i = 0
                     async def handle(request):
@@ -56,7 +57,7 @@ class Router():
                             return await middleware.process(request, handle)
                     return handle
                 handler = get_response_handler(result)
-                return await handler(request)
+                return request, handler
         return False
 
 class Route():
@@ -67,11 +68,11 @@ class Route():
         pass
     async def match(self, request):
         method = request.method
-        path = request.path
+        path = request.subpath if hasattr(request, 'subpath') else request.path
         args = self.path.match(path)
         if method in self.methods and args != False:
             request.params = args
-            return self.handler
+            return request, self.handler
         else:
             return False
 

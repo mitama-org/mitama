@@ -31,7 +31,7 @@ class Request(web.Request):
         if sess is None:
             storage = self.get('mitama_session_storage')
             sess = await storage.load_session(self)
-            self['mitama_session_storage'] = sess
+            self['mitama_session'] = sess
         return sess
     @classmethod
     def from_request(cls, request):

@@ -4,6 +4,7 @@ import base64
 from cryptography import fernet
 from mitama.app import Middleware
 from collections.abc import MutableMapping
+from mitama.http import Response
 
 
 class Session(MutableMapping):
@@ -118,7 +119,7 @@ class EncryptedCookieStorage():
                     ).decode('utf-8')
                 )
                 return Session(None, data = data, new = False, max_age = self.max_age)
-            except InvalidToken:
+            except:
                 return Session(None, data = None, new = True, max_age = self.max_age)
     async def save_session(self, request, response, session):
         if session.empty:
@@ -154,16 +155,9 @@ class SessionMiddleware(Middleware):
         self.storage = storage
     async def process(self, request, handler):
         request['mitama_session_storage'] = self.storage
-        print('session middlewaree', request['mitama_session_storage'])
         raise_response = False
-        try:
-            response = await handler(request)
-        except web.HTTPException as exc:
-            response = exc
-            raise_response = True
-        if not isinstance(response, web.StreamResponse):
-            raise RuntimeError('Expect response, not {!r}'.format(type(response)))
-        if not isinstance(response, web.Response):
+        response = await handler(request)
+        if not isinstance(response, Response):
             return response
         if response.prepared:
             raise RuntimeError('Cannot save session data into prepared response')

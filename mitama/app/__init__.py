@@ -38,9 +38,6 @@ class StaticFileController(Controller):
         )
         if len(self.paths) == 0:
             self.paths.append(self.app.install_dir / 'static')
-        else:
-            for path in paths:
-                self.paths.append(Path(path))
     async def handle(self, req: Request):
         for path in self.paths:
             filename = path / req.params['path']
