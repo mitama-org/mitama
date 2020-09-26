@@ -2,6 +2,7 @@ from mitama.db.types import *
 from mitama.db import BaseDatabase
 from base64 import b64encode
 import magic
+from mitama.permission import PermissionMixin
 
 class Database(BaseDatabase):
     pass
@@ -23,5 +24,28 @@ class Invite(db.Model):
     def retrieve(cls, id):
         return cls.query.filter(cls.id == id).first()
 
+class CreateUserPermission(PermissionMixin, db.Model):
+    upPropagate = True
+    pass
+
+class UpdateUserPermission(PermissionMixin, db.Model):
+    upPropagate = True
+    pass
+
+class DeleteUserPermission(PermissionMixin, db.Model):
+    upPropagate = True
+    pass
+
+class CreateGroupPermission(PermissionMixin, db.Model):
+    upPropagate = True
+    pass
+
+class UpdateGroupPermission(PermissionMixin, db.Model):
+    upPropagate = True
+    pass
+
+class DeleteGroupPermission(PermissionMixin, db.Model):
+    upPropagate = True
+    pass
 
 db.create_all()
