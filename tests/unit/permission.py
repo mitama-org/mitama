@@ -29,7 +29,7 @@ class PiyoTargetedPermission(PermissionMixin, db.Model):
 
 class FugaTargetedPermission(PermissionMixin, db.Model):
     target = types.Column(types.Group)
-    targetUpPropagate = False
+    targetDownPropagate = True
     pass
 
 db.create_all()
@@ -104,4 +104,28 @@ def test_target_up_propagate():
     assert HogeTargetedPermission.is_forbidden(u[2], u[4])
     assert HogeTargetedPermission.is_forbidden(u[2], g[3])
     assert HogeTargetedPermission.is_forbidden(u[2], g[4])
+
+def test_target_propagate():
+    PiyoTargetedPermission.accept(u[2], g[2])
+    assert PiyoTargetedPermission.is_forbidden(u[2], g[0])
+    assert PiyoTargetedPermission.is_forbidden(u[2], g[1])
+    assert PiyoTargetedPermission.is_forbidden(u[2], u[0])
+    assert PiyoTargetedPermission.is_forbidden(u[2], u[1])
+    assert PiyoTargetedPermission.is_accepted(u[2], g[2])
+    assert PiyoTargetedPermission.is_forbidden(u[2], u[3])
+    assert PiyoTargetedPermission.is_forbidden(u[2], u[4])
+    assert PiyoTargetedPermission.is_forbidden(u[2], g[3])
+    assert PiyoTargetedPermission.is_forbidden(u[2], g[4])
+
+def test_target_down_propagate():
+    FugaTargetedPermission.accept(u[2], g[2])
+    assert FugaTargetedPermission.is_forbidden(u[2], g[0])
+    assert FugaTargetedPermission.is_forbidden(u[2], g[1])
+    assert FugaTargetedPermission.is_forbidden(u[2], u[0])
+    assert FugaTargetedPermission.is_forbidden(u[2], u[1])
+    assert FugaTargetedPermission.is_accepted(u[2], g[2])
+    assert FugaTargetedPermission.is_accepted(u[2], u[3])
+    assert FugaTargetedPermission.is_accepted(u[2], u[4])
+    assert FugaTargetedPermission.is_accepted(u[2], g[3])
+    assert FugaTargetedPermission.is_accepted(u[2], g[4])
 
