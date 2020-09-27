@@ -47,13 +47,17 @@ class Node(object):
         for rel in rels:
             parent.append(rel.parent)
         return parent
-    def is_ancester(self, node):
-        if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
+    def is_ancestor(self, node):
+        if not isinstance(node, Group) and not isinstance(node, User):
             raise TypeError('Checking object must be Group or User instance')
         layer = self.parents()
         while len(layer) > 0:
-            if node in layer:
+            if isinstance(node, Group) and node in layer:
                 return True
+            else:
+                for node_ in layer:
+                    if isinstance(node, User) and node_.is_in(node):
+                        return True
             layer_ = list()
             for node_ in layer:
                 layer_.extend(
@@ -119,14 +123,14 @@ class Group(db.Model, Node):
     def remove(self, node):
         if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
             raise TypeError('Removing object must be Group or User instance')
-        rel = Relation.query.filter(Relation.parent == self and Relation.child == node).first()
+        rel = Relation.query.filter(Relation.parent == self).filter(Relation.child == node).first()
         db.session.delete(rel)
         db.session.commit()
     def remove_all(self, nodes):
         for node in nodes:
             if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
                 raise TypeError('Appending object must be Group or User instance')
-        rels = Relation.query.filter(Relation.parent == self and Relation.child in nodes).all()
+        rels = Relation.query.filter(Relation.parent == self).filter(Relation.child in nodes).all()
         db.session.delete(rels)
         db.session.commit()
     def children(self):
@@ -151,10 +155,10 @@ class Group(db.Model, Node):
             layer = layer_
         return False
     def is_in(self, node):
-        if node.__class__ != 'Group' and node.__class__ != 'User':
+        if not isinstance(node, Group) and not isinstance(node, User):
             raise TypeError('Checking object must be Group or User instance')
-        rels = Relation.query.filter(Relation.parent == self and Relation.node == node).all()
-        return rels.len()!=0
+        rels = Relation.query.filter(Relation.parent == self).filter(Relation.child == node).all()
+        return len(rels) != 0
     def delete(self):
         hook_registry.delete_group(self)
         super().delete()
