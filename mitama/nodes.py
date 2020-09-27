@@ -13,6 +13,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from mitama.db import _CoreDatabase, func, orm
 from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
 from mitama.hook import HookRegistry
+from mitama.app.noimage import load_noimage_user, load_noimage_group
 
 db = _CoreDatabase()
 hook_registry = HookRegistry()
@@ -74,7 +75,7 @@ class User(db.Model, Node):
         if self._icon != None:
             return self._icon
         else:
-            return noimage_user
+            return load_noimage_user()
     @icon.setter
     def icon(self, value):
         self._icon = value
@@ -95,7 +96,7 @@ class Group(db.Model, Node):
         if self._icon != None:
             return self._icon
         else:
-            return noimage_group
+            return load_noimage_group()
     @icon.setter
     def icon(self, value):
         self._icon = value

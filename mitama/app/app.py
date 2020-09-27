@@ -6,7 +6,7 @@ from pathlib import Path
 import magic
 import os
 from base64 import b64encode
-from mitama.app.noimage import noimage_app
+from mitama.app.noimage import load_noimage_app
 from mitama.http import Request, Response
 
 def dataurl(blob):
@@ -19,7 +19,7 @@ class App:
     instances = list()
     description = ""
     name = ""
-    icon = noimage_app
+    icon = load_noimage_app
     def __init__(self, **kwargs):
         self.app = web.Application(client_max_size = kwargs["client_max_size"] if "client_max_size" in kwargs else 100*1024*1024)
         self.screen_name = kwargs['name']
