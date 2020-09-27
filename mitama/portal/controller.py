@@ -52,10 +52,15 @@ class RegisterController(Controller):
             try:
                 data = await request.post()
                 user = User()
-                user.screen_name = data['screen_name']
-                user.name = data['name']
                 user.password = password_hash(data['password'])
-                user.icon = data['icon'].file.read() if "icon" in data else invite.icon
+                if invite.editable:
+                    user.screen_name = data['screen_name']
+                    user.name = data['name']
+                    user.icon = data['icon'].file.read() if "icon" in data else invite.icon
+                else:
+                    user.screen_name = invite.screen_name
+                    user.name = invite.name
+                    user.icon = invite.icon
                 user.create()
                 sess["jwt_token"] = get_jwt(user)
                 return Response.redirect(
@@ -89,6 +94,13 @@ class RegisterController(Controller):
                 user.password = password_hash(data['password'])
                 user.icon = data["icon"].file.read()
                 user.create()
+                Admin.accept(user)
+                UserCreatePermission.accept(user)
+                UserUpdatePermission.accept(user)
+                UserDeletePermission.accept(user)
+                GroupCreatePermission.accept(user)
+                GroupUpdatePermission.accept(user)
+                GroupDeletePermission.accept(user)
                 sess["jwt_token"] = get_jwt(user)
                 return Response.redirect(
                     self.app.convert_url("/")
@@ -112,6 +124,8 @@ class HomeController(Controller):
 
 class UsersController(Controller):
     async def create(self, req):
+        if UserCreatePermission.is_forbidden(req.user):
+            return await self.app.error(request, 403)
         template = self.view.get_template('user/create.html')
         invites = Invite.list()
         if req.method == 'POST':
@@ -123,6 +137,7 @@ class UsersController(Controller):
                 invite.screen_name = post['screen_name']
                 invite.icon = icon
                 invite.token = str(uuid4())
+                invite.editable = 'editable' in post
                 invite.create()
                 invites = Invites.list()
                 return await Response.render(template, req, {
@@ -143,9 +158,9 @@ class UsersController(Controller):
             "icon": noimage_user
         })
     async def cancel(self, req):
-        invite = Invite.retrieve(req.params['id'])
-        invite.delete()
-        return Response.redirect(self.app.convert_url('/users/invite'))
+        if UserCreatePermission.is_forbidden(req.user):
+            return await self.app.error(request, 403)
+        invite = Invite.retrieve(req.params['id']) invite.delete() return Response.redirect(self.app.convert_url('/users/invite'))
     async def retrieve(self, req):
         template = self.view.get_template('user/retrieve.html')
         user = User.retrieve(screen_name = req.params["id"])
@@ -155,6 +170,8 @@ class UsersController(Controller):
     async def update(self, req):
         template = self.view.get_template('user/update.html')
         user = User.retrieve(screen_name = req.params["id"])
+        if UserUpdatePermission.is_forbidden(req.user, user):
+            return await self.app.error(request, 403)
         if req.method == "POST":
             post = await req.post()
             try:
@@ -187,6 +204,8 @@ class UsersController(Controller):
             "icon": user.icon,
         })
     async def delete(self, req):
+        if UserDeletePermission.is_forbidden(req.user):
+            return await self.app.error(request, 403)
         template = self.view.get_template('user/delete.html')
         return await Response.render(template, req)
     async def list(self, req):
@@ -198,6 +217,8 @@ class UsersController(Controller):
 
 class GroupsController(Controller):
     async def create(self, req):
+        if GroupCreatePermission.is_forbidden(req.user):
+            return await self.app.error(request, 403)
         template = self.view.get_template('group/create.html')
         groups = Group.list()
         if req.method == 'POST':
@@ -230,6 +251,8 @@ class GroupsController(Controller):
             "group": group
         })
     async def update(self, req):
+        if GroupUpdatePermission.is_forbidden(req.user, user):
+            return await self.app.error(request, 403)
         template = self.view.get_template('group/update.html')
         group = Group.retrieve(screen_name = req.params["id"])
         if req.method == "POST":
@@ -264,6 +287,8 @@ class GroupsController(Controller):
             "icon": group.icon,
         })
     async def delete(self, req):
+        if GroupDeletePermission.is_forbidden(req.user):
+            return await self.app.error(request, 403)
         template = self.view.get_template('group/delete.html')
         return await Response.render(template, req)
     async def list(self, req):
@@ -275,6 +300,8 @@ class GroupsController(Controller):
 
 class AppsController(Controller):
     async def update(self, req):
+        if Admin.is_forbidden(req.user):
+            return await self.app.error(request, 403)
         template = self.view.get_template('apps/update.html')
         apps = AppRegistry()
         if req.method == "POST":

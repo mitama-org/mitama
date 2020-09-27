@@ -14,20 +14,32 @@ from sqlalchemy import *
 class User(TypeDecorator):
     impl = Integer
     def process_bind_param(self, value, dialect):
-        return value.id
+        if value == None:
+            return None
+        else:
+            return value.id
     def process_result_value(self, value, dialect):
         from mitama.nodes import User
-        user = User.retrieve(value)
-        return user
+        if value == None:
+            return None
+        else:
+            user = User.retrieve(value)
+            return user
 
 class Group(TypeDecorator):
     impl = Integer
     def process_bind_param(self, value, dialect):
-        return value.id
+        if value == None:
+            return None
+        else:
+            return value.id
     def process_result_value(self, value, dialect):
         from mitama.nodes import Group
-        group = Group.retrieve(value)
-        return group
+        if value == None:
+            return None
+        else:
+            group = Group.retrieve(value)
+            return group
 
 class Node(TypeDecorator):
     impl = Integer

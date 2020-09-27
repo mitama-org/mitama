@@ -32,6 +32,10 @@ class FugaTargetedPermission(PermissionMixin, db.Model):
     targetDownPropagate = True
     pass
 
+class HogePiyoTargetedPermission(PermissionMixin, db.Model):
+    target = types.Column(types.Group, nullable = True)
+    pass
+
 db.create_all()
 
 u = list()
@@ -128,4 +132,25 @@ def test_target_down_propagate():
     assert FugaTargetedPermission.is_accepted(u[2], u[4])
     assert FugaTargetedPermission.is_accepted(u[2], g[3])
     assert FugaTargetedPermission.is_accepted(u[2], g[4])
+
+def test_target_none_propagate():
+    HogePiyoTargetedPermission.accept(u[3])
+    assert HogePiyoTargetedPermission.is_accepted(u[3], g[0])
+    assert HogePiyoTargetedPermission.is_accepted(u[3], u[0])
+    assert HogePiyoTargetedPermission.is_accepted(u[3], u[1])
+    assert HogePiyoTargetedPermission.is_accepted(u[3], g[2])
+    assert HogePiyoTargetedPermission.is_accepted(u[3], u[2])
+    assert HogePiyoTargetedPermission.is_accepted(u[3], u[4])
+    assert HogePiyoTargetedPermission.is_accepted(u[3], g[3])
+    assert HogePiyoTargetedPermission.is_accepted(u[3], g[4])
+    assert HogePiyoTargetedPermission.is_forbidden(u[4], g[0])
+    assert HogePiyoTargetedPermission.is_forbidden(u[4], g[1])
+    assert HogePiyoTargetedPermission.is_forbidden(u[4], u[0])
+    assert HogePiyoTargetedPermission.is_forbidden(u[4], u[1])
+    assert HogePiyoTargetedPermission.is_forbidden(u[4], g[2])
+    assert HogePiyoTargetedPermission.is_forbidden(u[4], u[2])
+    assert HogePiyoTargetedPermission.is_forbidden(u[4], u[4])
+    assert HogePiyoTargetedPermission.is_forbidden(u[4], g[3])
+    assert HogePiyoTargetedPermission.is_forbidden(u[4], g[4])
+
 

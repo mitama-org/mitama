@@ -16,6 +16,7 @@ class Invite(db.Model):
     screen_name = Column(String)
     name = Column(String)
     token = Column(String, unique = True)
+    editable = Column(Bool)
     def icon_to_dataurl(self):
         f = magic.Magic(mime = True, uncompress = True)
         mime = f.from_buffer(self.icon)
@@ -30,6 +31,8 @@ class CreateUserPermission(PermissionMixin, db.Model):
 
 class UpdateUserPermission(PermissionMixin, db.Model):
     upPropagate = True
+    targetDownPropagate = True
+    target = Column(User)
     pass
 
 class DeleteUserPermission(PermissionMixin, db.Model):
@@ -42,9 +45,15 @@ class CreateGroupPermission(PermissionMixin, db.Model):
 
 class UpdateGroupPermission(PermissionMixin, db.Model):
     upPropagate = True
+    targetDownPropagate = True
+    target = Column(Group)
     pass
 
 class DeleteGroupPermission(PermissionMixin, db.Model):
+    upPropagate = True
+    pass
+
+class Admin(PermissionMixin, db.Model):
     upPropagate = True
     pass
 

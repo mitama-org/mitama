@@ -18,7 +18,7 @@ class PermissionMixin(object):
     def accept(cls, node, target = None):
         perm = cls()
         perm.node = node
-        if hasattr(cls, 'target'):
+        if hasattr(cls, 'target') and target != None:
             perm.target = target
         perm.create()
     @classmethod
@@ -32,7 +32,7 @@ class PermissionMixin(object):
     def is_accepted(cls, node, target = None):
         perms = cls.query.filter(cls.node == node).all()
         for perm in perms:
-            if perm.is_target(target):
+            if perm.is_target(target) or perm.is_target(None):
                 return True
         if node.__class__.__name__ == 'User':
             parents = node.parents()
