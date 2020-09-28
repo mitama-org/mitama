@@ -12,6 +12,8 @@ import sys
 
 def exec():
     subcmd = sys.argv[1]
+    if subcmd == '':
+        subcmd = 'help'
     m = importlib.import_module('.' + subcmd, 'mitama.command')
     cmd = m.Command()
     cmd.handle(sys.argv[2:])
