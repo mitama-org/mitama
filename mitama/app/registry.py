@@ -37,7 +37,6 @@ class AppRegistry(_Singleton):
             builder.set_name(app_name)
             app = builder.build()
             self[_app['path']] = app
-        print(self._server)
         if self._server != None:
             self._server.load_routes()
     def router(self):
