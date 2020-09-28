@@ -24,10 +24,11 @@ class PermissionMixin(object):
     @classmethod
     def forbit(cls, node, target = None):
         if hasattr(cls, 'target'):
-            perm = cls.query.filter(cls.node == node).first()
-        else:
             perm = cls.query.filter(cls.node == node).filter(cls.target == target).first()
-        perm.delete()
+        else:
+            perm = cls.query.filter(cls.node == node).first()
+        if perm!=None:
+            perm.delete()
     @classmethod
     def is_accepted(cls, node, target = None):
         perms = cls.query.filter(cls.node == node).all()
@@ -40,13 +41,17 @@ class PermissionMixin(object):
                 if cls.is_accepted(group, target):
                     return True
         for node_ in cls.query.all():
-            if cls.upPropagate and node_.node.is_ancestor(node) and node_.is_target(target):
+            if node_.node == None:
+                continue
+            if cls.upPropagate and not isinstance(node_.node, User) and node_.node.is_ancestor(node) and node_.is_target(target):
                 return True
-            if cls.downPropagate and node_.node.is_descendant(node) and node_.is_target(target):
+            if cls.downPropagate and not isinstance(node_.node, User) and node_.node.is_descendant(node) and node_.is_target(target):
                 return True
         return False
     def is_target(self, target = None):
         if not hasattr(self, 'target'):
+            return True
+        if self.target == None:
             return True
         if self.target == target:
             return True

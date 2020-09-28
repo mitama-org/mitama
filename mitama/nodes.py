@@ -102,11 +102,11 @@ class Group(db.Model, Node):
         self._icon = value
     @classmethod
     def tree(cls):
-        noparent = [rel.child.id for rel in db.session.query(Relation.child).group_by(Relation.child) if rel.child.__class__.__name__ == "Group"]
-        groups = [group for group in Group.query.filter().all() if group.id not in noparent and group.__class__.__name__ == "Group"]
+        noparent = [rel.child.id for rel in db.session.query(Relation.child).group_by(Relation.child) if isinstance(rel.child, Group)]
+        groups = [group for group in Group.query.filter().all() if group.id not in noparent and isinstance(group, Group)]
         return groups
     def append(self, node):
-        if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
+        if not isinstance(node, Group) and not isinstance(node, User):
             raise TypeError('Appending object must be Group or User instance')
         rel = Relation()
         rel.parent = self
@@ -114,26 +114,25 @@ class Group(db.Model, Node):
         rel.create()
     def append_all(self, nodes):
         for node in nodes:
-            if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
+            if not isinstance(node, Group) and not isinstance(node, User):
                 raise TypeError('Appending object must be Group or User instance')
             rel = Relation()
             rel.parent = self
             rel.child = node
-            db.session.add(rel)
-        db.session.commit()
+            Relation.query.session.add(rel)
+        Relation.query.session.commit()
     def remove(self, node):
-        if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
+        if not isinstance(node, Group) and not isinstance(node, User):
             raise TypeError('Removing object must be Group or User instance')
         rel = Relation.query.filter(Relation.parent == self).filter(Relation.child == node).first()
-        db.session.delete(rel)
-        db.session.commit()
+        rel.delete()
     def remove_all(self, nodes):
         for node in nodes:
-            if node.__class__.__name__ != 'Group' and node.__class__.__name__ != 'User':
+            if not isinstance(node, Group) and not isinstance(node, User):
                 raise TypeError('Appending object must be Group or User instance')
         rels = Relation.query.filter(Relation.parent == self).filter(Relation.child in nodes).all()
-        db.session.delete(rels)
-        db.session.commit()
+        Relation.query.session.delete(rels)
+        Relation.query.session.commit()
     def children(self):
         rels = Relation.query.filter(Relation.parent == self).all()
         children = list()

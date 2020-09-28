@@ -51,6 +51,8 @@ class Request(web.Request):
         post = await super().post()
         data = dict()
         for k,v in post.items():
+            if not isinstance(v, web.FileField) and len(v) == 0:
+                continue
             match = self.__dict_style.match(k)
             if match!=None:
                 name, key = match.group(1,2)

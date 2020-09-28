@@ -59,6 +59,6 @@ def check_jwt(token):
             secret,
             algorithm='HS256'
         )
-    except InvalidTokenError as err:
+    except jwt.exceptions.InvalidTokenError as err:
         raise AuthorizationError('Invalid token.')
     return User.query.filter(User.id == result['id']).first()

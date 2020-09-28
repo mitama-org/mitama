@@ -9,12 +9,12 @@ def load_noimage_app():
         noimage_app_path = config._project_dir / "static/noimage_app.png"
     else:
         noimage_app_path = Path(os.path.dirname(__file__)) / "static/noimage_app.png"
+    with open(noimage_app_path, "rb") as f:
+        noimage_app = f.read()
+    return noimage_app
 
 def load_noimage_user():
     config = get_from_project_dir()
-    with open(noimage_app_path, "rb") as f:
-        noimage_app = f.read()
-
     if (config._project_dir / "noimage_user").is_file():
         noimage_user_path = (config._project_dir / "static/noimage_user.png")
     else:
@@ -22,6 +22,7 @@ def load_noimage_user():
 
     with open(noimage_user_path, "rb") as f:
         noimage_user = f.read()
+    return noimage_user
 
 def load_noimage_group():
     config = get_from_project_dir()
@@ -32,4 +33,5 @@ def load_noimage_group():
 
     with open(noimage_group_path, "rb") as f:
         noimage_group = f.read()
+    return noimage_group
 

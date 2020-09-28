@@ -11,9 +11,11 @@
             <a href='{{ url('/apps') }}' class='focus'>アプリ</a>
         </div>
         <div class='tab-content'>
+            {% if is_admin %}
             <div class='tool-box'>
                 <a href='{{ url('/apps/settings') }}'><button>アプリ設定</button></a>
             </div>
+            {% endif %}
             <div class="inner">
                 <div class='app-list'>
                 {% for app in apps %}

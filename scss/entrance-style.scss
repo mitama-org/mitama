@@ -1,0 +1,88 @@
+@import './base.scss';
+body{
+    background: #fff;
+}
+header{
+    height: 56px;
+    padding: 8px;
+    #logo{
+        height: 56px;
+    }
+}
+#content{
+    padding: 64px 0;
+    text-align: center;
+    p>span{
+        display: inline-block;
+    }
+    form{
+        text-align: left;
+        padding: 24px;
+        max-width: 400px;
+        margin: 0 auto;
+        .main{
+            width: 320px;
+            margin: 0 auto;
+        }
+        input{
+            height: 32px;
+            line-height:32px;
+            padding: 0 8px;
+            border: none;
+            border-bottom-width: 2px;
+            border-bottom-style: solid;
+            border-bottom-color: #0000;
+            outline: none;
+            transition: all 0.2s;
+            width: 100%;
+            &:focus{
+                border-bottom-color: var(--accent-background);
+            }
+        }
+        #image-form {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-gap: 16px;
+            margin: 16px 0;
+            align-items: center;
+            input{
+                display: none;
+            }
+            img {
+                display: block;
+                width: 80px;
+                height: 80px;
+                border-radius: 40px;
+            }
+            .button {
+                display: flex;
+                background: var(--accent-background);
+                color: var(--main-background);
+                font-weight: bold;
+                height: 32px;
+                max-width: 160px;
+                border-radius: 4px;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+        dl{
+            margin: 0px 0 32px;
+            dt{
+                font-size: 0.8rem;
+                font-weight: bold;
+            }
+            dd{
+                margin:8px 0 16px;
+            }
+        }
+        .submit{
+            display: flex;
+            justify-content: center;
+            margin-top: 32px;
+            button{
+                width: 120px;
+            }
+        }
+    }
+}

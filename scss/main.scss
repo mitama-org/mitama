@@ -18,6 +18,11 @@
     .thin-title{
         font-size: 0.8rem;
         font-weight: bold;
+        &.between{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     }
     .tool-box{
         display: flex;
@@ -38,17 +43,19 @@
     }
     .profile-container{
         display:grid;
-        grid-template-columns: 80px 1fr;
+        grid-template-columns: 80px 1fr 80px;
         grid-gap: 8px;
         padding: 24px;
         max-width: 800px;
         margin: 0 auto;
-        .icon {
+        .user-icon, .icon {
             width: 80px;
             height:80px;
-            border-radius: 8px;
-            border: 4px solid #0001;
             box-sizing:border-box;
+            border: 4px solid #0001;
+        }
+        .icon{
+            border-radius: 8px;
         }
         .detail {
             padding: 12px;
@@ -65,12 +72,19 @@
                 color: var(--main-text-lighter);
             }
         }
+        .action{
+            grid-column: 3/4;
+            button{
+                width: 100%;
+            }
+        }
         .group-list {
             grid-column: 1/3;
         }
     }
     @import './form.scss';
     @import './list.scss';
+    @import './modal.scss';
     @include pc{
         max-width: 1200px;
         width: calc(100% - 100px);

@@ -6,10 +6,15 @@
 <div id='content'>
     <div class="inner">
         <div class="profile-container">
-            <img src="{{ dataurl(user.icon) }}" class="icon"/>
+            <img src="{{ dataurl(user.icon) }}" class="user-icon"/>
             <div class="detail">
                 <h2 class="name">{{user.name}}</h2>
                 <div class="screen-name">{{user.screen_name}}</div>
+            </div>
+            <div class='action'>
+            {% if user_update_permission(request.user, user) %}
+                <a href='/users/{{user.screen_name}}/settings'><button>設定</button></a>
+            {% endif %}
             </div>
         </div>
         <div class="content">

@@ -19,7 +19,7 @@ class App:
     instances = list()
     description = ""
     name = ""
-    icon = load_noimage_app
+    icon = load_noimage_app()
     def __init__(self, **kwargs):
         self.app = web.Application(client_max_size = kwargs["client_max_size"] if "client_max_size" in kwargs else 100*1024*1024)
         self.screen_name = kwargs['name']
@@ -27,21 +27,6 @@ class App:
         self.project_dir = Path(kwargs['project_dir']) if 'project_dir' in kwargs else None
         self.project_root_dir = Path(kwargs['project_root_dir']) if 'project_dir' in kwargs else None
         self.install_dir = Path(kwargs['install_dir']) if 'project_dir' in kwargs else Path(os.path.dirname(__file__)) / '../http/'
-        self.view= Environment(
-            enable_async = True,
-            loader = FileSystemLoader(self.install_dir / self.template_dir)
-        )
-        def filter_user(arg):
-            return [user for user in arg if user.__class__.__name__ == "User"]
-        def filter_group(arg):
-            return [group for group in arg if group.__class__.__name__ == "Group"]
-        self.view.filters["user"] = filter_user
-        self.view.filters["group"] = filter_group
-        self.view.globals.update(
-            url = self.convert_url,
-            fullurl = self.convert_fullurl,
-            dataurl = dataurl
-        )
         for instance in self.instances:
             instance.app = self
             instance.view = self.view
@@ -102,6 +87,24 @@ class App:
         url = str(url.path)
         url = URL(url[len(path):])
         return url
+    @property
+    def view(self):
+        self._view= Environment(
+            enable_async = True,
+            loader = FileSystemLoader(self.install_dir / self.template_dir)
+        )
+        def filter_user(arg):
+            return [user for user in arg if user.__class__.__name__ == "User"]
+        def filter_group(arg):
+            return [group for group in arg if group.__class__.__name__ == "Group"]
+        self._view.filters["user"] = filter_user
+        self._view.filters["group"] = filter_group
+        self._view.globals.update(
+            url = self.convert_url,
+            fullurl = self.convert_fullurl,
+            dataurl = dataurl
+        )
+        return self._view
     async def error(self, request, code):
         template = self.view.get_template(str(code) + '.html')
         return await Response.render(template, request)

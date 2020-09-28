@@ -49,12 +49,13 @@
             <p class='error'>{{ error }}</p>
             {% endif %}
         </form>
-        <section>
+        <section class='inner'>
             <h3 class='thin-title'>招待中ユーザー</h3>
             <div class='invite-list'>
+            {% if invites|length %}
             {% for invite in invites %}
                 <div class='item'>
-                    <img src='{{ dataurl(invite.icon)}}' class='icon' />
+                    <img src='{{ dataurl(invite.icon)}}' class='user-icon' />
                     <div class='detail'>
                         <div class='name'>{{invite.name}}</div>
                         <div class='screen_name'>{{invite.screen_name}}</div>
@@ -67,6 +68,9 @@
                     </div>
                 </div>
             {% endfor %}
+            {% else%}
+                <div class='no-item'>招待しているユーザーはいません</div>
+            {% endif %}
             </div>
         </section>
     <div>

@@ -9,9 +9,12 @@
 '''
 
 from sqlalchemy.orm import class_mapper
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
 class Model:
+    @declared_attr
+    def __tablename__(cls):
+        return re.sub("(.[A-Z])",lambda x:x.group(1)[0] + "_" +x.group(1)[1], cls.__name__).lower()
     def create(self):
         self.query.session.add(self)
         self.query.session.commit()

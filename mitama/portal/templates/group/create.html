@@ -6,7 +6,7 @@
 {% set post = request.post() %}
 <div id='content'>
     <h2 class='mini-title dark'>チームを作成</h2>
-    <form method='post' action='' enctype='multipart/form-data'>
+    <form method='POST' action='' enctype='multipart/form-data'>
         <dl>
             <dt>アイコン</dt>
             <dd>
@@ -34,7 +34,7 @@
             <dt>所属グループ</dt>
             <dd>
                 <select name='parent'>
-                    <option value=''></option>
+                    <option></option>
                     {% for group in groups %}
                         <option value='{{group.id}}'>{{ group.name }}</option>
                     {% endfor %}

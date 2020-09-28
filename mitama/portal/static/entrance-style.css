@@ -1,0 +1,148 @@
+@charset "UTF-8";
+/*
+ * 色定義
+*/
+:root {
+  --mtm-blue: #49a3e0;
+  --base-background: #efefef;
+  --header-text: #fff;
+  --main-color: var(--mtm-blue);
+  --header-background: var(--main-color);
+  --main-background: #ffffff;
+  --main-decoration: #cccccc;
+  --main-text: #444444;
+  --main-text-lighter: #777777;
+  --accent-text: #b33e5c;
+  --accent-background: #b33e5c;
+}
+
+/*
+ * 共通スタイル
+ */
+body {
+  margin: 0;
+  background: var(--base-background);
+  color: var(--main-text);
+  font-size: 14px;
+}
+
+a {
+  color: var(--accent-text);
+}
+
+button {
+  display: flex;
+  background: var(--accent-background);
+  color: var(--main-background);
+  font-weight: bold;
+  height: 32px;
+  width: auto;
+  padding: 0 8px;
+  border: none;
+  border-radius: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+.user-icon {
+  border-radius: 50%;
+}
+
+.icon {
+  object-fit: cover;
+}
+
+/*
+ * レスポンシブ
+ */
+body {
+  background: #fff;
+}
+
+header {
+  height: 56px;
+  padding: 8px;
+}
+header #logo {
+  height: 56px;
+}
+
+#content {
+  padding: 64px 0;
+  text-align: center;
+}
+#content p > span {
+  display: inline-block;
+}
+#content form {
+  text-align: left;
+  padding: 24px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+#content form .main {
+  width: 320px;
+  margin: 0 auto;
+}
+#content form input {
+  height: 32px;
+  line-height: 32px;
+  padding: 0 8px;
+  border: none;
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: #0000;
+  outline: none;
+  transition: all 0.2s;
+  width: 100%;
+}
+#content form input:focus {
+  border-bottom-color: var(--accent-background);
+}
+#content form #image-form {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  grid-gap: 16px;
+  margin: 16px 0;
+  align-items: center;
+}
+#content form #image-form input {
+  display: none;
+}
+#content form #image-form img {
+  display: block;
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+}
+#content form #image-form .button {
+  display: flex;
+  background: var(--accent-background);
+  color: var(--main-background);
+  font-weight: bold;
+  height: 32px;
+  max-width: 160px;
+  border-radius: 4px;
+  justify-content: center;
+  align-items: center;
+}
+#content form dl {
+  margin: 0px 0 32px;
+}
+#content form dl dt {
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+#content form dl dd {
+  margin: 8px 0 16px;
+}
+#content form .submit {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+#content form .submit button {
+  width: 120px;
+}
+
+/*# sourceMappingURL=entrance-style.css.map */

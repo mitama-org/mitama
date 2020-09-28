@@ -1,3 +1,4 @@
+{% set entrance = True %}
 {% extends 'base.html' %}
 {% block header %}
     {% include "entrance-header.html" %}
@@ -5,16 +6,27 @@
 {% block content %}
 {% set post = request.post() %}
 <div id='content'>
-    <form method='post' action='' enctype='multipart/form-data'>
-        <h1>ようこそ</h1>
-        <p>さっそく最初のユーザーを作り、Mitamaを始めましょう</p>
+    <h1>ようこそ</h1>
+    <p>
+        <span>さっそく最初のユーザーを作り、</span>
+        <span>Mitamaを始めましょう</span>
+    </p>
+    <form method='post' action='' enctype='multipart/form-data' class='entrance'>
         <dl>
             <dt>アイコン</dt>
             <dd>
-                <label id='image-form'>
-                    <input type='file' name='icon' accept='image/*' />
-                    <img class="icon" />
-                </label>
+                <div id='image-form'>
+                    <img src="{{ url("/static/noimage_user.svg") }}"/>
+                    <label class='button'>
+                        <input type='file' name='icon' accept='image/*' onchange='previewImage(this)' />
+                        画像を選択
+                    </label>
+                    <script>
+                        function previewImage(dom) {
+                            document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
+                        }
+                    </script>
+                </div>
             </dd>
             <dt>ログイン名</dt>
             <dd>
@@ -28,7 +40,10 @@
             <dd>
                 <input type='password' name='password' placeholder='パスワード' value='{{ post.password }}'/>
             </dd>
-        <button type="submit">はじめる</button>
+        </dl>
+        <div class='submit'>
+            <button type="submit">はじめる</button>
+        </div>
         <p class='error'>{{ error }}</p>
     </form>
 </div>

@@ -60,6 +60,21 @@ form {
     button[type='submit'] {
         width: 160px;
     }
+    .permission{
+        label{
+            display: grid;
+            grid-template-columns: 24px 1fr;
+            height: 32px;
+            input[type='checkbox'] {
+                width: 12px;
+                height: 12px;
+                margin: 10px 6px;
+            }
+            div{
+                line-height: 32px;
+            }
+        }
+    }
     @include pc{
         padding: 32px;
     }
