@@ -19,7 +19,9 @@ class App:
     instances = list()
     description = ""
     name = ""
-    icon = load_noimage_app()
+    @property
+    def icon(self):
+        return load_noimage_app()
     def __init__(self, **kwargs):
         self.app = web.Application(client_max_size = kwargs["client_max_size"] if "client_max_size" in kwargs else 100*1024*1024)
         self.screen_name = kwargs['name']
