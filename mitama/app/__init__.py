@@ -12,18 +12,57 @@ import os
 add_type('application/json', '.map')
 
 class Controller():
+    '''MVCのControllerの基底クラス
+
+    メソッドを記述すると、それをリクエスト処理に利用できる。
+    ルーティング時にメソッドを特に指定しない場合はhandleメソッドが実行される。
+    非同期関数として定義すること。非同期なので、別プロセスを中継するとかもやりやすい（かもしれない）。
+    :param app: Controllerを起動するAppのインスタンスの参照
+    :param view: Controllerが利用するJinja2のEnvironmentインスタンス
+    '''
     app = None
-    async def handle(self, req: Request):
+    view = None
+    async def handle(self, request: Request):
+        '''リクエストハンドラ
+
+        ルーティング時に特にメソッド名を指定しない場合にはこのメソッドが起動する。
+        独自にメソッドを定義する場合にも、このメソッドと同じインターフェースを実装しなければならない。
+        :param request: mitama.http.Requestのインスタンス
+        :return: mitama.http.Responseのインスタンス
+        '''
         pass
 
 class Middleware(metaclass = ABCMeta):
+    '''Requestを加工するMiddlewareの抽象クラス
+
+    processメソッドによって受け取ったRequestを変更し、handler（次のMiddleware、またはControllerのメソッド）に受け渡す。
+    :param app: Middlewareを起動するAppのインスタンスの参照
+    :param view: Middlewareが利用するJinja2のEnvironmentインスタンス
+    '''
     app = None
+    view = None
     @abstractmethod
-    async def process(self, req: Request, handler):
+    async def process(self, request: Request, handler):
+        '''Middlewareのメイン処理
+
+        Middlewareは必ずこのメソッドを実装しなければならない。
+        :param request: mitama.http.Requestのインスタンス
+        :param handler: requestを引数に受け取る関数（Middleware.process、またはControllerのリクエストハンドラ）
+        '''
         pass
 
 class StaticFileController(Controller):
+    '''静的ファイルを配信するController
+
+    デフォルトではアプリのパッケージ内の :file:`static/` の中身を配信する。
+    '''
     def __init__(self, *paths):
+        '''初期化処理
+
+        初期化するとき、引数にディレクトリのパスを列挙すると、そのディレクトリが配信される。
+        何も指定されなかった場合、アプリ内の :file:`static/` が配信される。
+        :param *paths: 配信するディレクトリ
+        '''
         super().__init__()
         self.paths = list(paths)
     def __connected__(self):

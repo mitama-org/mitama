@@ -6,6 +6,12 @@ import os
 import importlib
 
 class AppRegistry(_Singleton):
+    '''稼働しているアプリのレジストリ
+
+    サーバー内で稼働しているアプリのパスやパッケージ名が登録されているレジストリです。
+    mitama.jsonを読み込んでアプリを起動するクラスでもあります。
+    dictっぽくアプリの取得や配信の停止などが可能です。
+    '''
     _map = dict()
     _server = None
     def append(self, app):
@@ -20,8 +26,10 @@ class AppRegistry(_Singleton):
     def __delitem__(self, path):
         del self._map[path]
     def reset(self):
+        '''アプリの一覧をリセットします'''
         self._map = dict()
     def load_config(self):
+        '''アプリの一覧をmitama.jsonから読み込み、配信します'''
         config = get_from_project_dir()
         sys.path.append(str(config._project_dir))
         for app_name in config.apps:
@@ -40,6 +48,7 @@ class AppRegistry(_Singleton):
         if self._server != None:
             self._server.load_routes()
     def router(self):
+        '''アプリの情報に基づいてルーティングエンジンを生成します'''
         router = Router()
         for k in self._map.keys():
             app_router = self._map[k].router.clone(prefix = k)

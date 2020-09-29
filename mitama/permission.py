@@ -5,6 +5,32 @@ from mitama.db.types import Column, Integer, Node
 from sqlalchemy.ext.declarative import declared_attr
 
 class PermissionMixin(object):
+    '''パーミッションのモデルの実装を支援します
+
+    ホワイトリスト方式の許可システムを実装する上で役に立つ機能をまとめたクラスです。
+    このクラスとBaseDatabase.Modelを継承したクラスを定義するとパーミッションシステムを実現できます。
+
+    .. code-block:: python
+
+        class SomePermission(PermissionMixin, db.Model):
+            pass
+
+    継承先のクラスで :samp:`target` プロパティを定義した場合、特定のものに対してのみ許可する仕様にすることができます。
+
+    .. code-block:: python
+
+        class SomePermission(PermissionMixin, db.Model):
+            target = Column(User)
+
+    targetがUser、またはGroupの場合、targetUpPropagate、 targetDownPropagateを指定すれば、targetに対しても伝播をチェックすることができます。
+
+    :param id: 固有のID
+    :param node: 許可するUser、またはGroupのインスタンス
+    :param targetUpPropagate: targetがUser、またはGroupの場合の上向き伝播
+    :param targetDownPropagate: targetがUser、またはGroupの場合の下向き伝播
+    :param upPropagate: 許可対象のUser、またはGroupの場合の上向き伝播
+    :param downPropagate: 許可対象のUser、またはGroupの場合の下向き伝播
+    '''
     @declared_attr
     def __tablename__(cls):
         return '__'+cls.__name__.lower()+'_permission'
@@ -16,6 +42,11 @@ class PermissionMixin(object):
     downPropagate = False
     @classmethod
     def accept(cls, node, target = None):
+        '''UserまたはGroupに許可します
+
+        :param node: UserまたはGroupのインスタンス
+        :param target: 許可対象
+        '''
         perm = cls()
         perm.node = node
         if hasattr(cls, 'target') and target != None:
@@ -23,6 +54,11 @@ class PermissionMixin(object):
         perm.create()
     @classmethod
     def forbit(cls, node, target = None):
+        '''UserまたはGroupの許可を取りやめます
+
+        :param node: UserまたはGroupのインスタンス
+        :param target: 許可対象
+        '''
         if hasattr(cls, 'target'):
             perm = cls.query.filter(cls.node == node).filter(cls.target == target).first()
         else:
@@ -31,6 +67,11 @@ class PermissionMixin(object):
             perm.delete()
     @classmethod
     def is_accepted(cls, node, target = None):
+        '''UserまたはGroupが許可されているか確認します
+
+        :param node: UserまたはGroupのインスタンス
+        :param target: 許可対象
+        '''
         perms = cls.query.filter(cls.node == node).all()
         for perm in perms:
             if perm.is_target(target) or perm.is_target(None):
@@ -67,6 +108,11 @@ class PermissionMixin(object):
         return False
     @classmethod
     def is_forbidden(cls, node, target = None):
+        '''UserまたはGroupが許可されていないか確認します
+
+        :param node: UserまたはGroupのインスタンス
+        :param target: 許可対象
+        '''
         if not hasattr(cls, 'target'):
             return not cls.is_accepted(node)
         else:

@@ -1,9 +1,9 @@
 #!/usr/bin/python
 '''データベース
 
-    * データベースの接続とか抽象化の処理を書きます
-    * Databaseはシングルトンの接続のインスタンスを生成するクラスです
-    * 各アプリにはDatabaseを継承したクラスを定義してもらい、そいつのModelプロパティのベースクラスからモデルを作ってもらいます。
+データベースの接続とか抽象化の処理を書きます
+Databaseはシングルトンの接続のインスタンスを生成するクラスです
+各アプリにはDatabaseを継承したクラスを定義してもらい、そいつのModelプロパティのベースクラスからモデルを作ってもらいます。
 '''
 
 from sqlalchemy.ext.declarative import declarative_base
@@ -76,6 +76,10 @@ class _CoreDatabase(_Database):
                 self.set_engine(engine)
 
 class BaseDatabase(_Database):
+    '''アプリで利用するデータベースの操作を行うクラス
+
+    アプリからデータベースを使うたい場合、このクラスを継承したクラスをアプリ内に定義します。
+    '''
     def __init__(self, engine = None):
         super().__init__()
         if self.engine == None:

@@ -2,6 +2,12 @@ import inspect
 import os
 
 class Builder(object):
+    '''Appにメタ情報を入力して生成するビルダー
+
+    プロジェクトディレクトリのパスやインストール先、プロジェクト内のアプリ用ディレクトリのパスをAppに設定し、インスタンスを返却します。
+    特にこれを弄るケースは想定していませんが、独自の挙動を付けたかったら継承して作っても良いかもしれません。
+    アプリのパッケージ直下のAppBuilderが起動されるので、:file:`__init__.py` に :samp:`class AppBuilder(Builder)` を定義してください。
+    '''
     app = None
     def __init__(self):
         self.data = {}

@@ -6,8 +6,20 @@ class RoutingError(Exception):
     pass
 
 class Router():
+    '''ルーティングエンジン
+
+    手軽に実装できて必要最低限なものを目指したので、遅かったりして嫌いだったら無理にこれを使う必要はありません。
+    自前のものを適用したい場合は、とりあえず:samp:`async hoge.match(Request): -> Response` といったインターフェースを実装したメソッドを作ってください。
+    routesの中にRouterインスタンスを指定することもできます。
+    '''
     app = None
     def __init__(self, routes = [], middlewares = [], prefix = ''):
+        '''初期化処理
+
+        :param routes: Router、またはRouteのリスト
+        :param middlewares: Middlewareのリスト
+        :param prefix: 指定すると、パスの先頭がprefixと一致する場合のみマッチする
+        '''
         self.routes = routes
         self.middlewares = list()
         self.prefix = prefix
@@ -15,12 +27,32 @@ class Router():
             self.middlewares.append(middleware)
         self.i = 0
     def add_route(self, route):
+        '''ルーティング先を追加します
+
+        mitama.app.methodの関数で生成したRouteインスタンスを与えてください。
+        :param route: Routeインスタンス
+        '''
         self.routes.append(route)
     def add_routes(self, routes):
+        '''複数のルーティング先を追加します
+
+        mitama.app.methodの関数で生成したRouteインスタンスを与えてください。
+        :param routes: Routeインスタンスのリスト
+        '''
         self.routes.extend(routes)
     def add_middleware(self, middleware):
+        '''ミドルウェアを登録します
+
+        Middlewareクラスを与えると、このルーターのインスタンス内でマッチした場合にミドルウェアが順番に起動します。
+        :param middleware: Middlewareのインスタンス
+        '''
         self.middlewares.append(middleware)
     def add_middlewares(self, middlewares):
+        '''複数のミドルウェアを登録します
+
+        Middlewareクラスのリストを与えると、このルーターのインスタンス内でマッチした場合にミドルウェアが順番に起動します。
+        :param middlewares: Middlewareのインスタンスのリスト
+        '''
         self.middlewares.extend(middlewares)
     def clone(self, prefix = None):
         return Router(

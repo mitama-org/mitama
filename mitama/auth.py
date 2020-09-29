@@ -1,9 +1,9 @@
 #!/usr/bin/python
 '''パスワード認証
 
-    * Mitamaではパスワードのハッシュ化にはBCRYPTアルゴリズムの$2yプリフィクスのものを利用します
-    * 理由は、前回バージョンの第三版がPHPのpassword_hash関数を使用しており、移植性を保ちたかったからです。
-    * しょうもなくてすみません
+Mitamaではパスワードのハッシュ化にはBCRYPTアルゴリズムの$2yプリフィクスのものを利用します
+理由は、前回バージョンの第三版がPHPのpassword_hash関数を使用しており、移植性を保ちたかったからです。
+しょうもなくてすみません
 '''
 
 import bcrypt
@@ -20,6 +20,12 @@ class AuthorizationError(Exception):
     pass
 
 def password_auth(screen_name, password):
+    '''ログイン名とパスワードで認証します
+
+    :param screen_name: ログイン名
+    :param password: パスワード
+    :return: Userインスタンス
+    '''
     user = User.query.filter(User.screen_name == screen_name).first()
     password = base64.b64encode(
         hashlib.sha256(
@@ -32,6 +38,11 @@ def password_auth(screen_name, password):
         raise AuthorizationError('Wrong password')
 
 def password_hash(password):
+    '''パスワードをハッシュ化します
+
+    :param password: パスワードのプレーンテキスト
+    :return: パスワードハッシュ
+    '''
     salt = bcrypt.gensalt()
     password = base64.b64encode(
         hashlib.sha256(
@@ -41,6 +52,11 @@ def password_hash(password):
     return bcrypt.hashpw(password, salt)
 
 def get_jwt(user):
+    '''UserインスタンスからJWTを生成します
+
+    :param user: Userインスタンス
+    :return: JWT
+    '''
     nonce = ''.join([str(random.randint(0,9)) for i in range(16)])
     result = jwt.encode(
         {
@@ -53,6 +69,11 @@ def get_jwt(user):
     return result.decode()
 
 def check_jwt(token):
+    '''JWTからUserインスタンスを取得します
+
+    :param token: JWT
+    :return: Userインスタンス
+    '''
     try:
         result = jwt.decode(
             token,

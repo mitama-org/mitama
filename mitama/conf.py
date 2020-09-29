@@ -1,11 +1,8 @@
 #!/usr/bin/python
 '''configの実装
 
-    * 柔軟性を上げたかったので、デフォルト値を持ったオブジェクトのプロパティをdictの値で更新する方式をとった
-    * とりあえず、プロジェクトフォルダ直下のmitama.jsonを読む仕様にしている。
-
-Todo:
-    * コマンドから生成するmitama.jsonの値はconfigのデフォルト値を使うので、mitama.conf.Configにエクスポート関数を用意したい
+柔軟性を上げたかったので、デフォルト値を持ったオブジェクトのプロパティをdictの値で更新する方式をとった
+とりあえず、プロジェクトフォルダ直下のmitama.jsonを読む仕様にしている。
 '''
 
 import os
@@ -32,6 +29,11 @@ class Config:
 
 
 def get_from_project_dir():
+    '''プロジェクトフォルダを返します
+
+    App起動時にBuilderからメタ情報が登録されるので、基本的にはアプリから触る必要はないはずです。
+    :return: Configインスタンス
+    '''
     path = Path(os.getcwd())
     with open(path / 'mitama.json') as f:
         data = f.read()

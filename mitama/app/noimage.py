@@ -4,6 +4,7 @@ from mitama.conf import get_from_project_dir
 from base64 import b64encode
 
 def load_noimage_app():
+    '''アプリのNoImage画像を取得します'''
     config = get_from_project_dir()
     if (config._project_dir / "noimage_app").is_file():
         noimage_app_path = config._project_dir / "static/noimage_app.png"
@@ -14,6 +15,7 @@ def load_noimage_app():
     return noimage_app
 
 def load_noimage_user():
+    '''ユーザーのNoImage画像を取得します'''
     config = get_from_project_dir()
     if (config._project_dir / "noimage_user").is_file():
         noimage_user_path = (config._project_dir / "static/noimage_user.png")
@@ -25,6 +27,7 @@ def load_noimage_user():
     return noimage_user
 
 def load_noimage_group():
+    '''グループのNoImage画像を取得します'''
     config = get_from_project_dir()
     if (config._project_dir / "noimage_group").is_file():
         noimage_group_path = (config._project_dir / "static/noimage_group.png")

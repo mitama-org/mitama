@@ -68,6 +68,14 @@ class Node(object):
         return False
 
 class User(db.Model, Node):
+    '''ユーザーのモデルクラスです
+
+    :param id: 固有のID
+    :param screen_name: ログイン名
+    :param name: 名前
+    :param password: パスワード
+    :param icon: アイコン
+    '''
     __tablename__ = 'mitama_user'
     password = Column(String(255))
     @property
@@ -80,16 +88,26 @@ class User(db.Model, Node):
     def icon(self, value):
         self._icon = value
     def delete(self):
+        '''ユーザーを削除します'''
         hook_registry.delete_user(self)
         super().delete()
     def update(self):
+        '''ユーザー情報を更新します'''
         super().update()
         hook_registry.update_user(self)
     def create(self):
+        '''ユーザーを作成します'''
         super().create()
         hook_registry.create_user(self)
 
 class Group(db.Model, Node):
+    '''グループのモデルクラスです
+
+    :param id: 固有のID
+    :param screen_name: ドメイン名
+    :param name: 名前
+    :param icon: アイコン
+    '''
     __tablename__ = 'mitama_group'
     @property
     def icon(self):
@@ -160,12 +178,15 @@ class Group(db.Model, Node):
         rels = Relation.query.filter(Relation.parent == self).filter(Relation.child == node).all()
         return len(rels) != 0
     def delete(self):
+        '''グループを削除します'''
         hook_registry.delete_group(self)
         super().delete()
     def update(self):
+        '''グループの情報を更新します'''
         super().update()
         hook_registry.update_group(self)
     def create(self):
+        '''グループを作成します'''
         super().create()
         hook_registry.create_group(self)
 
