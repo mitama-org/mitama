@@ -78,5 +78,19 @@ class App(BaseApp):
                 sess_mid
             ])
         ])
+    def delete_user(self, user):
+        CreateUserPermission.forbit(user)
+        UpdateUserPermission.forbit(user)
+        DeleteUserPermission.forbit(user)
+        CreateGroupPermission.forbit(user)
+        UpdateGroupPermission.forbit(user)
+        DeleteGroupPermission.forbit(user)
+    def delete_group(self, group):
+        CreateUserPermission.forbit(group)
+        UpdateUserPermission.forbit(group)
+        DeleteUserPermission.forbit(group)
+        CreateGroupPermission.forbit(group)
+        UpdateGroupPermission.forbit(group)
+        DeleteGroupPermission.forbit(group)
     pass
 
