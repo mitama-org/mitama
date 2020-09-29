@@ -7,6 +7,7 @@ import magic
 import os
 from base64 import b64encode
 from mitama.app.noimage import load_noimage_app
+from mitama.hook import HookRegistry
 from mitama.http import Request, Response
 
 def dataurl(blob):
@@ -34,6 +35,7 @@ class App:
             instance.view = self.view
             if hasattr(instance,  '__connected__'):
                 instance.__connected__()
+        hook_registry = HookRegistry()
         if hasattr(self, 'create_user'):
             hook_registry.add_create_user_hook(self.create_user)
         if hasattr(self, 'create_group'):
