@@ -84,9 +84,9 @@ class PermissionMixin(object):
         for node_ in cls.query.all():
             if node_.node == None:
                 continue
-            if cls.upPropagate and not isinstance(node_.node, User) and node_.node.is_ancestor(node) and node_.is_target(target):
+            if node_.upPropagate and not isinstance(node_.node, User) and node_.node.is_ancestor(node) and node_.is_target(target):
                 return True
-            if cls.downPropagate and not isinstance(node_.node, User) and node_.node.is_descendant(node) and node_.is_target(target):
+            if node_.downPropagate and not isinstance(node_.node, User) and node_.node.is_descendant(node) and node_.is_target(target):
                 return True
         return False
     def is_target(self, target = None):

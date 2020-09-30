@@ -10,6 +10,7 @@
 
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
+import re
 
 class Model:
     @declared_attr
