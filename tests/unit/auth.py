@@ -9,7 +9,7 @@ def test_auth():
     from mitama.auth import password_hash, password_auth
     db.create_all()
     user = User()
-    user.id = 123
+    user._id = 123
     user.name = 'someone'
     user.screen_name = 'somebody'
     user.password = password_hash('somephrase')

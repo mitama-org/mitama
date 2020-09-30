@@ -15,12 +15,10 @@ def test_nodes():
     from mitama.nodes import User, Group
     class Profile(db.Model):
         __tablename__ = 'test_profile'
-        id = Column(types.Integer, primary_key = True)
         description = Column(types.String(255))
         user = Column(types.User)
     class GroupProfile(db.Model):
         __tablename__ = 'test_group_profile'
-        id = Column(types.Integer, primary_key = True)
         description = Column(types.String(255))
         group = Column(types.Group)
     db.create_all()
