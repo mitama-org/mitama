@@ -34,11 +34,11 @@ class AppRegistry(_Singleton):
         sys.path.append(str(config._project_dir))
         for app_name in config.apps:
             _app = config.apps[app_name]
-            init = importlib.__import__(app_name, fromlist = ['init_app'])
-            builder = init.AppBuilder()
             app_dir = config._project_dir / app_name
             if not app_dir.is_dir():
                 os.mkdir(app_dir)
+            init = importlib.__import__(app_name, fromlist = ['init_app'])
+            builder = init.AppBuilder()
             builder.set_project_dir(config._project_dir / app_name)
             builder.set_project_root_dir(config._project_dir)
             builder.set_path(_app['path'])
