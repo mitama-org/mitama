@@ -92,7 +92,6 @@ class RegisterController(Controller):
                 user.screen_name = data['screen_name']
                 user.name = data['name']
                 user.password = password_hash(data['password'])
-                print(data['icon'])
                 user.icon = data["icon"].file.read()
                 user.create()
                 Admin.accept(user)
@@ -182,7 +181,6 @@ class UsersController(Controller):
                 user.name = post["name"]
                 user.icon = icon
                 user.update()
-                user = User.retrieve(user.id)
                 if Admin.is_accepted(req.user):
                     if 'user_create' in post:
                         CreateUserPermission.accept(user)
@@ -262,7 +260,7 @@ class GroupsController(Controller):
                 group.icon = post['icon'].file.read() if "icon" in post else None
                 group.create()
                 if "parent" in post and post['parent'] != '':
-                    Group.query.filter(Group.id == post['parent']).first().append(group)
+                    Group.retrieve(int(post['parent'])).append(group)
                 group.append(req.user)
                 UpdateGroupPermission.accept(req.user, group)
                 return Response.redirect(self.app.convert_url("/groups"))
@@ -335,7 +333,6 @@ class GroupsController(Controller):
                         Admin.accept(group)
                     else:
                         Admin.forbit(group)
-                group = group.retrieve(group.id)
                 return await Response.render(template, req, {
                     "message": "変更を保存しました",
                     "group": group,
@@ -374,18 +371,16 @@ class GroupsController(Controller):
                     try:
                         nodes.append(User.retrieve(int(uid)))
                     except Exception as err:
-                        print(err)
                         pass
             if 'group' in post:
                 for gid in post['group']:
                     try:
                         nodes.append(Group.retrieve(int(gid)))
                     except Exception as err:
-                        print(err)
                         pass
             group.append_all(nodes)
         except Exception as err:
-            print(err)
+            pass
         finally:
             return Response.redirect(self.app.convert_url('/groups/'+group.screen_name+'/settings'))
     async def remove(self, req):
@@ -398,7 +393,7 @@ class GroupsController(Controller):
                 child = User.retrieve((cid + 1) / 2)
             group.remove(child)
         except Exception as err:
-            print(err)
+            pass
         finally:
             return Response.redirect(self.app.convert_url('/groups/'+group.screen_name+'/settings'))
     async def accept(self, req):
@@ -447,14 +442,12 @@ class AppsController(Controller):
                     }
                 with open(self.app.project_root_dir / "mitama.json", 'w') as f:
                     f.write(json.dumps(data))
-                print('loading_config')
                 apps.load_config()
                 return await Response.render(template, req, {
                     'message': '変更を保存しました',
                     "apps": apps,
                 })
             except Exception as err:
-                print(traceback.format_exc())
                 return await Response.render(template, req, {
                     "apps": apps,
                     'error': str(err)

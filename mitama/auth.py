@@ -60,7 +60,7 @@ def get_jwt(user):
     nonce = ''.join([str(random.randint(0,9)) for i in range(16)])
     result = jwt.encode(
         {
-            'id': user.id,
+            'id': user._id,
             'nonce': nonce
         },
         secret,
@@ -82,4 +82,4 @@ def check_jwt(token):
         )
     except jwt.exceptions.InvalidTokenError as err:
         raise AuthorizationError('Invalid token.')
-    return User.query.filter(User.id == result['id']).first()
+    return User.query.filter(User._id == result['id']).first()

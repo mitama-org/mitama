@@ -1,4 +1,5 @@
 from mitama.db.types import *
+from mitama.nodes import User, Group
 from mitama.db import BaseDatabase
 from base64 import b64encode
 import magic
@@ -10,8 +11,6 @@ class Database(BaseDatabase):
 db = Database()
 
 class Invite(db.Model):
-    __tablename__ = 'mitama_invite'
-    id = Column(Integer, primary_key = True)
     icon = Column(LargeBinary)
     screen_name = Column(String)
     name = Column(String)
@@ -21,9 +20,6 @@ class Invite(db.Model):
         f = magic.Magic(mime = True, uncompress = True)
         mime = f.from_buffer(self.icon)
         return 'data:'+mime+';base64,'+b64encode(self.icon).decode()
-    @classmethod
-    def retrieve(cls, id):
-        return cls.query.filter(cls.id == id).first()
 
 class CreateUserPermission(PermissionMixin, db.Model):
     upPropagate = True
@@ -32,7 +28,7 @@ class CreateUserPermission(PermissionMixin, db.Model):
 class UpdateUserPermission(PermissionMixin, db.Model):
     upPropagate = True
     targetDownPropagate = True
-    target = Column(User, nullable = True)
+    target = Column(User.type, nullable = True)
     pass
 
 class DeleteUserPermission(PermissionMixin, db.Model):
@@ -46,7 +42,7 @@ class CreateGroupPermission(PermissionMixin, db.Model):
 class UpdateGroupPermission(PermissionMixin, db.Model):
     upPropagate = True
     targetDownPropagate = True
-    target = Column(Group, nullable = True)
+    target = Column(Group.type, nullable = True)
     pass
 
 class DeleteGroupPermission(PermissionMixin, db.Model):

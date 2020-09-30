@@ -19,20 +19,20 @@ db = _CoreDatabase()
 hook_registry = HookRegistry()
 
 class Relation(db.Model):
-    __tablename__ = 'mitama_relation'
-    id = Column(Integer, primary_key = True)
     parent = Column(Group)
     child = Column(Node)
 
 class Node(object):
-    id = Column(Integer, primary_key = True)
     _icon = Column(LargeBinary)
     name = Column(String(255))
     screen_name = Column(String(255))
+    @property
+    def id(self):
+        return self._id
     @classmethod
     def retrieve(cls, id = None, screen_name = None):
         if id != None:
-            node = cls.query.filter(cls.id == id).first()
+            node = cls.query.filter(cls._id == id).first()
         elif screen_name != None:
             node = cls.query.filter(cls.screen_name == screen_name).first()
         else:
@@ -67,10 +67,10 @@ class Node(object):
             layer = layer_
         return False
 
-class User(db.Model, Node):
+class User(Node, db.Model):
     '''ユーザーのモデルクラスです
 
-    :param id: 固有のID
+    :param _id: 固有のID
     :param screen_name: ログイン名
     :param name: 名前
     :param password: パスワード
@@ -100,10 +100,10 @@ class User(db.Model, Node):
         super().create()
         hook_registry.create_user(self)
 
-class Group(db.Model, Node):
+class Group(Node, db.Model):
     '''グループのモデルクラスです
 
-    :param id: 固有のID
+    :param _id: 固有のID
     :param screen_name: ドメイン名
     :param name: 名前
     :param icon: アイコン
@@ -120,8 +120,8 @@ class Group(db.Model, Node):
         self._icon = value
     @classmethod
     def tree(cls):
-        noparent = [rel.child.id for rel in db.session.query(Relation.child).group_by(Relation.child) if isinstance(rel.child, Group)]
-        groups = [group for group in Group.query.filter().all() if group.id not in noparent and isinstance(group, Group)]
+        noparent = [rel.child._id for rel in db.session.query(Relation.child).group_by(Relation.child) if isinstance(rel.child, Group)]
+        groups = [group for group in Group.query.filter().all() if group._id not in noparent and isinstance(group, Group)]
         return groups
     def append(self, node):
         if not isinstance(node, Group) and not isinstance(node, User):

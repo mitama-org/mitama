@@ -10,9 +10,29 @@
 
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.types import TypeDecorator
+from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
+from mitama.extra import _classproperty
 import re
 
-class Model:
+class Model():
+    _id = Column(Integer, primary_key = True)
+    @_classproperty
+    def type(cls):
+        class Type(TypeDecorator):
+            impl = Integer
+            def process_bind_param(self, value, dialect):
+                if value == None:
+                    return None
+                else:
+                    return value._id
+            def process_result_value(self, value, dialect):
+                if value == None:
+                    return None
+                else:
+                    user = cls.retrieve(value)
+                    return user
+        return Type
     @declared_attr
     def __tablename__(cls):
         return re.sub("(.[A-Z])",lambda x:x.group(1)[0] + "_" +x.group(1)[1], cls.__name__).lower()
@@ -30,3 +50,10 @@ class Model:
             return cls.query.filter(cond).all()
         else:
             return cls.query.filter().all()
+    @classmethod
+    def retrieve(cls, id = None):
+        if id != None:
+            node = cls.query.filter(cls._id == id).one()
+        else:
+            raise Exception('Id not given')
+        return node

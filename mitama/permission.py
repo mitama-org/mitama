@@ -24,7 +24,7 @@ class PermissionMixin(object):
 
     targetがUser、またはGroupの場合、targetUpPropagate、 targetDownPropagateを指定すれば、targetに対しても伝播をチェックすることができます。
 
-    :param id: 固有のID
+    :param _id: 固有のID
     :param node: 許可するUser、またはGroupのインスタンス
     :param targetUpPropagate: targetがUser、またはGroupの場合の上向き伝播
     :param targetDownPropagate: targetがUser、またはGroupの場合の下向き伝播
@@ -34,7 +34,6 @@ class PermissionMixin(object):
     @declared_attr
     def __tablename__(cls):
         return '__'+cls.__name__.lower()+'_permission'
-    id = Column(Integer, primary_key = True)
     node = Column(Node)
     targetUpPropagate = False
     targetDownPropagate = False
