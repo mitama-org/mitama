@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  <img src='https://img.shields.io/pypi/l/mitama'>
+  <img src='https://img.shields.io/github/license/mitama-org/mitama'>
   <img src='https://badge.fury.io/py/mitama.svg'>
   <img src="https://img.shields.io/circleci/build/gh/mitama-org/mitama/master">
   <img src='https://img.shields.io/github/stars/mitama-org/mitama.svg'>
