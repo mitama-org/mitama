@@ -1,8 +1,18 @@
-from . import Metadata, urls
-from mitama.app import App
+from mitama.app import App, Router, StaticFileController
+from mitama.app.method import view
+from .controller import WelcomeController
 
-meta = Metadata()
-app = App(meta)
+welcome = WelcomeController()
+static = StaticFileController()
 
-
-app.router.add_routes(urls.urls)
+class App(App):
+    #name = 'MyApp'
+    #description = 'This is my App.'
+    instances = [
+        welcome,
+        static
+    ]
+    router = Router([
+        view('/', welcome),
+        view('/static/<path:path>', static),
+    ])

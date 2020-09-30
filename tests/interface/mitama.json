@@ -1,1 +1,6 @@
-{"apps": {"mitama.portal": {"path": "/"}}}
+{
+    "apps": {
+        "mitama.portal": {"path": "/"},
+        "mitama.skeleton": {"path": "/welcome"}
+    }
+}
