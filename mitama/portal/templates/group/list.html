@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+<div id='content'>
+    <div class='tab-container'>
+        <div class='tab-header'>
+            <a href='{{ url('/groups') }}' class='focus'>グループ</a>
+            <a href='{{ url('/users') }}'>ユーザー</a>
+            <a href='{{ url('/apps') }}'>アプリ</a>
+        </div>
+        <div class='tab-content'>
+            {% if create_permission %}
+            <div class='tool-box'>
+                <a href='{{ url('/groups/create') }}'><button>チームを作成</button></a>
+            </div>
+            {% endif %}
+            <div class="inner">
+                <div class='group-list'>
+                {% if groups|length %}
+                {% for group in groups recursive %}
+                    <div class='item'>
+                        <div class='branch'></div>
+                        <a href="{{ url("/groups/"+group.screen_name) }}" class="profile">
+                            <img src='{{ dataurl(group.icon) }}' class='icon' />
+                            <div class='detail'>
+                                <div class='name'>{{ group.name }}</div>
+                                <div class='screen-name'>{{ group.screen_name }}</div>
+                            </div>
+                        </a>
+                        {% set children = group.children()|group %}
+                        {% if children.length != 0: %}
+                        <div class='children'>
+                            {{ loop(children) }}
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                {% else%}
+                    <div class='no-item'>グループは存在しません</div>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

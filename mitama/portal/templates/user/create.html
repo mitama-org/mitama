@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+{% if error == None %}
+{% set post = request.post() %}
+{% else %}
+{% set post = {} %}
+{% endif %}
+<script>
+    function copyToClipboard(id) {
+        var copyTarget = document.getElementById(id);
+        copyTarget.select();
+        document.execCommand("Copy");
+    }
+</script>
+<div id='content'>
+    <h2 class='mini-title dark'>ユーザーを招待</h2>
+    <div class='left-main'>
+        <form method='post' action='' enctype='multipart/form-data' class="inner tight">
+            <dl>
+                <dt>アイコン</dt>
+                <dd>
+                    <div id='image-form'>
+                        <img src="{{ dataurl(icon) }}"/>
+                        <label class='button'>
+                            <input type='file' name='icon' accept='image/*' onchange="previewImage(this)" />
+                            画像を選択
+                        </label>
+                        <script>
+                            function previewImage(dom) {
+                                document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
+                            }
+                        </script>
+                    </div>
+                </dd>
+                <dt>ログイン名</dt>
+                <dd>
+                    <input type='text' name='screen_name' placeholder='ログイン名' value='{{ post.screen_name }}'/>
+                </dd>
+                <dt>名前</dt>
+                <dd>
+                    <input type='text' name='name' placeholder='名前' value='{{ post.name }}'/>
+                </dd>
+            </dl>
+            <button type='submit'>ユーザーを招待</button>
+            {% if error %}
+            <p class='error'>{{ error }}</p>
+            {% endif %}
+        </form>
+        <section class='inner'>
+            <h3 class='thin-title'>招待中ユーザー</h3>
+            <div class='invite-list'>
+            {% if invites|length %}
+            {% for invite in invites %}
+                <div class='item'>
+                    <img src='{{ dataurl(invite.icon)}}' class='user-icon' />
+                    <div class='detail'>
+                        <div class='name'>{{invite.name}}</div>
+                        <div class='screen_name'>{{invite.screen_name}}</div>
+                        <div class='buttons'>
+                            <a href='javascript:copyToClipboard("invite-{{ invite.token }}")'>招待URLをコピー</a>
+                            <a href=''>変更</a>
+                            <a href='{{ url('/users/invite/'+invite.id|string+'/delete') }}'>キャンセル</a>
+                            <input id="invite-{{ invite.token }}" type="text" value="{{ fullurl(request, '/signup?token='+invite.token) }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            {% else%}
+                <div class='no-item'>招待しているユーザーはいません</div>
+            {% endif %}
+            </div>
+        </section>
+    <div>
+</div>
+{% endblock %}

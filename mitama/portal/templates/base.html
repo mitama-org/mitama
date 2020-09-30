@@ -3,7 +3,12 @@
     <head>
         <meta charset='utf-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
-        <title></title>
+        {% if entrance == True %}
+            <link rel='stylesheet' href='{{ url('/static/entrance-style.css') }}' />
+        {% else %}
+            <link rel='stylesheet' href='{{ url('/static/style.css') }}' />
+        {% endif %}
+        <title>{{ title }} | Mitama</title>
     </head>
     <body>
 {% block header %}

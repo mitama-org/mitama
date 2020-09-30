@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg71"
+   sodipodi:docname="settings.svg"
+   inkscape:version="0.92.4 5da689c313, 2019-01-14">
+  <metadata
+     id="metadata77">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs75" />
+  <sodipodi:namedview
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1308"
+     inkscape:window-height="1670"
+     id="namedview73"
+     showgrid="false"
+     inkscape:zoom="0.8359375"
+     inkscape:cx="256"
+     inkscape:cy="256"
+     inkscape:window-x="1383"
+     inkscape:window-y="109"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg71" />
+  <path
+     d="M277.58 114.56c.81-11.1 7.1-26.54 4.42-36.38-24.96 10.98-48.36 14.05-48.55 46.09-.1 13.95 2.62 50.02-4.23 60.54-5.92 9.12-20.22 16.46-29.05 25.09-17.41 16.96-33.09 44.56-41.98 67.19-5.03 12.82-9.29 27.53-5.36 41.23 7.79 27.25 43.36 55.1 68.49 66.29 9.06 4.08 21.54 8.99 31.55 8.41 31.01-1.85 74.5-34.22 89.99-60.14 17.09-28.63 5.9-77.59-6.12-106.73-17.71-43.01-42.65-45.34-54.51-80.05-2.64-7.78-5.24-23.37-4.65-31.54zM466.9 305.13c8.87 15.36 21.32 27.38 35.71 35.61l-50.31 87.14c-46.82-26.79-106.39-10.94-133.21 35.51-8.84 15.32-13.02 32.07-12.98 48.61H205.48c-.28-53.88-43.75-97.48-97.35-97.48-17.74 0-34.37 4.78-48.7 13.13L9.12 340.5c46.61-27.15 62.67-86.66 35.85-133.11-8.91-15.45-21.45-27.5-35.94-35.74L59.34 84.5c46.86 26.98 106.57 11.15 133.43-35.37C201.72 33.64 205.89 16.7 205.75 0h100.63c0 54.12 43.59 97.99 97.36 97.99 17.83 0 34.54-4.83 48.92-13.25l50.31 87.14c-46.78 27.09-62.94 86.72-36.08 133.24l.01.01z"
+     id="path69" />
+</svg>

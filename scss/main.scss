@@ -1,0 +1,158 @@
+#content{
+    margin-top: 16px;
+    margin-left: auto;
+    margin-right: auto;
+    background: var(--main-background);
+    .mini-title{
+        font-size: 0.8rem;
+        font-weight: bold;
+        height: 40px;
+        line-height: 40px;
+        margin: 0;
+        padding: 8px 16px;
+        &.dark {
+            border-bottom: 1px solid #eee;
+            background-color: #00000005;
+        }
+    }
+    .thin-title{
+        font-size: 0.8rem;
+        font-weight: bold;
+        &.between{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+    .tool-box{
+        display: flex;
+        padding: 16px;
+        justify-content: flex-end;
+    }
+    .tab-container{
+        display: grid;
+        .tab-header{
+            a{
+                height: 32px;
+                box-sizing: border-box;
+                text-decoration: none;
+                font-weight:bold;
+                font-size: 0.8rem;
+            }
+        }
+    }
+    .profile-container{
+        display:grid;
+        grid-template-columns: 80px 1fr 80px;
+        grid-gap: 8px;
+        padding: 24px;
+        max-width: 800px;
+        margin: 0 auto;
+        .user-icon, .icon {
+            width: 80px;
+            height:80px;
+            box-sizing:border-box;
+            border: 4px solid #0001;
+        }
+        .icon{
+            border-radius: 8px;
+        }
+        .detail {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            .name {
+                font-size: 1.1rem;
+                color: var(--main-text);
+                margin: 0;
+            }
+            .screen-name {
+                font-size: 1rem;
+                color: var(--main-text-lighter);
+            }
+        }
+        .action{
+            grid-column: 3/4;
+            button{
+                width: 100%;
+            }
+        }
+        .group-list {
+            grid-column: 1/3;
+        }
+    }
+    @import './form.scss';
+    @import './list.scss';
+    @import './modal.scss';
+    @include pc{
+        max-width: 1200px;
+        width: calc(100% - 100px);
+        margin-left: auto;
+        margin-right: auto;
+        section{
+            padding: 32px;
+        }
+        .inner {
+            padding-top: 32px;
+            padding-bottom: 32px;
+        }
+        .tight {
+            padding-left: 32px;
+            padding-right: 32px;
+        }
+        .tab-container{
+            grid-template-columns: 240px 1fr;
+            .tab-header{
+                padding: 32px 16px;
+                a {
+                    height: 32px;
+                    line-height: 32px;
+                    padding: 0 16px;
+                    display: block;
+                    background: var(--main-background);
+                    color: var(--main-color);
+                    font-weight: bold;
+                    border-left-width: 4px;
+                    border-left-style: solid;
+                    border-left-color: #0000;
+                    &.focus {
+                        border-left-color: var(--main-color);
+                    }
+                }
+            }
+        }
+        .left-main{
+            display: grid;
+            grid-template-columns: 1fr 400px;
+        }
+    }
+    @include sp {
+        max-width: 900px;
+        width: 100%;
+        .inner {
+            padding: 8px;
+        }
+        .tab-container{
+            grid-template-rows: 32px 1fr;
+            grid-gap: 8px;
+        }
+        .tab-header{
+            height: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            a {
+                display: flex;
+                border-top-width: 4px;
+                border-top-style: solid;
+                border-top-color: var(--main-background);
+                color: var(--main-text);
+                justify-content: center;
+                align-items: center;
+                &.focus{
+                    border-top-color: var(--main-color);
+                }
+            }
+        }
+    }
+}

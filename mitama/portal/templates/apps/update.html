@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+{% if error==None %}
+{% set post = request.post() %}
+{% else %}
+{% set post = {} %}
+{% endif%}
+<div id='content'>
+    <h2 class='mini-title dark'>アプリ設定</h2>
+    <form method='POST' action='' enctype='multipart/form-data' class="inner tight">
+        <div class="app-list">
+        {% for app in apps %}
+            <div class="item">
+                <img src="{{ dataurl(app.icon) }}" class="icon"/>
+                <div class='detail'>
+                    <div class='name'>{{ app.name }}</div>
+                    <div class='screen-name'>{{ app.screen_name }}</div>
+                    <div class="prefix">
+                        <div class="prefix_title">プリフィクス</div>
+                        <input type="text" name="prefix[{{app.screen_name}}]" value="{{app.path}}" placeholder="プリフィクス">
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        <button type='submit'>設定を変更</button>
+        {% if error %}
+            <p class='error'>{{ error }}</p>
+        {% endif %}
+        {% if message %}
+            <p class='message'>{{ message}}</p>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}
+

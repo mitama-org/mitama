@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+{% set post = request.post() %}
+<div id='content'>
+    <h2 class='mini-title dark'>チームを作成</h2>
+    <form method='POST' action='' enctype='multipart/form-data'>
+        <dl>
+            <dt>アイコン</dt>
+            <dd>
+                <div id='image-form'>
+                    <img class="icon" src="{{ dataurl(icon) }}"/>
+                    <label class='button'>
+                        <input type='file' name='icon' accept='image/*' onchange="previewImage(this)" />
+                        画像を選択
+                    </label>
+                    <script>
+                        function previewImage(dom) {
+                            document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
+                        }
+                    </script>
+                </div>
+            </dd>
+            <dt>ドメイン名</dt>
+            <dd>
+                <input type='text' name='screen_name' placeholder='ドメイン名' value='{{ post.screen_name }}'/>
+            </dd>
+            <dt>名前</dt>
+            <dd>
+                <input type='text' name='name' placeholder='名前' value='{{ post.name }}'/>
+            </dd>
+            <dt>所属グループ</dt>
+            <dd>
+                <select name='parent'>
+                    <option></option>
+                    {% for group in groups %}
+                        <option value='{{group.id}}'>{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+            </dd>
+        </dl>
+        <button type='submit'>チームを作成</button>
+        <p class='error'>{{ error }}</p>
+    </form>
+</div>
+{% endblock %}

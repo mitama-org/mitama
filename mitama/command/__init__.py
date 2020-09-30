@@ -11,6 +11,10 @@ import importlib
 import sys
 
 def exec():
+    '''コマンドを起動します
+
+    コマンドライン引数からサブコマンドのインスタンスを生成し、起動します。
+    '''
     subcmd = sys.argv[1]
     m = importlib.import_module('.' + subcmd, 'mitama.command')
     cmd = m.Command()

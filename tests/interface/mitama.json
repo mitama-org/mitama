@@ -1,13 +1,1 @@
-{
-    "apps": {
-        "app1": {
-            "include": "app1",
-            "path": "/home"
-        },
-        "portal": {
-            "include": "mitama.portal",
-            "path": "/"
-        }
-    }
-
-}
+{"apps": {"mitama.portal": {"path": "/"}}}

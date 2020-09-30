@@ -23,15 +23,14 @@ def test_model():
     db = _CoreDatabase(engine)
     class Todo(db.Model):
         __tablename__ = 'test_todo'
-        id = Column(Integer, primary_key = True)
         title = Column(String(255))
         description = Column(String(255))
         datetime = Column(DateTime)
     db.create_all()
     session = create_session(engine)
-    session.execute('insert into test_todo (id, title, description, datetime) values (123, "test todo", "this is the test", datetime("2020-08-04 12:00:00"))')
+    session.execute('insert into test_todo (_id, title, description, datetime) values (123, "test todo", "this is the test", datetime("2020-08-04 12:00:00"))')
     test_todo = Todo.query.first()
-    assert test_todo.id == 123
+    assert test_todo._id == 123
     assert test_todo.title == 'test todo'
     assert test_todo.description == 'this is the test'
     assert test_todo.datetime == datetime(2020, 8, 4, 12)

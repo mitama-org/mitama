@@ -26,16 +26,16 @@ for i in range(5):
     if i > 0:
         g[i-1].append(g[i])
 
-def test_ancester():
-    assert g[4].is_ancester(g[0])
-    assert g[4].is_ancester(g[1])
-    assert g[4].is_ancester(g[2])
-    assert g[4].is_ancester(g[3])
-    assert not g[4].is_ancester(g[4])
-    assert not g[0].is_ancester(g[4])
-    assert not g[1].is_ancester(g[4])
-    assert not g[2].is_ancester(g[4])
-    assert not g[3].is_ancester(g[4])
+def test_ancestor():
+    assert g[4].is_ancestor(g[0])
+    assert g[4].is_ancestor(g[1])
+    assert g[4].is_ancestor(g[2])
+    assert g[4].is_ancestor(g[3])
+    assert not g[4].is_ancestor(g[4])
+    assert not g[0].is_ancestor(g[4])
+    assert not g[1].is_ancestor(g[4])
+    assert not g[2].is_ancestor(g[4])
+    assert not g[3].is_ancestor(g[4])
 
 def test_descendant():
     assert g[0].is_descendant(g[4])

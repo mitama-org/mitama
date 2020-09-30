@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+{% if error == None %}
+{% set post = request.post() %}
+{% else %}
+{% set post = {} %}
+{% endif %}
+<div id='content'>
+    <h2 class='mini-title dark'>{{ group.name }}の設定</h2>
+    <div class="left-main">
+        <form method='POST' action='' enctype='multipart/form-data' class="inner tight">
+            <dl>
+                <dt>アイコン</dt>
+                <dd>
+                    <div id='image-form'>
+                        <img src="{{ dataurl(icon) }}" class="icon"/>
+                        <label class='button'>
+                            <input type='file' name='icon' accept='image/*' onchange="previewImage(this)" />
+                            画像を選択
+                        </label>
+                        <script>
+                            function previewImage(dom) {
+                                document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
+                            }
+                        </script>
+                    </div>
+                </dd>
+                <dt>ドメイン名</dt>
+                <dd>
+                    <input type='text' name='screen_name' placeholder='ドメイン名' value='{{ screen_name }}'/>
+                </dd>
+                <dt>名前</dt>
+                <dd>
+                    <input type='text' name='name' placeholder='名前' value='{{ name }}'/>
+                </dd>
+                {% if is_admin(request.user) %}
+                <dt>権限の設定</dt>
+                <dd class='permission'>
+                    <p>所属メンバーには以下の権限が付与されます</p>
+                    <label>
+                        <input
+                            type='checkbox'
+                            name='user_create'
+                            value='on'
+                            {{ 'checked' if user_create_permission(group) else ''}}
+                        />
+                        <div>ユーザーの招待</div>
+                    </label>
+                    <label>
+                        <input
+                            type='checkbox'
+                            name='user_update'
+                            value='on'
+                            {{ 'checked' if user_update_permission(group) else ''}}
+                        />
+                        <div>ユーザー情報の変更</div>
+                    </label>
+                    <label>
+                        <input
+                            type='checkbox'
+                            name='user_delete'
+                            value='on'
+                            {{ 'checked' if user_delete_permission(group) else ''}}
+                        />
+                        <div>ユーザーの追放</div>
+                    </label>
+                    <label>
+                        <input
+                            type='checkbox'
+                            name='group_create'
+                            value='on'
+                            {{ 'checked' if group_create_permission(group) else ''}}
+                        />
+                        <div>グループの作成</div>
+                    </label>
+                    <label>
+                        <input
+                            type='checkbox'
+                            name='group_update'
+                            value='on'
+                            {{ 'checked' if group_update_permission(group) else ''}}
+                        />
+                        <div>グループ情報の更新</div>
+                    </label>
+                    <label>
+                        <input
+                            type='checkbox'
+                            name='group_delete'
+                            value='on'
+                            {{ 'checked' if group_delete_permission(group) else ''}}
+                        />
+                        <div>グループの強制解散</div>
+                    </label>
+                    <label>
+                        <input
+                            type='checkbox'
+                            name='admin'
+                            value='on'
+                            {{ 'checked' if is_admin(group) else ''}}
+                        />
+                        <div>管理者権限（アプリ設定・権限設定の権限）</div>
+                    </label>
+                </dd>
+            {% endif %}
+            </dl>
+            <button type='submit'>設定を変更</button>
+            {% if error %}
+                <p class='error'>{{ error }}</p>
+            {% endif %}
+            {% if message %}
+                <p class='message'>{{ message}}</p>
+            {% endif %}
+        </form>
+        <section class='inner'>
+            <h3 class="thin-title between">
+                参加中
+                <button onclick='document.querySelector("#modal-switch").click()'>追加</button>
+            </h3>
+            <div class='member-control-list'>
+                {% set groups = group.children()|group %}
+                {% if groups|length > 0 %}
+                <h4>グループ</h4>
+                {% for group_ in groups %}
+                <div class='item'>
+                    <img src='{{dataurl(group_.icon)}}' class='icon'>
+                    <div class='detail'>
+                        <div class='name'>{{group_.name}}</div>
+                        <div class='screen-name'>{{group_.screen_name}}</div>
+                    </div>
+                    <div class='actions'>
+                        <a href='/groups/{{group.screen_name}}/remove/{{group_.id * 2}}'><button>はずす</button></a>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% set users = group.children()|user %}
+                {% if users|length > 0 %}
+                <h4>ユーザー</h4>
+                {% for user in users %}
+                <div class='item'>
+                    <img src='{{dataurl(user.icon)}}' class='user-icon'>
+                    <div class='detail'>
+                        <div class='name'>{{user.name}}</div>
+                        <div class='screen-name'>{{user.screen_name}}</div>
+                    </div>
+                    <div class='actions'>
+                        <a href='/groups/{{group.screen_name}}/remove/{{user.id * 2 - 1}}'><button>はずす</button></a>
+                        {% if not group_update_permission(user, group) %}
+                        <a href='/groups/{{group.screen_name}}/accept/{{user.id * 2 - 1}}/update'><button>変更を許可</button></a>
+                        {% else %}
+                        <a href='/groups/{{group.screen_name}}/forbit/{{user.id * 2 - 1}}/update'><button>変更を拒否</button></a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </section>
+    </div>
+    <input type='checkbox' id='modal-switch' />
+    <div class='modal'>
+        <label class='background' for='modal-switch'></label>
+        <form action='/groups/{{group.screen_name}}/append' method='POST' class='inner'>
+            <h3>ユーザーを追加</h3>
+            <div class='two-columns'>
+                <div>
+                    <h4>ユーザー</h4>
+                    <div class='member-append-list user'>
+                        <input type='search' oninput='reload_list("#user")' placeholder='検索'>
+                    {% for user in all_users %}
+                        <label class='item-container'>
+                            <input type='checkbox' name='user[]' value='{{user.id}}'>
+                            <div class='item'>
+                                <img src='{{dataurl(user.icon)}}' class='user-icon'>
+                                <div class='detail'>
+                                    <div class='name'>{{user.name}}</div>
+                                    <div class='screen-name'>{{user.screen_name}}</div>
+                                </div>
+                            </div>
+                        </label>
+                    {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <h4>グループ</h4>
+                    <div class='member-append-list group' id='#group'>
+                        <input type='search' oninput='reload_list("#group")' placeholder='検索'>
+                    {% for group in all_groups %}
+                        <label class='item-container'>
+                            <input type='checkbox' name='group[]' value='{{group.id}}'>
+                            <div class='item'>
+                                <img src='{{dataurl(group.icon)}}' class='icon'>
+                                <div class='detail'>
+                                    <div class='name'>{{group.name}}</div>
+                                    <div class='screen-name'>{{group.screen_name}}</div>
+                                </div>
+                            </div>
+                        </label>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class='modal-submit'>
+                <button>追加</button>
+                <button type='button' onclick='document.querySelector("#modal-switch").click()'>キャンセル</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
