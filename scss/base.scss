@@ -1,0 +1,65 @@
+/*
+ * 色定義
+*/
+:root{
+    --mtm-blue: #49a3e0;
+    --base-background: #efefef;
+    --header-text: #fff;
+    --main-color: var(--mtm-blue);;
+    --header-background: var(--main-color);
+    --main-background: #ffffff;
+    --main-decoration: #cccccc;
+    --main-text: #444444;
+    --main-text-lighter: #777777;
+    --accent-text: #b33e5c;
+    --accent-background: #b33e5c;
+}
+
+/*
+ * 共通スタイル
+ */
+body{
+    margin: 0;
+    background: var(--base-background);
+    color: var(--main-text);
+    font-size: 14px;
+}
+
+a {
+    color: var(--accent-text);
+}
+
+button {
+    display: flex;
+    background: var(--accent-background);
+    color: var(--main-background);
+    font-weight: bold;
+    height: 32px;
+    width: auto;
+    padding: 0 8px;
+    border: none;
+    border-radius: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-icon{
+    border-radius: 50%;
+}
+.icon {
+    object-fit: cover;
+}
+
+/*
+ * レスポンシブ
+ */
+@mixin pc{
+    @media screen and (min-width: 901px) {
+        @content
+    }
+}
+@mixin sp {
+    @media screen and (max-width: 900px) {
+        @content
+    }
+}

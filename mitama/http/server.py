@@ -1,47 +1,58 @@
 #!/usr/bin/python
-'''httpサーバー
+'''httpサーバー'''
 
-    * てめえら喜べ、非同期だ。
-    * ルーティングは完全にaiohttpのやつに頼る
-    * アプリケーションごとにルーティングを定義したフォルダを作ってもらうはずなので、それを少し調整して一つの配列にマージして使う
-    * ここではわりとしっかり目のMVC2のControllerを定義してやって、そのインターフェースをアプリに強制させる方式をとりたい
-'''
-
+import base64, re
+from cryptography import fernet
 from aiohttp import web
-from abc import ABCMeta, abstractmethod
+from mitama.http.session import SessionMiddleware, EncryptedCookieStorage
+from mitama.conf import get_from_project_dir
+from mitama.auth import AuthorizationError
+from mitama.auth import password_hash, password_auth, get_jwt
+from mitama.app import App, Middleware
 
-class Response(web.Response):
-    pass
-class StreamResponse(web.StreamResponse):
-    pass
-class Request(web.Request):
-    pass
-
-class Controller:
-    @abstractmethod
-    async def handle(self, req: Request):
-        pass
-
-class Server:
-    routing = []
-    def add_routes(self, routes: list):
-        for path, ctrl in routes:
-            self.add_route(path, ctrl)
-    def add_route(self, path, ctrl):
-        if type(ctrl) is str:
-            handler = eval(ctrl)
-        elif isinstance(ctrl, Controller):
-            handler = ctrl.handle
-        elif callable(ctrl):
-            handler = ctrl
+class PathMiddleware(Middleware):
+    async def process(self, request, handler):
+        path_to_check = []
+        if '?' in request.raw_path:
+            path, query = request.raw_path.split('?', 1)
+            query = '?' + query
         else:
-            raise TypeError(
-                'Given controller is not correct type.'
-                'Controller must be function, class which extends mitama.http.server.Controller,'
-                'or a string whose name of the callable thing.'
-            )
-        self.routing.append(web.get(path, ctrl.handle))
+            query = ''
+            path = request.raw_path
+        path_to_check.append(re.sub('//+', '/', path) + query)
+        if not request.path.endswith('/'):
+            path_to_check.append(path + '/' + query)
+        path_to_check.append(re.sub('//+', '/', path + '/') + query)
+        for path in path_to_check:
+            resolves, request = await self._check_request_solves(request, path)
+            if resolves:
+                raise redirect_class(request.raw_path + query)
+        return await handler(request)
+
+class Server():
+    def __init__(self, port=8080):
+        self.port = port
+        fernet_key = fernet.Fernet.generate_key()
+        secret_key = base64.urlsafe_b64decode(fernet_key)
+        self.session_middleware = SessionMiddleware(EncryptedCookieStorage(secret_key))
+    def registry(self, registry):
+        self.registry = registry
+        self.registry._server = self
+    def load_routes(self):
+        self.router = self.registry.router()
+        self.router.add_middlewares([
+            self.session_middleware,
+        ])
+        if hasattr(self, '_app'):
+            self._app.router = self.router
     def run(self):
-        app = web.Application()
-        app.add_routes(self.routing)
-        web.run_app(app)
+        self.load_routes()
+        class _App(App):
+            router = self.router
+        config = get_from_project_dir()
+        self._app = _App(
+            name = '_mitama',
+            path = '/'
+        )
+        web.run_app(self._app.app, port = self.port, access_log = None)
+

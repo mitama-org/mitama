@@ -1,0 +1,29 @@
+{
+  "name": "mitama",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-css": "sass scss/style.scss mitama/portal/static/style.css; sass scss/entrance-style.scss mitama/portal/static/entrance-style.css",
+    "watch-css": "nodemon -e scss -x \"npm run build-css\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mitama-org/mitama.git"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/mitama-org/mitama/issues"
+  },
+  "homepage": "https://github.com/mitama-org/mitama#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.4",
+    "sass": "^1.26.11"
+  }
+}

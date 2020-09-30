@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+<div id='content'>
+    <div class="inner">
+        <div class="profile-container">
+            <img src="{{ dataurl(user.icon) }}" class="user-icon"/>
+            <div class="detail">
+                <h2 class="name">{{user.name}}</h2>
+                <div class="screen-name">{{user.screen_name}}</div>
+            </div>
+            <div class='action'>
+            {% if user_update_permission(request.user, user) %}
+                <a href='/users/{{user.screen_name}}/settings'><button>設定</button></a>
+            {% endif %}
+            </div>
+        </div>
+        <div class="content">
+            <h2 class="mini-title">所属</h2>
+            <div class='group-list tight'>
+            {% for g in user.parents() %}
+                <div class='item'>
+                    <div class='branch'></div>
+                    <a href="{{ url("/groups/"+g.screen_name) }}" class="profile">
+                        <img src='{{ dataurl(g.icon) }}' class='icon' />
+                        <div class='detail'>
+                            <div class='name'>{{ g.name }}</div>
+                            <div class='screen-name'>{{ g.screen_name }}</div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

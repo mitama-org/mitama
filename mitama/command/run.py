@@ -7,6 +7,9 @@ Todo:
     * マイグレーションの実行の実装
 
 '''
+from mitama.http.server import Server
+import mitama.nodes
+from mitama.app import AppRegistry
 
 class Command:
     def handle(self, argv = None):
@@ -15,4 +18,7 @@ class Command:
         except IndexError:
             port = '8080'
         server = Server(port)
+        registry = AppRegistry()
+        registry.load_config()
+        server.registry(registry)
         server.run()

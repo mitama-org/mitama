@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <title>Welcome to 棺桶</title>
+        <style type='text/css'>
+            body{
+                margin: 0;
+                height: 100vh;
+                width: 100vw;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #wrapper{
+                width: 100%;
+                max-width: 300px;
+            }
+            #logo{
+                width: 80%;
+                display: block;
+                margin: 0 auto;
+            }
+            menu {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 16px;
+                height: 40px;
+                padding: 0;
+            }
+            menu button{
+                height: 40px;
+                width: 120px;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 4px;
+                color: #000;
+                background: #0000;
+                border: 1px solid #000;
+                padding: 0 16px;
+            }
+            a{
+                text-decoration: none;
+            }
+            h1{
+                font-size: 1.2rem;
+                color: #444;
+                text-align: center;
+                margin: 24px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id='wrapper'>
+            <img src='{{ url('/static/vertical-logo.svg') }}' id='logo'>
+            <h1>Mitama is ready...</h1>
+            <menu>
+                <a href='https://mitama-docs.netlify.app'>
+                    <button>Documentation</button>
+                </a>
+                <a href='https://github.com/mitama-org/mitama'>
+                    <button>GitHub</button>
+                </a>
+            </menu>
+        </div>
+    </body>
+</html>

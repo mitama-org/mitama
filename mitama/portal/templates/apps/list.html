@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+<div id='content'>
+    <div class='tab-container'>
+        <div class='tab-header'>
+            <a href='{{ url('/groups') }}'>グループ</a>
+            <a href='{{ url('/users') }}'>ユーザー</a>
+            <a href='{{ url('/apps') }}' class='focus'>アプリ</a>
+        </div>
+        <div class='tab-content'>
+            {% if is_admin %}
+            <div class='tool-box'>
+                <a href='{{ url('/apps/settings') }}'><button>アプリ設定</button></a>
+            </div>
+            {% endif %}
+            <div class="inner">
+                <div class='app-list'>
+                {% for app in apps %}
+                    <a href="{{ url(app.path) }}" class="item">
+                        <img src='{{ dataurl(app.icon) }}' class='icon' />
+                        <div class='detail'>
+                            <div class='name'>{{ app.name }}</div>
+                            <div class='screen-name'>{{ app.screen_name }}</div>
+                            <p class='description'>{{ app.description }}</p>
+                        </div>
+                    </a>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

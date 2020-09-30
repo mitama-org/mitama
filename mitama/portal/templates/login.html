@@ -1,0 +1,20 @@
+{% set entrance = True %}
+{% extends 'base.html' %}
+{% block header %}
+    {% include "entrance-header.html" %}
+{% endblock %}
+{% block content %}
+<div id='content'>
+    <form method='post' action='' class='entrance'>
+        <div class='main'>
+            <h1>ログイン</h1>
+            <input type='text' name='screen_name' placeholder='ログイン名' value='{{ screen_name }}'/>
+            <input type='password' name='password' placeholder='パスワード' value='{{ password }}'/>
+        </div>
+        <div class='submit'>
+            <button type="submit">ログイン</button>
+        </div>
+        <p class='error'>{{ error }}</p>
+    </form>
+</div>
+{% endblock %}

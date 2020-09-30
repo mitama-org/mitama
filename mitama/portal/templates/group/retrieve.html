@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+<div id='content'>
+    <div class="inner">
+        <div class="profile-container">
+            <img src="{{ dataurl(group.icon) }}" class="icon"/>
+            <div class="detail">
+                <h2 class="name">{{group.name}}</h2>
+                <div class="screen-name">{{group.screen_name}}</div>
+            </div>
+            <div class='action'>
+            {% if group_update_permission(request.user, group) %}
+                <a href='/groups/{{group.screen_name}}/settings'><button>設定</button></a>
+            {% endif %}
+            </div>
+            <div class='group-list'>
+                <div class="children">
+                {% for g in group.children()|group %}
+                    <div class='item'>
+                        <div class='branch'></div>
+                        <a href="{{ url("/groups/"+g.screen_name) }}" class="profile">
+                            <img src='{{ dataurl(g.icon) }}' class='icon' />
+                            <div class='detail'>
+                                <div class='name'>{{ g.name }}</div>
+                                <div class='screen-name'>{{ g.screen_name }}</div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <h2 class="mini-title">メンバー</h2>
+            <div class="user-list tight">
+                {% for user in group.children()|user %}
+                    <a href="{{url("/users/"+user.screen_name)}}" class="item">
+                        <img src='{{ dataurl(user.icon) }}' class='user-icon' />
+                        <div class='detail'>
+                            <div class='name'>{{ user.name }}</div>
+                            <div class='screen-name'>{{ user.screen_name }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

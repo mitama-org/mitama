@@ -1,0 +1,31 @@
+<header id='header'>
+    <div>
+        <a href='{{ url('/') }}'>
+            <img src='{{ url('/static/white-logo.svg') }}' alt='Mitama' id='logo'/>
+        </a>
+    </div>
+    <div id='user-menu'>
+        <img src="{{ dataurl(request.user.icon) }}" class='user-icon'/>
+        {{ request.user.name }}
+        <menu>
+            <div>
+                <a href='{{ url('/users/' + request.user.screen_name) }}'>
+                    <img src="{{ dataurl(request.user.icon) }}" class='user-icon'/>
+                    <div>マイページ</div>
+                </a>
+                {% if user_update_permission(request.user, request.user) %}
+                <a href='{{ url('/users/' + request.user.screen_name + "/settings") }}'>
+                    <svg><use xlink:href="{{ url("/static/spritesheet.svg") }}#settings"></use></svg>
+                    <div>設定</div>
+                </a>
+                {% endif %}
+            </div>
+            <div>
+                <a href='/logout'>
+                    <svg><use xlink:href="{{ url("/static/spritesheet.svg") }}#logout"></use></svg>
+                    <div>ログアウト</div>
+                </a>
+            </div>
+        </menu>
+    </div>
+</header>

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+<div id='content'>
+    <div class='tab-container'>
+        <div class='tab-header'>
+            <a href='{{ url('/groups') }}'>グループ</a>
+            <a href='{{ url('/users') }}' class='focus'>ユーザー</a>
+            <a href='{{ url('/apps') }}'>アプリ</a>
+        </div>
+        <div class='tab-content'>
+            {% if create_permission %}
+            <div class='tool-box'>
+                <a href='{{ url('/users/invite') }}'><button>ユーザーを招待</button></a>
+            </div>
+            {% endif %}
+            <div class="inner">
+                <div class='user-list'>
+                {% if users|length %}
+                {% for user in users %}
+                    <a href="{{ url("/users/"+user.screen_name) }}" class="item">
+                        <img src='{{ dataurl(user.icon) }}' class='user-icon' />
+                        <div class='detail'>
+                            <div class='name'>{{ user.name }}</div>
+                            <div class='screen-name'>{{ user.screen_name }}</div>
+                        </div>
+                    </a>
+                {% endfor %}
+                {% else%}
+                    <div class='no-item'>ユーザーはいません</div>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
