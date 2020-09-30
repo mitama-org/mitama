@@ -3,7 +3,10 @@
 </h1>
 
 <p align="center">
+  <img src='https://img.shields.io/pypi/l/mitama'>
+  <img src='https://badge.fury.io/py/mitama.svg'>
   <img src="https://circleci.com/gh/mitama-org/mitama.svg?style=svg">
+  <img src='https://img.shields.io/github/stars/mitama-org/mitama.svg'>
 </p>
 
 ## Mitamaとは
