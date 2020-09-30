@@ -92,7 +92,7 @@ class RegisterController(Controller):
                 user.screen_name = data['screen_name']
                 user.name = data['name']
                 user.password = password_hash(data['password'])
-                user.icon = data["icon"].file.read()
+                user.icon = data["icon"].file.read() if 'icon' in data else load_noimage_user()
                 user.create()
                 Admin.accept(user)
                 CreateUserPermission.accept(user)
