@@ -11,9 +11,15 @@ from mitama.conf import Config
 
 def init_project_dir(path):
     with open(path / 'mitama.json', mode = 'w') as f:
-        conf = Config({})
+        conf = Config(path, {
+            'apps': {
+                'mitama.portal': {
+                    'path': '/'
+                }
+            }
+        })
         data = conf.to_dict()
-        json_text = json.dumps(data)
+        json_text = json.dumps(data, indent=2)
         f.write(json_text)
 
 class Command:
