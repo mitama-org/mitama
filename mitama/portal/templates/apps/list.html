@@ -19,7 +19,7 @@
             <div class="inner">
                 <div class='app-list'>
                 {% for app in apps %}
-                    <a href="{{ app.url }}" class="item">
+                    <a href="{{ url(app.path) }}" class="item">
                         <img src='{{ dataurl(app.icon) }}' class='icon' />
                         <div class='detail'>
                             <div class='name'>{{ app.name }}</div>

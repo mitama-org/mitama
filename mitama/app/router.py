@@ -5,6 +5,7 @@ import re
 class RoutingError(Exception):
     pass
 
+
 class Router():
     '''ルーティングエンジン
 
@@ -68,28 +69,41 @@ class Router():
             else:
                 path = path[len(self.prefix):]
                 request.subpath = path
-        for route in self.routes:
-            result = await route.match(request)
-            if result != False:
-                request, result = result
-                def get_response_handler(result):
-                    i = 0
-                    async def handle(request):
-                        nonlocal i
-                        if i>=len(self.middlewares) or len(self.middlewares) == 0:
-                            if callable(result):
-                                return await result(request)
-                            elif callable(getattr(result, 'handle')):
-                                return await result.handle(request)
+        paths_to_check = [path]
+        paths_to_check.append(re.sub('//+', '/', path))
+        if not request.path.endswith('/'):
+            paths_to_check.append(path + '/')
+        paths_to_check.append(
+            re.sub('//+', '/', path + '/'))
+        if path.endswith('/'):
+            merged_slashes = re.sub('//+', '/', path)
+            paths_to_check.append(merged_slashes[:-1])
+
+        for path in paths_to_check:
+            print(path)
+            for route in self.routes:
+                request.subpath = path
+                result = await route.match(request)
+                if result != False:
+                    request, result = result
+                    def get_response_handler(result):
+                        i = 0
+                        async def handle(request):
+                            nonlocal i
+                            if i>=len(self.middlewares) or len(self.middlewares) == 0:
+                                if callable(result):
+                                    return await result(request)
+                                elif callable(getattr(result, 'handle')):
+                                    return await result.handle(request)
+                                else:
+                                    raise RoutingError('Unsupported interface object. Only callables and Controller instances are supported.')
                             else:
-                                raise RoutingError('Unsupported interface object. Only callables and Controller instances are supported.')
-                        else:
-                            middleware = self.middlewares[i]
-                            i += 1
-                            return await middleware.process(request, handle)
-                    return handle
-                handler = get_response_handler(result)
-                return request, handler
+                                middleware = self.middlewares[i]
+                                i += 1
+                                return await middleware.process(request, handle)
+                        return handle
+                    handler = get_response_handler(result)
+                    return request, handler
         return False
 
 class Route():
