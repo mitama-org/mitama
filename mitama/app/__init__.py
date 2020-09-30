@@ -81,7 +81,7 @@ class StaticFileController(Controller):
         for path in self.paths:
             filename = path / req.params['path']
             if filename.is_file():
-                mime = guess_type(filename) or 'application/octet-stream'
+                mime = guess_type(str(filename)) or 'application/octet-stream'
                 with open(filename) as f:
                     return Response(body = f.read(), headers={
                         'content-type': mime[0]
