@@ -10,7 +10,23 @@ setup(
         'develop': ['pytest']
     },
     packages = find_packages(),
-    include_package_data = True,
+    package_data = {
+        'mitama.portal': [
+            'templates/*.html',
+            'templates/**/*.html',
+            'static/*',
+        ],
+        'mitama.skeleton': [
+            'templates/*.html',
+            'static/*',
+        ],
+        'mitama.http': [
+            'templates/*.html',
+        ],
+        'mitama.app': [
+            'static/*',
+        ]
+    },
     entry_points = {
         'console_scripts': [
             'mitama = mitama.command:exec'
