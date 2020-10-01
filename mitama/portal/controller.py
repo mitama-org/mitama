@@ -62,6 +62,7 @@ class RegisterController(Controller):
                     user.name = invite.name
                     user.icon = invite.icon
                 user.create()
+                UpdateUserPermission.accept(user, user)
                 sess["jwt_token"] = get_jwt(user)
                 return Response.redirect(
                     self.app.convert_url('/')
@@ -298,7 +299,6 @@ class GroupsController(Controller):
         if req.method == "POST":
             post = await req.post()
             try:
-                print(post)
                 icon = post["icon"].file.read() if "icon" in post else group.icon
                 group.screen_name = post["screen_name"]
                 group.name = post["name"]

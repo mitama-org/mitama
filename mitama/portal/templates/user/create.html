@@ -43,6 +43,12 @@
                 <dd>
                     <input type='text' name='name' placeholder='名前' value='{{ post.name }}'/>
                 </dd>
+                <div>
+                    <label>
+                        <input type='checkbox' name='editable' checked />
+                        プロフィールのカスタマイズを許可する
+                    </label>
+                </div>
             </dl>
             <button type='submit'>ユーザーを招待</button>
             {% if error %}
@@ -62,7 +68,7 @@
                         <div class='buttons'>
                             <a href='javascript:copyToClipboard("invite-{{ invite.token }}")'>招待URLをコピー</a>
                             <a href=''>変更</a>
-                            <a href='{{ url('/users/invite/'+invite.id|string+'/delete') }}'>キャンセル</a>
+                            <a href='{{ url('/users/invite/'+invite._id|string+'/delete') }}'>キャンセル</a>
                             <input id="invite-{{ invite.token }}" type="text" value="{{ fullurl(request, '/signup?token='+invite.token) }}" readonly>
                         </div>
                     </div>

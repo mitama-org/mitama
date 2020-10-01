@@ -1,12 +1,15 @@
 <header id='header'>
-    <div>
+    <div id='logo_container'>
         <a href='{{ url('/') }}'>
             <img src='{{ url('/static/white-logo.svg') }}' alt='Mitama' id='logo'/>
         </a>
     </div>
     <div id='user-menu'>
-        <img src="{{ dataurl(request.user.icon) }}" class='user-icon'/>
-        {{ request.user.name }}
+        <input type='checkbox' id='menu-status'>
+        <label for='menu-status'>
+            <img src="{{ dataurl(request.user.icon) }}" class='user-icon'/>
+            {{ request.user.name }}
+        </label>
         <menu>
             <div>
                 <a href='{{ url('/users/' + request.user.screen_name) }}'>

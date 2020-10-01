@@ -10,18 +10,24 @@ header{
         height: 40px;
         display: block;
     }
-    & > div {
+    #logo_container {
         padding: 8px 16px;
     }
     #user-menu{
-        display: grid;
-        grid-gap: 8px;
-        grid-template-columns: 32px 1fr;
-        align-items: center;
-        height: 40px;
-        font-weight: bold;
-        background: #0001;
-        width: 160px;
+        #menu-status{
+            display: none;
+        }
+        label{
+            padding: 8px 16px;
+            display: grid;
+            grid-gap: 8px;
+            grid-template-columns: 32px 1fr;
+            align-items: center;
+            height: 40px;
+            font-weight: bold;
+            background: #0001;
+            width: 160px;
+        }
         .user-icon{
             width: 32px;
             height: 32px;
@@ -33,7 +39,7 @@ header{
         flex-direction: column;
         justify-content: flex-end;
         position: absolute;
-        top: -20px;
+        top: 40px;
         pointer-events: none;
         width: 200px;
         right: 0;
@@ -80,9 +86,9 @@ header{
             }
         }
     }
-    #user-menu:hover > menu {
+    #menu-status:checked ~ menu {
         opacity: 1;
         pointer-events: all;
-        top: 0px;
+        top: 64px;
     }
 }
