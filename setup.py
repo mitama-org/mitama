@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name = 'mitama',
@@ -9,17 +9,22 @@ setup(
     extra_requires = {
         'develop': ['pytest']
     },
-    packages = ['mitama'],
-    package_dir = {'mitama': 'mitama'},
+    packages = find_packages(),
     package_data = {
-        'mitama': [
-            'portal/templates/*.html',
-            'portal/templates/**/*.html',
-            'portal/static/*',
-            'skeleton/templates/*.html',
-            'skeleton/static/*',
-            'http/templates/*.html',
-            'app/static/*',
+        'mitama.portal': [
+            'templates/*.html',
+            'templates/**/*.html',
+            'static/*',
+        ],
+        'mitama.skeleton': [
+            'templates/*.html',
+            'static/*',
+        ],
+        'mitama.http': [
+            'templates/*.html',
+        ],
+        'mitama.app': [
+            'static/*',
         ]
     },
     entry_points = {
