@@ -11,19 +11,17 @@ setup(
     },
     packages = ['mitama'],
     package_dir = {'mitama': 'mitama'},
-    package_data = [
-        {
-            'mitama': [
-                'portal/templates/*.html',
-                'portal/templates/**/*.html',
-                'portal/static/*',
-                'skeleton/templates/*.html',
-                'skeleton/static/*',
-                'http/templates/*.html',
-                'app/static/*',
-            ]
-        },
-    ],
+    package_data = {
+        'mitama': [
+            'portal/templates/*.html',
+            'portal/templates/**/*.html',
+            'portal/static/*',
+            'skeleton/templates/*.html',
+            'skeleton/static/*',
+            'http/templates/*.html',
+            'app/static/*',
+        ]
+    },
     entry_points = {
         'console_scripts': [
             'mitama = mitama.command:exec'
