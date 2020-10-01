@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name = 'mitama',
@@ -9,8 +9,21 @@ setup(
     extra_requires = {
         'develop': ['pytest']
     },
-    packages = find_packages(),
-    include_package_data = True,
+    packages = ['mitama'],
+    package_dir = {'mitama': 'mitama'}
+    package_data = [
+        {
+            'mitama': [
+                'portal/templates/*.html',
+                'portal/templates/**/*.html',
+                'portal/static/*',
+                'skeleton/templates/*.html',
+                'skeleton/static/*',
+                'http/templates/*.html',
+                'app/static/*',
+            ]
+        },
+    ],
     entry_points = {
         'console_scripts': [
             'mitama = mitama.command:exec'
