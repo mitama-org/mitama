@@ -80,7 +80,6 @@ class Router():
             paths_to_check.append(merged_slashes[:-1])
 
         for path in paths_to_check:
-            print(path)
             for route in self.routes:
                 request.subpath = path
                 result = await route.match(request)
