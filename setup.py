@@ -4,11 +4,14 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'mitama',
-    version = '1.0.2',
     install_requires = ['sqlalchemy', 'aiohttp', 'bcrypt', 'pyjwt', 'jinja2', 'cryptography', 'python-magic'],
     extra_requires = {
         'develop': ['pytest']
     },
+    use_scm_version = True,
+    setup_requires = [
+        'setuptools_scm'
+    ],
     packages = find_packages(),
     package_data = {
         'mitama.portal': [
