@@ -10,7 +10,7 @@ setup(
         'develop': ['pytest']
     },
     packages = ['mitama'],
-    package_dir = {'mitama': 'mitama'}
+    package_dir = {'mitama': 'mitama'},
     package_data = [
         {
             'mitama': [
