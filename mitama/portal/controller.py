@@ -137,7 +137,7 @@ class UsersController(Controller):
                 invite.editable = 'editable' in post
                 invite.create()
                 invites = Invite.list()
-                return await Response.render(template, {
+                return Response.render(template, {
                     'invites': invites,
                     "icon": load_noimage_user()
                 })
