@@ -2,7 +2,6 @@ import time
 import json
 import base64
 from cryptography import fernet
-from mitama.app import Middleware
 from collections.abc import MutableMapping
 from mitama.http import Response
 
@@ -151,22 +150,3 @@ class EncryptedCookieStorage():
             response.set_cookie(self._cookie_name, cookie_data, **params_)
 
 
-class SessionMiddleware(Middleware):
-    fernet_key = fernet.Fernet.generate_key()
-    def __init__(self):
-        secret_key = base64.urlsafe_b64decode(self.fernet_key)
-        cookie_storage = EncryptedCookieStorage(secret_key)
-        self.storage = cookie_storage
-    def process(self, request, handler):
-        request['mitama_session_storage'] = self.storage
-        raise_response = False
-        response = handler(request)
-        if not isinstance(response, Response):
-            return response
-        session = request.get('mitama_session')
-        if session is not None:
-            if session._changed:
-                self.storage.save_session(request, response, session)
-        if raise_response:
-            raise response
-        return response

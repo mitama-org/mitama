@@ -4,9 +4,9 @@
 ポート番号を引数に取ってHTTPサーバーを起動するコマンド
 実行されてないマイグレーションもこいつが実行する
 '''
-from mitama.http import _MainApp, run_app
+from mitama.http import run_app
 import mitama.nodes
-from mitama.app import AppRegistry
+from mitama.app import _MainApp, AppRegistry
 
 class Command:
     def handle(self, argv = None):

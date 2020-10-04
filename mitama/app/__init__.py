@@ -1,5 +1,5 @@
 from jinja2 import *
-from .app import App
+from .app import App, _MainApp
 from .router import Router
 from .builder import Builder
 from .registry import AppRegistry

@@ -5,7 +5,7 @@ from pathlib import Path
 import magic
 import os
 from base64 import b64encode
-from mitama.app.noimage import load_noimage_app
+from mitama.noimage import load_noimage_app
 from mitama.hook import HookRegistry
 from mitama.http import Request, Response
 
@@ -112,3 +112,42 @@ class App:
                 request.app = self
                 return handle(request)
             return request, _handle, method
+
+def _session_middleware():
+    from mitama.http.session import EncryptedCookieStorage
+    from cryptography import fernet
+    from mitama.app import Middleware
+    import base64
+    class SessionMiddleware(Middleware):
+        fernet_key = fernet.Fernet.generate_key()
+        def __init__(self):
+            secret_key = base64.urlsafe_b64decode(self.fernet_key)
+            cookie_storage = EncryptedCookieStorage(secret_key)
+            self.storage = cookie_storage
+        def process(self, request, handler):
+            request['mitama_session_storage'] = self.storage
+            raise_response = False
+            response = handler(request)
+            if not isinstance(response, Response):
+                return response
+            session = request.get('mitama_session')
+            if session is not None:
+                if session._changed:
+                    self.storage.save_session(request, response, session)
+            if raise_response:
+                raise response
+            return response
+    return SessionMiddleware
+
+class _MainApp(App):
+    def __init__(self, app_registry):
+        self.app_registry = app_registry
+        self._router = None
+        super().__init__(name='_mitama', path='/', package = '_mitama')
+    @property
+    def router(self):
+        if self._router == None or self.app_registry.changed:
+            router = self.app_registry.router()
+            router.add_middleware(_session_middleware())
+            self._router = router
+        return self._router

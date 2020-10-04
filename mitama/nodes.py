@@ -13,7 +13,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from mitama.db import _CoreDatabase, func, orm
 from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
 from mitama.hook import HookRegistry
-from mitama.app.noimage import load_noimage_user, load_noimage_group
+from mitama.noimage import load_noimage_user, load_noimage_group
 
 db = _CoreDatabase()
 hook_registry = HookRegistry()

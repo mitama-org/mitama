@@ -6,7 +6,7 @@
 '''
 from mitama.http import run_app
 import mitama.nodes
-from mitama.app import AppRegistry
+from mitama.app import _MainApp, AppRegistry
 
 class Command:
     def handle(self, argv = None):

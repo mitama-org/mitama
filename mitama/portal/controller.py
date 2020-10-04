@@ -2,7 +2,7 @@ from mitama.app import Controller, AppRegistry
 from mitama.http import Response
 from mitama.nodes import User, Group
 from mitama.auth import password_hash, password_auth, get_jwt, AuthorizationError
-from mitama.app.noimage import load_noimage_group, load_noimage_user
+from mitama.noimage import load_noimage_group, load_noimage_user
 import json
 import traceback
 from uuid import uuid4
