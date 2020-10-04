@@ -68,10 +68,14 @@ header #logo {
   height: 40px;
   display: block;
 }
-header > div {
+header #logo_container {
   padding: 8px 16px;
 }
-header #user-menu {
+header #user-menu #menu-status {
+  display: none;
+}
+header #user-menu label {
+  padding: 8px 16px;
   display: grid;
   grid-gap: 8px;
   grid-template-columns: 32px 1fr;
@@ -91,7 +95,7 @@ header menu {
   flex-direction: column;
   justify-content: flex-end;
   position: absolute;
-  top: -20px;
+  top: 40px;
   pointer-events: none;
   width: 200px;
   right: 0;
@@ -138,10 +142,10 @@ header menu a:hover {
 header menu a:hover svg {
   fill: var(--main-color);
 }
-header #user-menu:hover > menu {
+header #menu-status:checked ~ menu {
   opacity: 1;
   pointer-events: all;
-  top: 0px;
+  top: 64px;
 }
 
 #content {

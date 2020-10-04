@@ -60,6 +60,7 @@ class RegisterController(Controller):
                     user.name = invite.name
                     user.icon = invite.icon
                 user.create()
+                UpdateUserPermission.accept(user, user)
                 sess["jwt_token"] = get_jwt(user)
                 return Response.redirect(
                     self.app.convert_url('/')
@@ -135,8 +136,8 @@ class UsersController(Controller):
                 invite.token = str(uuid4())
                 invite.editable = 'editable' in post
                 invite.create()
-                invites = Invites.list()
-                return Response.render(template, {
+                invites = Invite.list()
+                return await Response.render(template, {
                     'invites': invites,
                     "icon": load_noimage_user()
                 })
