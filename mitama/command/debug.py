@@ -21,4 +21,5 @@ class Command:
         app_registry = AppRegistry()
         app_registry.load_config()
         app = _MainApp(app_registry)
+        app_registry.start_watch()
         run_app(app, port)

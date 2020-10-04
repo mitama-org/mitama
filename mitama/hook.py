@@ -1,4 +1,4 @@
-from mitama.extra import _Singleton
+from mitama._extra import _Singleton
 
 class HookRegistry(_Singleton):
     def __init__(self):

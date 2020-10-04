@@ -12,7 +12,7 @@ from sqlalchemy.orm import class_mapper
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.types import TypeDecorator
 from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
-from mitama.extra import _classproperty
+from mitama._extra import _classproperty
 import re
 
 class Model():
