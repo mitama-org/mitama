@@ -54,7 +54,7 @@ class App:
     def set_middleware(self, middlewares):
         self.app.middlewares.extend(middlewares)
     def convert_fullurl(self, req, url):
-        scheme= req.scheme
+        scheme = req.scheme
         hostname = req.host
         path = self.path
         if path[0] != '/':

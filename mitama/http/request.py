@@ -1,6 +1,7 @@
 import cgi
 import http
 import http.cookies
+import io
 from urllib.parse import parse_qs
 from yarl import URL
 
@@ -21,13 +22,27 @@ class _Cookies():
 class _RequestPayload():
     def __init__(self, field_storage):
         self._field_storage = field_storage
+    def __contains__(self, key):
+        if key not in self._field_storage:
+            return False
+        elif isinstance(self._field_storage[key].file, io.BytesIO):
+            return (self._field_storage[key].filename or '') != ''
+        else:
+            return len(self._field_storage[key].value) > 0
     def __getitem__(self, key):
         if key not in self._field_storage:
             raise KeyError
-        elif self._field_storage[key].file is None:
+        elif (self._field_storage[key].filename or '') != '':
+            return self._field_storage[key]
+        elif len(self._field_storage[key].value) > 0:
             return self._field_storage[key].value
         else:
-            return self._field_storage[key]
+            raise KeyError
+    def get(self, key, default = None):
+        if key in self:
+            return self[key]
+        else:
+            return default
     @classmethod
     def parse_body(cls, rfile, content_type, length):
         environ = {
@@ -43,7 +58,7 @@ class _RequestPayload():
 
 class Request():
     MessageClass = http.client.HTTPMessage
-    def __init__(self, method, path, version, headers, rfile):
+    def __init__(self, method, path, version, headers, ssl, rfile):
         self._method = method
         self._raw_path = path
         self._url = URL(path)
@@ -60,9 +75,11 @@ class Request():
                     self._query[k] = v
         else:
             self._path = path[0]
-            self._query = None
+            self._query = {}
         self._version = version
         self._headers = headers
+        self._secure = ssl
+        self._host = self._headers.get('Host')
         self._rfile = rfile
         self._data = dict()
     def __setitem__(self, key, value):
@@ -73,6 +90,12 @@ class Request():
         del self._data[key]
     def get(self, key):
         return self._data[key] if key in self._data else None
+    @property
+    def scheme(self):
+        return 'https' if self._secure else 'http'
+    @property
+    def host(self):
+        return self._host
     @property
     def method(self):
         return self._method
@@ -106,9 +129,9 @@ class Request():
             self._cookies = _Cookies(C)
             return self._cookies
     def post(self):
-        content_type = self._headers.get('Content-Type')
-        length = int(self._headers.get('Content-Length'))
-        if content_type in ('multipart/form-data', 'application/x-www-form-urlencoded'):
+        content_type = self._headers.get('Content-Type', '')
+        length = int(self._headers.get('Content-Length', 0))
+        if content_type.startswith('multipart/form-data') or content_type.startswith('application/x-www-form-urlencoded'):
             parsed_body = _RequestPayload.parse_body(self._rfile, content_type, length)
         elif content_type == 'application/json':
             payload = self._rfile.read()
@@ -128,7 +151,7 @@ class Request():
             self['mitama_session'] = sess
         return sess
     @classmethod
-    def parse_stream(cls, rfile):
+    def parse_stream(cls, rfile, ssl = False):
         words = rfile.readline().decode().rstrip('\r\n').split(' ')
         version = words[-1]
         if not 2 <= len(words) <= 3:
@@ -144,4 +167,4 @@ class Request():
             raise Exception('')
         except http.client.HTTPException as err:
             raise Exception('')
-        return cls(command, path, version, headers, rfile)
+        return cls(command, path, version, headers, ssl, rfile)

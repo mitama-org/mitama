@@ -6,12 +6,12 @@
 {% block content %}
 <div id='content'>
     <h1>Mitamaに参加する</h1>
-    <form method='post' action='' enctype="multipart/form-data" class='entrance'>
+    <form method='POST' action='' enctype="multipart/form-data" class='entrance'>
         <dl>
             <dt>アイコン</dt>
             <dd>
                 <div id='image-form'>
-                    <img src="{{ dataurl(icon) if icon != None else url("/static/noimage_user.svg") }}"/>
+                    <img src="{{ dataurl(icon) if icon|length > 0 else url("/static/noimage_user.svg") }}"/>
                     {% if editable %}
                     <label class='button'>
                         <input type='file' name='icon' accept='image/*' onchange='previewImage(this)'/>

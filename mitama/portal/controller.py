@@ -52,14 +52,15 @@ class RegisterController(Controller):
                 user = User()
                 user.password = password_hash(data['password'])
                 if invite.editable:
-                    user.screen_name = data['screen_name']
-                    user.name = data['name']
+                    user.screen_name = data.get('screen_name', '')
+                    user.name = data.get('name', '')
                     user.icon = data['icon'].file.read() if "icon" in data else invite.icon
                 else:
                     user.screen_name = invite.screen_name
                     user.name = invite.name
                     user.icon = invite.icon
                 user.create()
+                invite.delete()
                 UpdateUserPermission.accept(user, user)
                 sess["jwt_token"] = get_jwt(user)
                 return Response.redirect(
@@ -69,10 +70,10 @@ class RegisterController(Controller):
                 error = str(err)
                 return Response.render(template, {
                     'error': error,
-                    "name": data["name"],
-                    "screen_name": data["screen_name"],
-                    "password": data["password"],
-                    "icon": data["icon"].file.read(),
+                    "name": data.get("name", invite.name),
+                    "screen_name": data.get("screen_name", invite.screen_name),
+                    "password": data.get("password", ''),
+                    "icon": data.get("icon").file.read(),
                     'editable': invite.editable
                 })
         return Response.render(template, {
@@ -130,8 +131,8 @@ class UsersController(Controller):
             try:
                 icon = post["icon"].file.read() if "icon" in post else load_noimage_user()
                 invite = Invite()
-                invite.name = post['name']
-                invite.screen_name = post['screen_name']
+                invite.name = post.get('name', '')
+                invite.screen_name = post.get('screen_name', '')
                 invite.icon = icon
                 invite.token = str(uuid4())
                 invite.editable = 'editable' in post
@@ -145,8 +146,8 @@ class UsersController(Controller):
                 error = str(err)
                 return Response.render(template, {
                     'invites': invites,
-                    "name": post["name"],
-                    "screen_name": post["screen_name"],
+                    "name": post.get("name", ''),
+                    "screen_name": post.get("screen_name", ''),
                     "icon": icon,
                     'error': error
                 })
@@ -221,8 +222,8 @@ class UsersController(Controller):
                 return Response.render(template, {
                     "error": error,
                     "user": user,
-                    "screen_name": post["screen_name"],
-                    "name": post["name"],
+                    "screen_name": post.get("screen_name", user.screen_name),
+                    "name": post.get("name", user.name),
                     "icon": icon,
                 })
         return Response.render(template, {
@@ -258,16 +259,19 @@ class GroupsController(Controller):
                 group.screen_name = post['screen_name']
                 group.icon = post['icon'].file.read() if "icon" in post else None
                 group.create()
+                print('created')
                 if "parent" in post and post['parent'] != '':
                     Group.retrieve(int(post['parent'])).append(group)
                 group.append(req.user)
+                print('append')
                 UpdateGroupPermission.accept(req.user, group)
+                print('accept')
                 return Response.redirect(self.app.convert_url("/groups"))
             except Exception as err:
                 error = str(err)
                 return Response.render(template, {
                     'groups': groups,
-                    "icon": post["icon"].file.read() if "icon" in post else None,
+                    "icon": load_noimage_group(),
                     'error': error
                 })
         return Response.render(template, {
@@ -347,9 +351,9 @@ class GroupsController(Controller):
                     'all_groups': groups,
                     'all_users': users,
                     "group": group,
-                    "screen_name": post["screen_name"],
-                    "name": post["name"],
-                    "icon": icon,
+                    "screen_name": post.get("screen_name", ''),
+                    "name": post.get("name", ''),
+                    "icon": group.icon,
                 })
         return Response.render(template, {
             "group": group,
