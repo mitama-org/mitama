@@ -1,5 +1,4 @@
 #!/usr/bin/python
-from aiohttp import web
 from yarl import URL
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
