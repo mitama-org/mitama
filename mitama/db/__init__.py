@@ -14,7 +14,7 @@ from sqlalchemy.sql import func
 from sqlalchemy import orm
 from .model import Model
 from .driver.sqlite3 import get_engine, get_app_engine
-from mitama.extra import _Singleton
+from mitama._extra import _Singleton
 import inspect
 
 class _QueryProperty:
