@@ -17,24 +17,19 @@ def dataurl(blob):
 
 class App:
     template_dir = 'templates'
-    instances = list()
     description = ""
     name = ""
     @property
     def icon(self):
         return load_noimage_app()
     def __init__(self, **kwargs):
-        self.app = web.Application(client_max_size = kwargs["client_max_size"] if "client_max_size" in kwargs else 100*1024*1024)
         self.screen_name = kwargs['name']
         self.path = kwargs['path']
+        self.package = kwargs['package']
         self.project_dir = Path(kwargs['project_dir']) if 'project_dir' in kwargs else None
         self.project_root_dir = Path(kwargs['project_root_dir']) if 'project_dir' in kwargs else None
         self.install_dir = Path(kwargs['install_dir']) if 'project_dir' in kwargs else Path(os.path.dirname(__file__)) / '../http/'
-        for instance in self.instances:
-            instance.app = self
-            instance.view = self.view
-            if hasattr(instance,  '__connected__'):
-                instance.__connected__()
+        self.router._app = self
         hook_registry = HookRegistry()
         if hasattr(self, 'create_user'):
             hook_registry.add_create_user_hook(self.create_user)
@@ -48,18 +43,15 @@ class App:
             hook_registry.add_delete_user_hook(self.delete_user)
         if hasattr(self, 'delete_group'):
             hook_registry.add_delete_group_hook(self.delete_group)
-        async def handle(request):
-            if not isinstance(request, Request):
-                request = Request.from_request(request)
-            result = await self.router.match(request)
-            if result:
-                request, handle = result
-                return await handle(request)
-            else:
-                return await self.error(request, 404)
-        self.app.router.add_route('*', '/{tail:.*}', handle)
-    def __getattr__(self, name):
-        return getattr(self.app, name)
+    def __call__(self, request):
+        if not isinstance(request, Request):
+            request = Request.from_request(request)
+        result = self.router.match(request)
+        if result:
+            request, handle, method = result
+            return handle(request)
+        else:
+            return self.error(request, 404)
     def set_middleware(self, middlewares):
         self.app.middlewares.extend(middlewares)
     def convert_fullurl(self, req, url):
@@ -94,7 +86,6 @@ class App:
     @property
     def view(self):
         self._view= Environment(
-            enable_async = True,
             loader = FileSystemLoader(self.install_dir / self.template_dir)
         )
         def filter_user(arg):
@@ -109,6 +100,16 @@ class App:
             dataurl = dataurl
         )
         return self._view
-    async def error(self, request, code):
+    def error(self, request, code):
         template = self.view.get_template(str(code) + '.html')
-        return await Response.render(template, request)
+        return Response.render(template)
+    def match(self, request):
+        result = self.router.match(request)
+        if result == False:
+            return False
+        else:
+            request, handle, method = self.router.match(request)
+            def _handle(request):
+                request.app = self
+                return handle(request)
+            return request, _handle, method

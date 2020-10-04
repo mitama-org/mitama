@@ -16,6 +16,8 @@ class Builder(object):
         self.data['path'] = path
     def set_name(self, name):
         self.data['name'] = name
+    def set_package(self, package):
+        self.data['package'] = package
     def set_project_dir(self, path):
         self.data['project_dir'] = path
     def set_project_root_dir(self, path):

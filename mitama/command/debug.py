@@ -4,7 +4,7 @@
 ポート番号を引数に取ってHTTPサーバーを起動するコマンド
 実行されてないマイグレーションもこいつが実行する
 '''
-from mitama.http import _MainApp, run_app
+from mitama.http import run_app
 import mitama.nodes
 from mitama.app import AppRegistry
 
@@ -17,4 +17,5 @@ class Command:
         app_registry = AppRegistry()
         app_registry.load_config()
         app = _MainApp(app_registry)
+        app_registry.start_watch()
         run_app(app, port)

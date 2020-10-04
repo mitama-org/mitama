@@ -1,4 +1,5 @@
 from mitama.http import Request, Response
+import inspect
 import copy
 import re
 
@@ -10,22 +11,21 @@ class Router():
     '''ルーティングエンジン
 
     手軽に実装できて必要最低限なものを目指したので、遅かったりして嫌いだったら無理にこれを使う必要はありません。
-    自前のものを適用したい場合は、とりあえず:samp:`async hoge.match(Request): -> Response` といったインターフェースを実装したメソッドを作ってください。
+    自前のものを適用したい場合は、とりあえず:samp:`hoge.match(Request): -> Response` といったインターフェースを実装したメソッドを作ってください。
     routesの中にRouterインスタンスを指定することもできます。
     '''
-    app = None
+    _app = None
     def __init__(self, routes = [], middlewares = [], prefix = ''):
         '''初期化処理
 
         :param routes: Router、またはRouteのリスト
         :param middlewares: Middlewareのリスト
-        :param prefix: 指定すると、パスの先頭がprefixと一致する場合のみマッチする
         '''
-        self.routes = routes
+        self._parent = None
+        self.routes = list()
         self.middlewares = list()
-        self.prefix = prefix
-        for middleware in middlewares:
-            self.middlewares.append(middleware)
+        self.add_routes(routes)
+        self.add_middlewares(middlewares)
         self.i = 0
     def add_route(self, route):
         '''ルーティング先を追加します
@@ -33,6 +33,8 @@ class Router():
         mitama.app.methodの関数で生成したRouteインスタンスを与えてください。
         :param route: Routeインスタンス
         '''
+        if isinstance(route, Router):
+            route._parent = self
         self.routes.append(route)
     def add_routes(self, routes):
         '''複数のルーティング先を追加します
@@ -40,7 +42,8 @@ class Router():
         mitama.app.methodの関数で生成したRouteインスタンスを与えてください。
         :param routes: Routeインスタンスのリスト
         '''
-        self.routes.extend(routes)
+        for route in routes:
+            self.add_route(route)
     def add_middleware(self, middleware):
         '''ミドルウェアを登録します
 
@@ -54,21 +57,13 @@ class Router():
         Middlewareクラスのリストを与えると、このルーターのインスタンス内でマッチした場合にミドルウェアが順番に起動します。
         :param middlewares: Middlewareのインスタンスのリスト
         '''
-        self.middlewares.extend(middlewares)
-    def clone(self, prefix = None):
-        return Router(
-            routes = copy.copy(self.routes),
-            prefix = self.prefix if prefix == None else prefix
-        )
-    async def match(self, request):
+        for middleware in middlewares:
+            self.add_middleware(middleware)
+    def clone(self):
+        return Router(routes = copy.copy(self.routes))
+    def match(self, request):
         method = request.method
         path = request.subpath if hasattr(request, 'subpath') else request.path
-        if self.prefix != '' and self.prefix != '/':
-            if path[:len(self.prefix)] != self.prefix:
-                return False
-            else:
-                path = path[len(self.prefix):]
-                request.subpath = path
         paths_to_check = [path]
         paths_to_check.append(re.sub('//+', '/', path))
         if not request.path.endswith('/'):
@@ -82,44 +77,68 @@ class Router():
         for path in paths_to_check:
             for route in self.routes:
                 request.subpath = path
-                result = await route.match(request)
+                result = route.match(request)
                 if result != False:
-                    request, result = result
-                    def get_response_handler(result):
+                    request, result, method = result
+                    def get_response_handler(result, method):
                         i = 0
-                        async def handle(request):
+                        def handle(request):
                             nonlocal i
+                            nonlocal result
+                            if inspect.isclass(result):
+                                result = result(request.app)
+                                if method is not None:
+                                    inst = result
+                                    def result(request):
+                                        return inst(request, method)
                             if i>=len(self.middlewares) or len(self.middlewares) == 0:
                                 if callable(result):
-                                    return await result(request)
-                                elif callable(getattr(result, 'handle')):
-                                    return await result.handle(request)
+                                    return result(request)
                                 else:
                                     raise RoutingError('Unsupported interface object. Only callables and Controller instances are supported.')
                             else:
-                                middleware = self.middlewares[i]
+                                if hasattr(request, 'app'):
+                                    middleware = self.middlewares[i](request.app)
+                                else:
+                                    middleware = self.middlewares[i]()
                                 i += 1
-                                return await middleware.process(request, handle)
+                                return middleware.process(request, handle)
                         return handle
-                    handler = get_response_handler(result)
-                    return request, handler
+                    handler = get_response_handler(result, method)
+                    return request, handler, None
         return False
 
 class Route():
-    def __init__(self, methods, path, handler):
+    def __init__(self, methods, path, handler, method_name):
         self.methods = methods
         self.path = Path(path)
         self.handler = handler
+        self.method_name = method_name
         pass
-    async def match(self, request):
+    def match(self, request):
         method = request.method
         path = request.subpath if hasattr(request, 'subpath') else request.path
         args = self.path.match(path)
         if method in self.methods and args != False:
             request.params = args
-            return request, self.handler
+            return request, self.handler, self.method_name
         else:
             return False
+
+class GroupRoute():
+    def __init__(self, path, router):
+        self.path = path
+        self.router = router
+        pass
+    def match(self, request):
+        path = request.subpath if hasattr(request, 'subpath') else request.path
+        if str(self.path) != '' and str(self.path) != '/':
+            if path[:len(self.path)] != self.path:
+                return False
+            else:
+                path = path[len(self.path):]
+                request.subpath = path
+        return self.router.match(request)
 
 def _re_flatten(p):
     if '(' not in p:

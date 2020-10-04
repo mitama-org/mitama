@@ -6,7 +6,6 @@ from mitama.app import Middleware
 from collections.abc import MutableMapping
 from mitama.http import Response
 
-
 class Session(MutableMapping):
     def __init__(self, identity, *, data, new, max_age = None):
         self._changed = False
@@ -70,7 +69,7 @@ class Session(MutableMapping):
         self._changed = True
 
 class EncryptedCookieStorage():
-    def __init__(self, secret_key, *, cookie_name = 'AIOHTTP_SESSION',
+    def __init__(self, secret_key, *, cookie_name = 'MITAMA_SESSION',
                  domain = None, max_age = None, path = '/',
                  secure = None, httponly = True, encoder = json.dumps,
                  decoder = json.loads):
@@ -106,7 +105,7 @@ class EncryptedCookieStorage():
         else:
             data = {}
         return data
-    async def load_session(self, request):
+    def load_session(self, request):
         cookie = self.load_cookie(request)
         if cookie is None:
             return Session(None, data = None, new = True, max_age = self.max_age)
@@ -121,7 +120,7 @@ class EncryptedCookieStorage():
                 return Session(None, data = data, new = False, max_age = self.max_age)
             except:
                 return Session(None, data = None, new = True, max_age = self.max_age)
-    async def save_session(self, request, response, session):
+    def save_session(self, request, response, session):
         if session.empty:
             return self.save_cookie(response, '', max_age = session.max_age)
         cookie_data = self._encoder(
@@ -130,41 +129,44 @@ class EncryptedCookieStorage():
         self.save_cookie(
             response,
             self._fernet.encrypt(cookie_data).decode('utf-8'),
-            max_age = session.max_age
-        )
+            max_age = session.max_age)
     def load_cookie(self, request):
         cookie = request.cookies.get(self._cookie_name)
         return cookie
     def save_cookie(self, response, cookie_data, *, max_age = None):
         params = dict(self._cookie_params)
+        params_ = dict()
+        for k in params.keys():
+            params_[k.replace('_', '-')] = params[k]
         if max_age is not None:
-            params['max_age'] = max_age
-            params['expires'] = time.strftime('%a, %d-%b-%Y %T GMT', time.gmtime(time.time() + max_age))
+            params_['max-age'] = max_age
+            params_['expires'] = time.strftime('%a, %d-%b-%Y %T GMT', time.gmtime(time.time() + max_age))
         if not cookie_data:
             response.del_cookie(
                 self._cookie_name,
-                domain = params['domain'],
-                path = params['path']
+                domain = params_['domain'],
+                path = params_['path']
             )
         else:
-            response.set_cookie(self._cookie_name, cookie_data, **params)
+            response.set_cookie(self._cookie_name, cookie_data, **params_)
 
 
 class SessionMiddleware(Middleware):
-    def __init__(self, storage):
-        self.storage = storage
-    async def process(self, request, handler):
+    fernet_key = fernet.Fernet.generate_key()
+    def __init__(self):
+        secret_key = base64.urlsafe_b64decode(self.fernet_key)
+        cookie_storage = EncryptedCookieStorage(secret_key)
+        self.storage = cookie_storage
+    def process(self, request, handler):
         request['mitama_session_storage'] = self.storage
         raise_response = False
-        response = await handler(request)
+        response = handler(request)
         if not isinstance(response, Response):
             return response
-        if response.prepared:
-            raise RuntimeError('Cannot save session data into prepared response')
         session = request.get('mitama_session')
         if session is not None:
             if session._changed:
-                await self.storage.save_session(request, response, session)
+                self.storage.save_session(request, response, session)
         if raise_response:
             raise response
         return response

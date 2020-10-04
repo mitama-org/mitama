@@ -8,8 +8,8 @@ class SessionMiddleware(Middleware):
 
     ログインしていないユーザーがアクセスした場合、/login?redirect_to=<URL>にリダイレクトします。
     '''
-    async def process(self, request, handler):
-        sess = await request.session()
+    def process(self, request, handler):
+        sess = request.session()
         try:
             if 'jwt_token' in sess:
                 request.user = check_jwt(sess['jwt_token'])
@@ -17,5 +17,5 @@ class SessionMiddleware(Middleware):
                 return Response.redirect('/login?redirect_to='+urllib.parse.quote(str(request.url), safe=''))
         except Exception as err:
             return Response.redirect('/login?redirect_to='+urllib.parse.quote(str(request.url), safe=''))
-        return await handler(request)
+        return handler(request)
 
