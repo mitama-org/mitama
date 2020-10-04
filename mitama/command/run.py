@@ -14,7 +14,10 @@ class Command:
         try:
             port = argv[0]
         except IndexError:
-            port = '8080'
+            if hasattr(config, 'port'):
+                port = config.port
+            else:
+                port = '8080'
         config = get_from_project_dir()
         if not hasattr(config, 'ssl'):
             config.ssl = False
