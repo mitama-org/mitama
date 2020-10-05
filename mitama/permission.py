@@ -3,6 +3,7 @@
 from mitama.nodes import User, Group, Relation
 from mitama.db.types import Column, Integer, Node
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.schema import UniqueConstraint
 
 class PermissionMixin(object):
     '''パーミッションのモデルの実装を支援します
@@ -34,6 +35,13 @@ class PermissionMixin(object):
     @declared_attr
     def __tablename__(cls):
         return '__'+cls.__name__.lower()+'_permission'
+    @declared_attr
+    def __table_args__(cls):
+        if hasattr(cls, 'target'):
+            unique = UniqueConstraint('node', 'target', name='unique')
+        else:
+            unique = UniqueConstraint('node', name='unique')
+        return (unique, )
     node = Column(Node)
     targetUpPropagate = False
     targetDownPropagate = False

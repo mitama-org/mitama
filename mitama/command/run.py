@@ -11,6 +11,7 @@ from mitama.conf import get_from_project_dir
 
 class Command:
     def handle(self, argv = None):
+        config = get_from_project_dir()
         try:
             port = argv[0]
         except IndexError:
@@ -18,7 +19,6 @@ class Command:
                 port = config.port
             else:
                 port = '8080'
-        config = get_from_project_dir()
         if not hasattr(config, 'ssl'):
             config.ssl = False
         app_registry = AppRegistry()

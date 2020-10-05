@@ -1,6 +1,7 @@
 import base64, re
 import ssl
-from http.server import ThreadingHTTPServer
+#from http.server import ThreadingHTTPServer
+from http.server import HTTPServer
 from socketserver import StreamRequestHandler
 from .request import Request
 from .response import Response
@@ -19,12 +20,14 @@ def run_app(app, port, request_factory = Request.parse_stream, ssl = False):
             response = app(request)
             response.start(request, self.wfile)
     def serve():
-        with ThreadingHTTPServer(('', int(port)), RequestHandler) as server:
+        #with ThreadingHTTPServer(('', int(port)), RequestHandler) as server:
+        with HTTPServer(('', int(port)), RequestHandler) as server:
             server.serve_forever()
     th_nossl = threading.Thread(name = 'nossl', target = serve)
     if ssl != False:
         def ssl_serve():
-            with ThreadingHTTPServer(('', int(ssl['port'])), SSLRequestHandler) as server:
+            #with ThreadingHTTPServer(('', int(ssl['port'])), SSLRequestHandler) as server:
+            with HTTPServer(('', int(ssl['port'])), SSLRequestHandler) as server:
                 if ssl!=False:
                     ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
                     crtx.load_cert_chain(ssl['cert'], ssl['key'])
