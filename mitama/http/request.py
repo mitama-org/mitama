@@ -43,6 +43,11 @@ class _RequestPayload():
             return self[key]
         else:
             return default
+    def getlist(self, key, default = list()):
+        if key in self:
+            return self._field_storage.getlist(key)
+        else:
+            return default
     @classmethod
     def parse_body(cls, rfile, content_type, length):
         environ = {
