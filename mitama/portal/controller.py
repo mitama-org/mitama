@@ -259,13 +259,10 @@ class GroupsController(Controller):
                 group.screen_name = post['screen_name']
                 group.icon = post['icon'].file.read() if "icon" in post else None
                 group.create()
-                print('created')
                 if "parent" in post and post['parent'] != '':
                     Group.retrieve(int(post['parent'])).append(group)
                 group.append(req.user)
-                print('append')
                 UpdateGroupPermission.accept(req.user, group)
-                print('accept')
                 return Response.redirect(self.app.convert_url("/groups"))
             except Exception as err:
                 error = str(err)
@@ -369,16 +366,18 @@ class GroupsController(Controller):
             group = Group.retrieve(screen_name = req.params['id'])
             nodes = list()
             if 'user' in post:
-                for uid in post['user']:
+                for uid in post.getlist('user'):
                     try:
                         nodes.append(User.retrieve(int(uid)))
                     except Exception as err:
+                        print(err)
                         pass
             if 'group' in post:
-                for gid in post['group']:
+                for gid in post.getlist('group'):
                     try:
                         nodes.append(Group.retrieve(int(gid)))
                     except Exception as err:
+                        print(err)
                         pass
             group.append_all(nodes)
         except Exception as err:
