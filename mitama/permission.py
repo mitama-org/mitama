@@ -71,7 +71,10 @@ class PermissionMixin(object):
         :param node: UserまたはGroupのインスタンス
         :param target: 許可対象
         '''
-        perms = cls.query.filter(cls.node == node).all()
+        query = cls.query.filter(cls.node == node)
+        if hasattr(cls, 'target'):
+            query = query.filter(cls.target == target)
+        perms = query.all()
         for perm in perms:
             if perm.is_target(target) or perm.is_target(None):
                 return True

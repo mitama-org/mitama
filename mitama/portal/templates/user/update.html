@@ -103,9 +103,11 @@
             {% endif %}
             </dl>
             <button type='submit'>設定を変更</button>
-            <a href='{{ url('/users/'+user.id+'/delete') }}'>
+            <!--
+            <a href='{{ url('/users/'+user.id|string+'/delete') }}'>
                 <button type='button'>ユーザーを削除</button>
             </a>
+            -->
             {% if error %}
                 <p class='error'>{{ error }}</p>
             {% endif %}
