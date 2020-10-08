@@ -79,8 +79,8 @@ class App:
             path = '/' + path
         if path[-1] == '/':
             path = path[0:-2]
-        url = str(url.path)
-        url = URL(url[len(path):])
+        url = str(url)
+        url = url[len(path):]
         return url
     @property
     def view(self):
