@@ -645,7 +645,6 @@ header #menu-status:checked ~ menu {
 }
 #content .app-list .item .detail {
   display: flex;
-  justify-content: space-around;
   flex-direction: column;
   padding: 8px 0;
 }
