@@ -9,9 +9,13 @@ from .model import UpdateUserPermission, CreateUserPermission, DeleteUserPermiss
 
 import urllib
 
+with open(Path(os.path.dirname(__file__)) / 'static/icon.png', 'rb') as f:
+    icon = f.read()
+
 class App(BaseApp):
     name = "Mitama Portal"
     description = "Mitamaのアプリポータルです。他のアプリを確認できる他、配信の設定やグループの編集、ユーザーの招待ができます。"
+    icon = icon
     @property
     def view(self):
         view = super().view
