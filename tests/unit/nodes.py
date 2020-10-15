@@ -103,14 +103,14 @@ def test_crud():
     test_user.screen_name = 'test_user_screen__'
     test_user.password = 'test_pass__'
     test_user.create()
-    searched = User.query.filter(User.screen_name == 'test_user_screen__').first()
+    searched = User.query.filter(User._screen_name == 'test_user_screen__').first()
     assert test_user == searched
     test_user.name = 'test_user_changed'
     test_user.update()
-    searched = User.query.filter(User.screen_name == 'test_user_screen__').first()
+    searched = User.query.filter(User._screen_name == 'test_user_screen__').first()
     assert test_user == searched
     test_user.delete()
-    searched = User.query.filter(User.screen_name == 'test_user_screen__').all()
+    searched = User.query.filter(User._screen_name == 'test_user_screen__').all()
     assert len(searched) == 0
 
 
