@@ -26,7 +26,7 @@ def password_auth(screen_name, password):
     :param password: パスワード
     :return: Userインスタンス
     '''
-    user = User.query.filter(User.screen_name == screen_name).first()
+    user = User.retrieve(screen_name = screen_name)
     password = base64.b64encode(
         hashlib.sha256(
             password.encode() * 10
@@ -82,4 +82,4 @@ def check_jwt(token):
         )
     except jwt.exceptions.InvalidTokenError as err:
         raise AuthorizationError('Invalid token.')
-    return User.query.filter(User._id == result['id']).first()
+    return User.retrieve(result['id'])

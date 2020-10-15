@@ -14,6 +14,8 @@ from mitama.db import _CoreDatabase, func, orm
 from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
 from mitama.hook import HookRegistry
 from mitama.noimage import load_noimage_user, load_noimage_group
+import magic
+from base64 import b64encode
 
 db = _CoreDatabase()
 hook_registry = HookRegistry()
@@ -25,7 +27,7 @@ class Relation(db.Model):
 class Node(object):
     _icon = Column(LargeBinary)
     _name = Column('name', String(255))
-    _screen_name = Column('scnreen_name', String(255))
+    _screen_name = Column('screen_name', String(255))
     _name_proxy = list()
     _screen_name_proxy = list()
     _icon_proxy = list()
@@ -67,13 +69,13 @@ class Node(object):
         if id != None:
             node = cls.query.filter(cls._id == id).first()
         elif screen_name != None:
-            node = cls.query.filter(cls.screen_name == screen_name).first()
+            node = cls.query.filter(cls._screen_name == screen_name).first()
         else:
             raise Exception('')
         return node
     def icon_to_dataurl(self):
         f = magic.Magic(mime = True, uncompress = True)
-        mime = f.from_buffer(self._icon)
+        mime = f.from_buffer(self.icon)
         return 'data:'+mime+';base64,'+b64encode(self.icon).decode()
     def parents(self):
         rels = Relation.query.filter(Relation.child == self).all()
@@ -101,13 +103,13 @@ class Node(object):
         return False
     @classmethod
     def add_name_proxy(cls, fn):
-        self._name_proxy.append(fn)
+        cls._name_proxy.append(fn)
     @classmethod
     def add_screen_name_proxy(cls, fn):
-        self._screen_name_proxy.append(fn)
+        cls._screen_name_proxy.append(fn)
     @classmethod
     def add_icon_proxy(cls, fn):
-        self._icon_proxy.append(fn)
+        cls._icon_proxy.append(fn)
 
 class User(Node, db.Model):
     '''ユーザーのモデルクラスです
