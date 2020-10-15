@@ -24,11 +24,44 @@ class Relation(db.Model):
 
 class Node(object):
     _icon = Column(LargeBinary)
-    name = Column(String(255))
-    screen_name = Column(String(255))
+    _name = Column('name', String(255))
+    _screen_name = Column('scnreen_name', String(255))
+    _name_proxy = list()
+    _screen_name_proxy = list()
+    _icon_proxy = list()
     @property
     def id(self):
         return self._id
+    @property
+    def name(self):
+        name = self._name
+        for fn in self._name_proxy:
+            name = fn(name)
+        return name
+    @property
+    def screen_name(self):
+        screen_name = self._screen_name
+        for fn in self._screen_name_proxy:
+            screen_name = fn(screen_name)
+        return screen_name
+    @property
+    def icon(self):
+        if self._icon != None:
+            icon = self._icon
+        else:
+            icon = self.load_noimage()
+        for fn in self._icon_proxy:
+            icon = fn(icon)
+        return icon
+    @name.setter
+    def name(self, value):
+        self._name = value
+    @screen_name.setter
+    def screen_name(self, value):
+        self._screen_name = value
+    @icon.setter
+    def icon(self, value):
+        self._icon = value
     @classmethod
     def retrieve(cls, id = None, screen_name = None):
         if id != None:
@@ -66,6 +99,15 @@ class Node(object):
                 )
             layer = layer_
         return False
+    @classmethod
+    def add_name_proxy(cls, fn):
+        self._name_proxy.append(fn)
+    @classmethod
+    def add_screen_name_proxy(cls, fn):
+        self._screen_name_proxy.append(fn)
+    @classmethod
+    def add_icon_proxy(cls, fn):
+        self._icon_proxy.append(fn)
 
 class User(Node, db.Model):
     '''ユーザーのモデルクラスです
@@ -78,15 +120,8 @@ class User(Node, db.Model):
     '''
     __tablename__ = 'mitama_user'
     password = Column(String(255))
-    @property
-    def icon(self):
-        if self._icon != None:
-            return self._icon
-        else:
-            return load_noimage_user()
-    @icon.setter
-    def icon(self, value):
-        self._icon = value
+    def load_noimage():
+        return load_noimage_user()
     def delete(self):
         '''ユーザーを削除します'''
         hook_registry.delete_user(self)
@@ -109,15 +144,8 @@ class Group(Node, db.Model):
     :param icon: アイコン
     '''
     __tablename__ = 'mitama_group'
-    @property
-    def icon(self):
-        if self._icon != None:
-            return self._icon
-        else:
-            return load_noimage_group()
-    @icon.setter
-    def icon(self, value):
-        self._icon = value
+    def load_noimage():
+        return load_noimage_group()
     @classmethod
     def tree(cls):
         noparent = [rel.child._id for rel in db.session.query(Relation.child).group_by(Relation.child) if isinstance(rel.child, Group)]
