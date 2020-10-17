@@ -462,3 +462,17 @@ class AppsController(Controller):
         return Response.render(template, {
             "apps": apps,
         })
+
+class ACSController(Controller):
+    def redirect(request):
+        pass
+
+    def post(request):
+        pass
+
+class SLOController(Controller):
+    def redirect(request):
+        pass
+
+    def post(request):
+        pass
