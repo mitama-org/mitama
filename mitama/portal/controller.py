@@ -7,6 +7,7 @@ import json
 import traceback
 import saml2
 from saml2 import BINDING_HTTP_POST
+from saml2.client import Saml2Client
 from uuid import uuid4
 from .model import Invite, CreateUserPermission, UpdateUserPermission, DeleteUserPermission, CreateGroupPermission, UpdateGroupPermission, DeleteGroupPermission, Admin
 
@@ -465,7 +466,14 @@ class AppsController(Controller):
             "apps": apps,
         })
 
+CNFBASE = 'sp_conf'
+SP = Saml2Client(config_file = CNFBASE)
+
 class ACSController(Controller):
+    def __init__(self, app):
+        super().__init__(app)
+        self.sp = SP
+
     def _parse_authn_request_response(post):
         if 'SAMLResponse' not in post:
             return Response(status = 401)
