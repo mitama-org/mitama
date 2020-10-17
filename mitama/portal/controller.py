@@ -5,6 +5,8 @@ from mitama.auth import password_hash, password_auth, get_jwt, AuthorizationErro
 from mitama.noimage import load_noimage_group, load_noimage_user
 import json
 import traceback
+import saml2
+from saml2 import BINDING_HTTP_POST
 from uuid import uuid4
 from .model import Invite, CreateUserPermission, UpdateUserPermission, DeleteUserPermission, CreateGroupPermission, UpdateGroupPermission, DeleteGroupPermission, Admin
 
@@ -468,8 +470,11 @@ class ACSController(Controller):
         pass
 
     def post(request):
-        pass
-
+        post = request.post()
+        if 'SAMLResponse' not in post:
+            return Response(status = 401)
+        saml_res = self.sp.parse_authn_request_response(post['SAMLResponse']), BINDING_HTTP_POST
+        
 class SLOController(Controller):
     def redirect(request):
         pass
