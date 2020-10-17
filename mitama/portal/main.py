@@ -56,6 +56,10 @@ class App(BaseApp):
                 view('/groups/<id>/delete', GroupsController, 'delete'),
                 view('/apps', AppsController, 'list'),
                 view('/apps/settings', AppsController, 'update'),
+                view('/acs/post<hoge:re:.*>', ACSController, 'post'),
+                view('/acs/redirect<hoge:re:.*>', ACSController, 'redirect'),
+                view('/slo/post<hoge:re:.*>', SLOController, 'post'),
+                view('/slo/redirect<hoge:re:.*>', SLOController, 'redirect')
             ], middlewares = [
                 InitializeMiddleware,
                 SessionMiddleware
