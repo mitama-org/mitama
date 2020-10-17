@@ -466,15 +466,20 @@ class AppsController(Controller):
         })
 
 class ACSController(Controller):
+    def _parse_authn_request_response(post):
+        if 'SAMLResponse' not in post:
+            return Response(status = 401)
+        saml_res = self.sp.parse_authn_request_response(post['SAMLResponse'], BINDING_HTTP_POST)
+        return Response.redirect(self.app.convert_url('/'))
+
     def redirect(request):
-        pass
+        query = request.query
+        return self._parse_authn_request_response(query)
 
     def post(request):
         post = request.post()
-        if 'SAMLResponse' not in post:
-            return Response(status = 401)
-        saml_res = self.sp.parse_authn_request_response(post['SAMLResponse']), BINDING_HTTP_POST
-        
+        return self._parse_authn_request_response(post)
+
 class SLOController(Controller):
     def redirect(request):
         pass
