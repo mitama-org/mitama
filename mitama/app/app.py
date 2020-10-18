@@ -25,6 +25,8 @@ class App:
         self.screen_name = kwargs['name']
         self.path = kwargs['path']
         self.package = kwargs['package']
+        self.host = kwargs['host']
+        self.config = kwargs['config']
         self.project_dir = Path(kwargs['project_dir']) if 'project_dir' in kwargs else None
         self.project_root_dir = Path(kwargs['project_root_dir']) if 'project_dir' in kwargs else None
         self.install_dir = Path(kwargs['install_dir']) if 'project_dir' in kwargs else Path(os.path.dirname(__file__)) / '../http/'
@@ -53,9 +55,8 @@ class App:
             return self.error(request, 404)
     def set_middleware(self, middlewares):
         self.app.middlewares.extend(middlewares)
-    def convert_fullurl(self, req, url):
-        scheme = req.scheme
-        hostname = req.host
+    def convert_fullurl(self, url):
+        hostname = self.host
         path = self.path
         if path[0] != '/':
             path = '/' + path
@@ -63,7 +64,7 @@ class App:
             path = path[0:-2]
         if url[0] != '/':
             url = '/' + url
-        return scheme + "://" + hostname + path + url
+        return "//" + hostname + path + url
     def convert_url(self, url):
         path = self.path
         if path[0] != '/':
@@ -140,10 +141,10 @@ def _session_middleware():
     return SessionMiddleware
 
 class _MainApp(App):
-    def __init__(self, app_registry):
+    def __init__(self, app_registry, host):
         self.app_registry = app_registry
         self._router = None
-        super().__init__(name='_mitama', path='/', package = '_mitama')
+        super().__init__(name='_mitama', path='/', package = '_mitama', config={}, host=host)
     @property
     def router(self):
         if self._router == None or self.app_registry.changed:

@@ -2,12 +2,11 @@ from mitama.app import Controller, AppRegistry
 from mitama.http import Response
 from mitama.nodes import User, Group
 from mitama.auth import password_hash, password_auth, get_jwt, AuthorizationError
+from mitama.conf import get_from_project_dir
 from mitama.noimage import load_noimage_group, load_noimage_user
 import json
 import traceback
-import saml2
-from saml2 import BINDING_HTTP_POST
-from saml2.client import Saml2Client
+from saml2 import BINDING_HTTP_REDIRECT, BINDING_HTTP_POST
 from uuid import uuid4
 from .model import Invite, CreateUserPermission, UpdateUserPermission, DeleteUserPermission, CreateGroupPermission, UpdateGroupPermission, DeleteGroupPermission, Admin
 
@@ -465,9 +464,6 @@ class AppsController(Controller):
         return Response.render(template, {
             "apps": apps,
         })
-
-CNFBASE = 'sp_conf'
-SP = Saml2Client(config_file = CNFBASE)
 
 class ACSController(Controller):
     def __init__(self, app):

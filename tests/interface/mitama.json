@@ -1,6 +1,16 @@
 {
+    "host":"localhost:8080",
     "apps": {
-        "mitama.portal": {"path": "/"},
+        "mitama.portal": {
+            "path": "/",
+            "saml": {
+                "key": "pki/server.key",
+                "cert": "pki/server.crt",
+                "metadata": {
+                    "local": "idp.xml"
+                }
+            }
+        },
         "mitama.skeleton": {"path": "/welcome"},
         "icon_mod": {"path": "/icon"}
     }

@@ -69,6 +69,8 @@ class AppRegistry(_Singleton):
             builder.set_project_root_dir(config._project_dir)
             builder.set_path(_app['path'])
             builder.set_name(app_name)
+            builder.set_host(config.host)
+            builder.set_config(_app)
             app = builder.build()
             self[_app['path']] = app
     def router(self):

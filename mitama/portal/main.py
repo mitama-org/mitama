@@ -6,8 +6,23 @@ from mitama.app import App as BaseApp, Router, static_files
 from mitama.app.method import *
 from mitama.app.middlewares import SessionMiddleware
 from .model import UpdateUserPermission, CreateUserPermission, DeleteUserPermission, CreateGroupPermission, UpdateGroupPermission, DeleteGroupPermission, Admin
+import saml2
+from saml2 import BINDING_HTTP_REDIRECT, BINDING_HTTP_POST
+from saml2.entity_category.edugain import COC
+from saml2.client import Saml2Client
+from saml2.saml import NAME_FORMAT_URI
 
 import urllib
+
+try:
+    from saml2.sigver import get_xmlsec_binary
+except ImportError:
+    get_xmlsec_binary = None
+
+if get_xmlsec_binary:
+    xmlsec_path = get_xmlsec_binary(["/opt/local/bin","/usr/local/bin"])
+else:
+    xmlsec_path = '/usr/local/bin/xmlsec1'
 
 with open(Path(os.path.dirname(__file__)) / 'static/icon.png', 'rb') as f:
     icon = f.read()
@@ -16,6 +31,38 @@ class App(BaseApp):
     name = "Mitama Portal"
     description = "Mitamaのアプリポータルです。他のアプリを確認できる他、配信の設定やグループの編集、ユーザーの招待ができます。"
     icon = icon
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        SAML_CNF = saml2.config.config_factory('sp', {
+            "entityid": "https:"+self.convert_fullurl("/sp.xml"),
+            "entity_category": [COC],
+            "description": "Example SP",
+            "service": {
+                "sp": {
+                    "want_response_signed": False,
+                    "authn_requests_signed": True,
+                    "logout_requests_signed": True,
+                    "endpoints": {
+                        "assertion_consumer_service": [
+                            (str(self.convert_url("/acs/post")), BINDING_HTTP_POST)
+                        ],
+                        "single_logout_service": [
+                            (str(self.convert_url("/slo/redirect")), BINDING_HTTP_REDIRECT),
+                            (str(self.convert_url("/slo/post")), BINDING_HTTP_POST)
+                        ]
+                    }
+                }
+            },
+            "key_file": str(self.project_dir / self.config["saml"]["key"]),
+            "cert_file": str(self.project_dir / self.config["saml"]["cert"]),
+            "xmlsec_binary": xmlsec_path,
+            "metadata": {
+                "local": [str(self.project_dir / self.config["saml"]["metadata"]["local"])]
+            },
+            "name_form": NAME_FORMAT_URI
+        })
+        SP = Saml2Client(config = SAML_CNF)
+
     @property
     def view(self):
         view = super().view

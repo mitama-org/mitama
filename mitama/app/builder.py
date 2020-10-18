@@ -22,6 +22,10 @@ class Builder(object):
         self.data['project_dir'] = path
     def set_project_root_dir(self, path):
         self.data['project_root_dir'] = path
+    def set_config(self, config):
+        self.data['config'] = config
+    def set_host(self, host):
+        self.data['host'] = host
     def build(self):
         install_dir = os.path.dirname(inspect.getfile(self.__class__))
         self.data['install_dir'] = install_dir

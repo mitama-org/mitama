@@ -23,5 +23,5 @@ class Command:
             config.ssl = False
         app_registry = AppRegistry()
         app_registry.load_config()
-        app = _MainApp(app_registry)
+        app = _MainApp(app_registry, config.host)
         run_app(app, port)
