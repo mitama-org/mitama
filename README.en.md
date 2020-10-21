@@ -46,7 +46,7 @@ $ mitama run
 
 By default, the HTTP server is started on port 8080. Go to http://localhost:8080 and check.
 
-## setup
+## Setup
 Open mitama.json in your project.
 
 ```json
