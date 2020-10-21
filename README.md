@@ -9,6 +9,8 @@
   <img src='https://img.shields.io/github/stars/mitama-org/mitama.svg'>
 </p>
 
+[ [English](README.en.md) | [日本語](README.md) ]
+
 ## Mitamaとは
 
 Mitamaは悩めるシステム管理者のための<ruby>幸魂<rp>(</rp><rt>webアプリケーションフレームワーク</rt><rp>)</rp>です

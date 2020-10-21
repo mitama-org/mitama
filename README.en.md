@@ -9,6 +9,9 @@
   <img src='https://img.shields.io/github/stars/mitama-org/mitama.svg'>
 </p>
 
+[ [English](README.en.md) | [日本語](README.md) ]
+
+
 ## About Mitama
 
 A time of relief comes to system managers who are consumed by hard work.
