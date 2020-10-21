@@ -27,7 +27,7 @@ class Relation(db.Model):
 class Node(object):
     _icon = Column(LargeBinary)
     _name = Column('name', String(255))
-    _screen_name = Column('screen_name', String(255), unique = True)
+    _screen_name = Column('screen_name', String(255))
     _name_proxy = list()
     _screen_name_proxy = list()
     _icon_proxy = list()
@@ -146,7 +146,6 @@ class Group(Node, db.Model):
     :param icon: アイコン
     '''
     __tablename__ = 'mitama_group'
-    children = relationship('Node', backref = 'children')
     def load_noimage():
         return load_noimage_group()
     @classmethod
