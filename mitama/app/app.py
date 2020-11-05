@@ -107,7 +107,7 @@ class App:
         if result == False:
             return False
         else:
-            request, handle, method = self.router.match(request)
+            request, handle, method = result
             def _handle(request):
                 request.app = self
                 return handle(request)

@@ -140,7 +140,7 @@ class Request():
         if content_type.startswith('multipart/form-data') or content_type.startswith('application/x-www-form-urlencoded'):
             parsed_body = _RequestPayload.parse_body(self._rfile, content_type, length)
         elif content_type == 'application/json':
-            payload = self._rfile.read()
+            payload = self._rfile.read(length)
             parsed_body = json.loads(payload)
         else:
             parsed_body = None
