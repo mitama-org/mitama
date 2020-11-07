@@ -73,6 +73,13 @@ class Node(object):
         else:
             raise Exception('')
         return node
+    '''
+    def __eq__(self, op):
+        try:
+            return self._id == op._id
+        except:
+            return False
+    '''
     def icon_to_dataurl(self):
         f = magic.Magic(mime = True, uncompress = True)
         mime = f.from_buffer(self.icon)

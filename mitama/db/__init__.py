@@ -11,7 +11,7 @@ from sqlalchemy.ext.declarative.api import DeclarativeMeta
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm.exc import UnmappedClassError
 from sqlalchemy.sql import func
-from sqlalchemy import orm
+from sqlalchemy import orm, or_, and_, desc, asc
 from .model import Model
 from .driver.sqlite3 import get_engine, get_app_engine
 from mitama._extra import _Singleton
