@@ -26,7 +26,10 @@ def password_auth(screen_name, password):
     :param password: パスワード
     :return: Userインスタンス
     '''
-    user = User.retrieve(screen_name = screen_name)
+    try:
+        user = User.retrieve(screen_name = screen_name)
+    except:
+        raise AuthorizationError("user not found")
     password = base64.b64encode(
         hashlib.sha256(
             password.encode() * 10

@@ -129,7 +129,7 @@ class User(Node, db.Model):
     '''
     __tablename__ = 'mitama_user'
     password = Column(String(255))
-    def load_noimage():
+    def load_noimage(self):
         return load_noimage_user()
     def delete(self):
         '''ユーザーを削除します'''
@@ -153,7 +153,7 @@ class Group(Node, db.Model):
     :param icon: アイコン
     '''
     __tablename__ = 'mitama_group'
-    def load_noimage():
+    def load_noimage(self):
         return load_noimage_group()
     @classmethod
     def tree(cls):
