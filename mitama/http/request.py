@@ -144,21 +144,29 @@ class Request():
         if hasattr(self, '_cookies'):
             return self._cookies
         else:
-            C = http.cookies.BaseCookie()
-            C.load(self._headers.get('HTTP_COOKIE', ''))
+            cookie_header = self._headers.get('HTTP_COOKIE', '')
+            C = http.cookies.SimpleCookie(cookie_header)
             self._cookies = _Cookies(C)
             return self._cookies
     def post(self):
-        content_type = self._headers.get('Content-Type', '')
-        length = int(self._headers.get('Content-Length', 0))
-        if content_type.startswith('multipart/form-data') or content_type.startswith('application/x-www-form-urlencoded'):
-            parsed_body = _RequestPayload.parse_body(self._rfile, content_type, length)
-        elif content_type == 'application/json':
-            payload = self._rfile.read(length)
-            parsed_body = json.loads(payload)
+        if hasattr(self, '_post'):
+            return self._post
         else:
-            parsed_body = {}
-        return parsed_body
+            content_type = self._headers.get('CONTENT_TYPE', '')
+            length = self._headers.get('CONTENT_LENGTH', 0)
+            if length == '' or length is None:
+                length = 0
+            else:
+                length = int(length)
+            if content_type.startswith('multipart/form-data') or content_type.startswith('application/x-www-form-urlencoded'):
+                parsed_body = _RequestPayload.parse_body(self._rfile, content_type, length)
+            elif content_type == 'application/json':
+                payload = self._rfile.read(length)
+                parsed_body = json.loads(payload)
+            else:
+                parsed_body = {}
+            self._post = parsed_body if parsed_body is not None else {}
+            return self._post
     def session(self):
         '''セッション情報を取得します
 
