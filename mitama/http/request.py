@@ -96,6 +96,22 @@ class Request():
         del self._data[key]
     def get(self, key):
         return self._data[key] if key in self._data else None
+    @classmethod
+    def from_wsgi_env(cls, env):
+        method = env.get('REQUEST_METHOD')
+        path = env.get('PATH_INFO')
+        version = env.get('SERVER_PROTOCOL')
+        ssl = env.get('wsgi.url_scheme', 'http') == 'https',
+        rfile = env.get('wsgi.input')
+        headers = env
+        return Request(
+            method,
+            path,
+            version,
+            headers,
+            ssl,
+            rfile
+        )
     @property
     def scheme(self):
         return 'https' if self._secure else 'http'
@@ -129,9 +145,7 @@ class Request():
             return self._cookies
         else:
             C = http.cookies.BaseCookie()
-            cookie_headers = self._headers.get_all('cookie', [])
-            cookie_str = '; '.join(cookie_headers)
-            C.load(cookie_str)
+            C.load(self._headers.get('HTTP_COOKIE', ''))
             self._cookies = _Cookies(C)
             return self._cookies
     def post(self):
@@ -143,7 +157,7 @@ class Request():
             payload = self._rfile.read(length)
             parsed_body = json.loads(payload)
         else:
-            parsed_body = None
+            parsed_body = {}
         return parsed_body
     def session(self):
         '''セッション情報を取得します

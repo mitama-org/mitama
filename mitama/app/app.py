@@ -42,6 +42,11 @@ class App:
             hook_registry.add_delete_user_hook(self.delete_user)
         if hasattr(self, 'delete_group'):
             hook_registry.add_delete_group_hook(self.delete_group)
+    def wsgi(self, env, start_response):
+        request = Request.from_wsgi_env(env)
+        response = self(request)
+        body = response.start_wsgi(request, start_response)
+        return body
     def __call__(self, request):
         if not isinstance(request, Request):
             request = Request.from_request(request)

@@ -41,8 +41,30 @@ class Response(ResponseBase):
             if content_type is not None:
                 if charset is not None:
                     content_type += '; charset='+charset
+            else:
+                content_type = 'text/html'
         self.content_type = content_type
         self.body = body
+    @staticmethod
+    def _tob(body):
+        for c in body:
+            yield c
+    def start_wsgi(self, request, start_response):
+        headers = list()
+        for kv in self.headers.items():
+            print(kv)
+            headers.append(kv)
+        cookies = self._cookies.output(attrs=[], header='')
+        if len(cookies) > 0:
+            headers.extend([('Set-Cookie', cookie) for cookie in cookies.strip('\r\n')])
+        headers.append(('Content-Type', self.content_type))
+        start_response(('%s %s' % (self._status, self._reason)), headers)
+        if callable(self.body):
+            return [self.body(request)]
+        elif self.body is not None:
+            return [self.body]
+        else:
+            return []
     def start(self, request, stream):
         stream.write(('%s %s %s\r\n' % (self._version, self._status, self._reason)).encode())
         for k,v in self.headers.items():

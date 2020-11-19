@@ -14,7 +14,7 @@ class SessionController(Controller):
         if request.method == 'POST':
             try:
                 post = request.post()
-                result = password_auth(post['screen_name'], post['password'])
+                result = password_auth(post.get('screen_name'), post.get('password'))
                 sess = request.session()
                 sess['jwt_token'] = get_jwt(result)
                 redirect_to = request.query.get('redirect_to', '/')
