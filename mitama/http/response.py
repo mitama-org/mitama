@@ -41,8 +41,26 @@ class Response(ResponseBase):
             if content_type is not None:
                 if charset is not None:
                     content_type += '; charset='+charset
+            else:
+                content_type = 'text/html'
         self.content_type = content_type
         self.body = body
+    def start_wsgi(self, request, start_response):
+        headers = list()
+        for kv in self.headers.items():
+            print(kv)
+            headers.append(kv)
+        cookies = self._cookies.output(attrs=[], header='')
+        if len(cookies) > 0:
+            headers.extend([('Set-Cookie', cookie) for cookie in cookies.split('\r\n')])
+        headers.append(('Content-Type', self.content_type))
+        start_response(('%s %s' % (self._status, self._reason)), headers)
+        if callable(self.body):
+            return [self.body(request)]
+        elif self.body is not None:
+            return [self.body]
+        else:
+            return []
     def start(self, request, stream):
         stream.write(('%s %s %s\r\n' % (self._version, self._status, self._reason)).encode())
         for k,v in self.headers.items():
@@ -93,6 +111,20 @@ class StreamResponse(ResponseBase):
             self.body = body
         else:
             self.body = list()
+    def start_wsgi(self, request, start_response):
+        headers = list()
+        for kv in self.headers.items():
+            headers.append(kv)
+        cookies = self._cookies.output(attrs=[], header='')
+        if len(cookies) > 0:
+            headers.extend([('Set-Cookie', cookie) for cookie in cookies.strip('\r\n')])
+        headers.append(('Content-Type', self.content_type))
+        start_response(('%s %s' % (self._status, self._reason)), headers)
+        for chunk in self.body:
+            if callable(chunk):
+                yield chunk(request)
+            elif chunk is not None:
+                yield chunk
     def start(self, request, stream):
         stream.write(('%s %s %s\r\n' % (self._version, self._status, self._reason)).encode())
         for k,v in self.headers.items():

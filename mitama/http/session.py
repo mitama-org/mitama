@@ -106,6 +106,7 @@ class EncryptedCookieStorage():
         return data
     def load_session(self, request):
         cookie = self.load_cookie(request)
+        print('Cookie', cookie)
         if cookie is None:
             return Session(None, data = None, new = True, max_age = self.max_age)
         else:

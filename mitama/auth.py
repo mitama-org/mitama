@@ -28,6 +28,8 @@ def password_auth(screen_name, password):
     '''
     try:
         user = User.retrieve(screen_name = screen_name)
+        if user is None:
+            raise AuthorizationError("user not found")
     except:
         raise AuthorizationError("user not found")
     password = base64.b64encode(

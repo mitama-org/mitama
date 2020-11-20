@@ -20,5 +20,5 @@ class Command:
             )
         current_dir = Path(os.getcwd())
         project_dir = current_dir / project_name
-        src = Path(os.path.dirname(__file__)) / '../skeleton'
+        src = Path(os.path.dirname(__file__)) / '../skeleton/app_templates'
         shutil.copytree(src, project_dir, symlinks=False)
