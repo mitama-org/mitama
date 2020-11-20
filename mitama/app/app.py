@@ -6,8 +6,8 @@ import magic
 import os
 from base64 import b64encode
 from mitama.noimage import load_noimage_app
-from mitama.hook import HookRegistry
-from mitama.http import Request, Response
+from .hook import HookRegistry
+from .http import Request, Response
 
 def dataurl(blob):
     f = magic.Magic(mime = True, uncompress = True)

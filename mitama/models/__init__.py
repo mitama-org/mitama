@@ -10,15 +10,23 @@ Todo:
 '''
 
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.schema import UniqueConstraint 
 from mitama.db import _CoreDatabase, func, orm
 from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
-from mitama.hook import HookRegistry
+from mitama.app.hook import HookRegistry
 from mitama.noimage import load_noimage_user, load_noimage_group
 import magic
-from base64 import b64encode
+import bcrypt
+import jwt
+import random
+import secrets
+import hashlib
+import base64
 
 db = _CoreDatabase()
 hook_registry = HookRegistry()
+
+secret = secrets.token_hex(32)
 
 class Relation(db.Model):
     parent = Column(Group)
@@ -83,7 +91,7 @@ class Node(object):
     def icon_to_dataurl(self):
         f = magic.Magic(mime = True, uncompress = True)
         mime = f.from_buffer(self.icon)
-        return 'data:'+mime+';base64,'+b64encode(self.icon).decode()
+        return 'data:'+mime+';base64,'+base64.b64encode(self.icon).decode()
     def parents(self):
         rels = Relation.query.filter(Relation.child == self).all()
         parent = list()
@@ -143,6 +151,70 @@ class User(Node, db.Model):
         '''ユーザーを作成します'''
         super().create()
         hook_registry.create_user(self)
+    @classmethod
+    def password_auth(cls,screen_name, password):
+        '''ログイン名とパスワードで認証します
+
+        :param screen_name: ログイン名
+        :param password: パスワード
+        :return: Userインスタンス
+        '''
+        try:
+            user = cls.retrieve(screen_name = screen_name)
+            if user is None:
+                raise AuthorizationError("user not found")
+        except:
+            raise AuthorizationError("user not found")
+        password = base64.b64encode(
+            hashlib.sha256(
+                password.encode() * 10
+            ).digest()
+        )
+        if bcrypt.checkpw(password, user.password):
+            return user
+        else:
+            raise AuthorizationError('Wrong password')
+    @staticmethod
+    def password_hash(password):
+        '''パスワードをハッシュ化します
+
+        :param password: パスワードのプレーンテキスト
+        :return: パスワードハッシュ
+        '''
+        salt = bcrypt.gensalt()
+        password = base64.b64encode(
+            hashlib.sha256(
+                password.encode() * 10
+            ).digest()
+        )
+        return bcrypt.hashpw(password, salt)
+    def get_jwt(self):
+        nonce = ''.join([str(random.randint(0,9)) for i in range(16)])
+        result = jwt.encode(
+            {
+                'id': self._id,
+                'nonce': nonce
+            },
+            secret,
+            algorithm='HS256'
+        )
+        return result.decode()
+    @classmethod
+    def check_jwt(cls, token):
+        '''JWTからUserインスタンスを取得します
+
+        :param token: JWT
+        :return: Userインスタンス
+        '''
+        try:
+            result = jwt.decode(
+                token,
+                secret,
+                algorithm='HS256'
+            )
+        except jwt.exceptions.InvalidTokenError as err:
+            raise AuthorizationError('Invalid token.')
+        return cls.retrieve(result['id'])
 
 class Group(Node, db.Model):
     '''グループのモデルクラスです
@@ -227,6 +299,124 @@ class Group(Node, db.Model):
         super().create()
         hook_registry.create_group(self)
 
+class PermissionMixin(object):
+    '''パーミッションのモデルの実装を支援します
 
+    ホワイトリスト方式の許可システムを実装する上で役に立つ機能をまとめたクラスです。
+    このクラスとBaseDatabase.Modelを継承したクラスを定義するとパーミッションシステムを実現できます。
+
+    .. code-block:: python
+
+        class SomePermission(PermissionMixin, db.Model):
+            pass
+
+    継承先のクラスで :samp:`target` プロパティを定義した場合、特定のものに対してのみ許可する仕様にすることができます。
+
+    .. code-block:: python
+
+        class SomePermission(PermissionMixin, db.Model):
+            target = Column(User)
+
+    targetがUser、またはGroupの場合、targetUpPropagate、 targetDownPropagateを指定すれば、targetに対しても伝播をチェックすることができます。
+
+    :param _id: 固有のID
+    :param node: 許可するUser、またはGroupのインスタンス
+    :param targetUpPropagate: targetがUser、またはGroupの場合の上向き伝播
+    :param targetDownPropagate: targetがUser、またはGroupの場合の下向き伝播
+    :param upPropagate: 許可対象のUser、またはGroupの場合の上向き伝播
+    :param downPropagate: 許可対象のUser、またはGroupの場合の下向き伝播
+    '''
+    @declared_attr
+    def __tablename__(cls):
+        return '__'+cls.__name__.lower()+'_permission'
+    @declared_attr
+    def __table_args__(cls):
+        if hasattr(cls, 'target'):
+            unique = UniqueConstraint('node', 'target', name='unique')
+        else:
+            unique = UniqueConstraint('node', name='unique')
+        return (unique, )
+    node = Column(Node)
+    targetUpPropagate = False
+    targetDownPropagate = False
+    upPropagate = False
+    downPropagate = False
+    @classmethod
+    def accept(cls, node, target = None):
+        '''UserまたはGroupに許可します
+
+        :param node: UserまたはGroupのインスタンス
+        :param target: 許可対象
+        '''
+        perm = cls()
+        perm.node = node
+        if hasattr(cls, 'target') and target != None:
+            perm.target = target
+        perm.create()
+    @classmethod
+    def forbit(cls, node, target = None):
+        '''UserまたはGroupの許可を取りやめます
+
+        :param node: UserまたはGroupのインスタンス
+        :param target: 許可対象
+        '''
+        if hasattr(cls, 'target'):
+            perm = cls.query.filter(cls.node == node).filter(cls.target == target).first()
+        else:
+            perm = cls.query.filter(cls.node == node).first()
+        if perm!=None:
+            perm.delete()
+    @classmethod
+    def is_accepted(cls, node, target = None):
+        '''UserまたはGroupが許可されているか確認します
+
+        :param node: UserまたはGroupのインスタンス
+        :param target: 許可対象
+        '''
+        perms = cls.query.filter(cls.node == node).all()
+        for perm in perms:
+            if perm.is_target(target) or perm.is_target(None):
+                return True
+        if node.__class__.__name__ == 'User':
+            parents = node.parents()
+            for group in parents:
+                if cls.is_accepted(group, target):
+                    return True
+        for node_ in cls.query.all():
+            if node_.node == None:
+                continue
+            if node_.upPropagate and not isinstance(node_.node, User) and node_.node.is_ancestor(node) and node_.is_target(target):
+                return True
+            if node_.downPropagate and not isinstance(node_.node, User) and node_.node.is_descendant(node) and node_.is_target(target):
+                return True
+        return False
+    def is_target(self, target = None):
+        if not hasattr(self, 'target'):
+            return True
+        if self.target == None:
+            return True
+        if self.target == target:
+            return True
+        if isinstance(target, User) or isinstance(target, Group):
+            if self.targetUpPropagate:
+                return self.target.is_ancestor(target)
+            elif self.targetDownPropagate:
+                return self.target.is_descendant(target)
+            else:
+                return self.target == target
+        elif self.target == target:
+            return True
+        return False
+    @classmethod
+    def is_forbidden(cls, node, target = None):
+        '''UserまたはGroupが許可されていないか確認します
+
+        :param node: UserまたはGroupのインスタンス
+        :param target: 許可対象
+        '''
+        if not hasattr(cls, 'target'):
+            return not cls.is_accepted(node)
+        else:
+            return not cls.is_accepted(node, target)
 
 db.create_all()

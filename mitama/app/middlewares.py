@@ -1,6 +1,6 @@
-from mitama.http import Response
-from mitama.auth import AuthorizationError, check_jwt
-from mitama.app import Middleware
+from .http import Response
+from .auth import AuthorizationError, check_jwt
+from .app import Middleware
 import urllib
 
 class SessionMiddleware(Middleware):

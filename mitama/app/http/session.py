@@ -3,7 +3,6 @@ import json
 import base64
 from cryptography import fernet
 from collections.abc import MutableMapping
-from mitama.http import Response
 
 class Session(MutableMapping):
     def __init__(self, identity, *, data, new, max_age = None):
