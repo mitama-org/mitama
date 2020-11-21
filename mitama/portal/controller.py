@@ -1,7 +1,6 @@
 from mitama.app import Controller, AppRegistry
-from mitama.http import Response
-from mitama.nodes import User, Group
-from mitama.auth import password_hash, password_auth, get_jwt, AuthorizationError
+from mitama.app.http import Response
+from mitama.models import User, Group, AuthorizationError
 from mitama.noimage import load_noimage_group, load_noimage_user
 import json
 import traceback
@@ -14,9 +13,9 @@ class SessionController(Controller):
         if request.method == 'POST':
             try:
                 post = request.post()
-                result = password_auth(post.get('screen_name'), post.get('password'))
+                result = User.password_auth(post.get('screen_name'), post.get('password'))
                 sess = request.session()
-                sess['jwt_token'] = get_jwt(result)
+                sess['jwt_token'] = User.get_jwt(result)
                 redirect_to = request.query.get('redirect_to', '/')
                 return Response.redirect(
                     redirect_to
@@ -50,7 +49,7 @@ class RegisterController(Controller):
             try:
                 data = request.post()
                 user = User()
-                user.password = password_hash(data['password'])
+                user.set_password(data['password'])
                 if invite.editable:
                     user.screen_name = data.get('screen_name', '')
                     user.name = data.get('name', '')
@@ -62,7 +61,7 @@ class RegisterController(Controller):
                 user.create()
                 invite.delete()
                 UpdateUserPermission.accept(user, user)
-                sess["jwt_token"] = get_jwt(user)
+                sess["jwt_token"] = User.get_jwt(user)
                 return Response.redirect(
                     self.app.convert_url('/')
                 )
@@ -91,7 +90,7 @@ class RegisterController(Controller):
                 user = User()
                 user.screen_name = data['screen_name']
                 user.name = data['name']
-                user.password = password_hash(data['password'])
+                user.set_password(data['password'])
                 user.icon = data["icon"].file.read() if 'icon' in data else load_noimage_user()
                 user.create()
                 Admin.accept(user)
@@ -102,7 +101,7 @@ class RegisterController(Controller):
                 UpdateGroupPermission.accept(user)
                 DeleteGroupPermission.accept(user)
                 UpdateUserPermission.accept(user, user)
-                sess["jwt_token"] = get_jwt(user)
+                sess["jwt_token"] = User.get_jwt(user)
                 return Response.redirect(
                     self.app.convert_url("/")
                 )

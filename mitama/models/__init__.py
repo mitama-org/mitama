@@ -9,10 +9,10 @@ Todo:
     * sqlalchemy用にUser型とGroup型を作って、↓のクラスをそのまま使ってDB呼び出しできるようにしたい
 '''
 
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.schema import UniqueConstraint 
 from mitama.db import _CoreDatabase, func, orm
-from mitama.db.types import Column, Integer, String, Node, Group, LargeBinary
+from mitama.db.types import Column, Integer, String, Node as NodeType, Group, LargeBinary
 from mitama.app.hook import HookRegistry
 from mitama.noimage import load_noimage_user, load_noimage_group
 import magic
@@ -28,9 +28,12 @@ hook_registry = HookRegistry()
 
 secret = secrets.token_hex(32)
 
+class AuthorizationError(Exception):
+    pass
+
 class Relation(db.Model):
     parent = Column(Group)
-    child = Column(Node)
+    child = Column(NodeType)
 
 class Node(object):
     _icon = Column(LargeBinary)
@@ -152,7 +155,7 @@ class User(Node, db.Model):
         super().create()
         hook_registry.create_user(self)
     @classmethod
-    def password_auth(cls,screen_name, password):
+    def password_auth(cls, screen_name, password):
         '''ログイン名とパスワードで認証します
 
         :param screen_name: ログイン名
@@ -174,8 +177,7 @@ class User(Node, db.Model):
             return user
         else:
             raise AuthorizationError('Wrong password')
-    @staticmethod
-    def password_hash(password):
+    def set_password(self, password):
         '''パスワードをハッシュ化します
 
         :param password: パスワードのプレーンテキスト
@@ -187,7 +189,7 @@ class User(Node, db.Model):
                 password.encode() * 10
             ).digest()
         )
-        return bcrypt.hashpw(password, salt)
+        self.password = bcrypt.hashpw(password, salt)
     def get_jwt(self):
         nonce = ''.join([str(random.randint(0,9)) for i in range(16)])
         result = jwt.encode(
@@ -336,7 +338,7 @@ class PermissionMixin(object):
         else:
             unique = UniqueConstraint('node', name='unique')
         return (unique, )
-    node = Column(Node)
+    node = Column(NodeType)
     targetUpPropagate = False
     targetDownPropagate = False
     upPropagate = False

@@ -32,7 +32,7 @@ setup(
     },
     entry_points = {
         'console_scripts': [
-            'mitama = mitama.command:exec'
+            'mitama = mitama.commands:exec'
         ]
     }
 )

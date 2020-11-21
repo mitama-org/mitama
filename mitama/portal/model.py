@@ -1,9 +1,8 @@
-from mitama.db.types import *
-from mitama.nodes import User, Group
 from mitama.db import BaseDatabase
+from mitama.db.types import *
+from mitama.models import User, Group, PermissionMixin
 from base64 import b64encode
 import magic
-from mitama.permission import PermissionMixin
 
 class Database(BaseDatabase):
     pass

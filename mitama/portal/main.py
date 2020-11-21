@@ -4,7 +4,7 @@ from .controller import *
 from .middleware import *
 from mitama.app import App as BaseApp, Router, static_files
 from mitama.app.method import *
-from mitama.app.middlewares import SessionMiddleware
+from mitama.utils.middlewares import SessionMiddleware
 from .model import UpdateUserPermission, CreateUserPermission, DeleteUserPermission, CreateGroupPermission, UpdateGroupPermission, DeleteGroupPermission, Admin
 
 import urllib

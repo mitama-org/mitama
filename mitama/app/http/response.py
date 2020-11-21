@@ -48,7 +48,6 @@ class Response(ResponseBase):
     def start_wsgi(self, request, start_response):
         headers = list()
         for kv in self.headers.items():
-            print(kv)
             headers.append(kv)
         cookies = self._cookies.output(attrs=[], header='')
         if len(cookies) > 0:

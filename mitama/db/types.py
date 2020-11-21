@@ -19,7 +19,7 @@ class User(TypeDecorator):
         else:
             return value._id
     def process_result_value(self, value, dialect):
-        from mitama.nodes import User
+        from mitama.models import User
         if value == None:
             return None
         else:
@@ -34,7 +34,7 @@ class Group(TypeDecorator):
         else:
             return value._id
     def process_result_value(self, value, dialect):
-        from mitama.nodes import Group
+        from mitama.models import Group
         if value == None:
             return None
         else:
@@ -52,9 +52,9 @@ class Node(TypeDecorator):
             raise TypeError('Appending object must be Group or User instance')
     def process_result_value(self, value, dialect):
         if value % 2 == 1:
-            from mitama.nodes import User
+            from mitama.models import User
             node = User.retrieve((value + 1) / 2)
         else:
-            from mitama.nodes import Group
+            from mitama.models import Group
             node = Group.retrieve(value / 2)
         return node

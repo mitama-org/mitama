@@ -4,8 +4,8 @@
 ポート番号を引数に取ってHTTPサーバーを起動するコマンド
 実行されてないマイグレーションもこいつが実行する
 '''
-from mitama.http import run_app
-import mitama.nodes
+import mitama.models
+from mitama.app.http import run_app
 from mitama.app import _MainApp, AppRegistry
 from mitama.conf import get_from_project_dir
 

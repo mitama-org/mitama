@@ -1,3 +1,5 @@
+import re
+
 class _Route():
     def __init__(self, methods, path, handler, method_name):
         self.methods = methods

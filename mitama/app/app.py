@@ -27,7 +27,7 @@ class App:
         self.package = kwargs['package']
         self.project_dir = Path(kwargs['project_dir']) if 'project_dir' in kwargs else None
         self.project_root_dir = Path(kwargs['project_root_dir']) if 'project_dir' in kwargs else None
-        self.install_dir = Path(kwargs['install_dir']) if 'project_dir' in kwargs else Path(os.path.dirname(__file__)) / '../http/'
+        self.install_dir = Path(kwargs['install_dir']) if 'project_dir' in kwargs else Path(os.path.dirname(__file__))
         self.router._app = self
         hook_registry = HookRegistry()
         if hasattr(self, 'create_user'):
@@ -119,7 +119,7 @@ class App:
             return request, _handle, method
 
 def _session_middleware():
-    from mitama.http.session import EncryptedCookieStorage
+    from mitama.app.http.session import EncryptedCookieStorage
     from cryptography import fernet
     from mitama.app import Middleware
     import base64
