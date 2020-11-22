@@ -1,6 +1,0 @@
-{
-    "apps": {
-        "mitama.portal": {"path": "/"},
-        "icon_mod": {"path": "/icon"}
-    }
-}
