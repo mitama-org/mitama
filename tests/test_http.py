@@ -15,7 +15,7 @@ class TestHttp(unittest.TestCase):
         self.assertEqual(req.method, environ['REQUEST_METHOD'])
         self.assertEqual(req.raw_path, '/?foo=bar&hoge=piyo')
         self.assertEqual(req.path, '/')
-        self.assertEqual(req.query, 'foo=bar&hoge=piyo')
+        self.assertEqual(req.query, {'foo': ['bar'], 'hoge': ['piyo']})
         self.assertEqual(req.version, environ['SERVER_PROTOCOL'])
         self.assertEqual(req.url, request_uri(environ))
     def test_response(self):
