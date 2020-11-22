@@ -6,7 +6,7 @@ setup(
     name = 'mitama',
     install_requires = ['sqlalchemy', 'bcrypt', 'pyjwt', 'jinja2', 'cryptography', 'python-magic', 'watchdog', 'yarl', 'pysaml2'],
     extra_requires = {
-        'develop': ['pytest']
+        'develop': ['unittest']
     },
     use_scm_version = True,
     setup_requires = [

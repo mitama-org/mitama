@@ -3,6 +3,7 @@ import http
 import http.cookies
 import io
 import json
+import wsgiref.util as wsgiutil
 from urllib.parse import parse_qs
 from yarl import URL
 
@@ -64,29 +65,9 @@ class _RequestPayload():
 
 class Request():
     MessageClass = http.client.HTTPMessage
-    def __init__(self, method, path, version, headers, ssl, rfile):
-        self._method = method
-        self._raw_path = path
-        self._url = URL(path)
-        path = path.split('?')
-        if len(path) == 2:
-            path, query = path
-            self._path = path
-            self._query = dict()
-            query = parse_qs(query)
-            for k, v in query.items():
-                if len(v) == 1:
-                    self._query[k] = v[0]
-                else:
-                    self._query[k] = v
-        else:
-            self._path = path[0]
-            self._query = {}
-        self._version = version
-        self._headers = headers
-        self._secure = ssl
-        self._host = self._headers.get('Host')
-        self._rfile = rfile
+    def __init__(self, environ):
+        self._environ = environ
+        self._rfile = environ['wsgi.input']
         self._data = dict()
     def __setitem__(self, key, value):
         self._data[key] = value
@@ -96,55 +77,39 @@ class Request():
         del self._data[key]
     def get(self, key):
         return self._data[key] if key in self._data else None
-    @classmethod
-    def from_wsgi_env(cls, env):
-        method = env.get('REQUEST_METHOD')
-        path = env.get('PATH_INFO')
-        version = env.get('SERVER_PROTOCOL')
-        ssl = env.get('wsgi.url_scheme', 'http') == 'https',
-        rfile = env.get('wsgi.input')
-        headers = env
-        return Request(
-            method,
-            path,
-            version,
-            headers,
-            ssl,
-            rfile
-        )
     @property
     def scheme(self):
-        return 'https' if self._secure else 'http'
+        return wsgiutil.guess_scheme(self._environ)
     @property
     def host(self):
-        return self._host
+        return self._environ['HTTP_HOST']
     @property
     def method(self):
-        return self._method
+        return self._environ['REQUEST_METHOD']
     @property
     def raw_path(self):
-        return self._raw_path
+        return self.path + ('?'+self.query if 'QUERY_STRING' in self._environ else '')
     @property
     def path(self):
-        return self._path
+        return self._environ.get('PATH_INFO', '/')
     @property
     def query(self):
-        return self._query
+        return self._environ.get('QUERY_STRING', '')
     @property
     def version(self):
-        return self._version
+        return self._environ['SERVER_PROTOCOL']
     @property
     def headers(self):
         return self._headers
     @property
     def url(self):
-        return self._raw_path
+        return wsgiutil.request_uri(self._environ)
     @property
     def cookies(self):
         if hasattr(self, '_cookies'):
             return self._cookies
         else:
-            cookie_header = self._headers.get('HTTP_COOKIE', '')
+            cookie_header = self._environ.get('HTTP_COOKIE', '')
             C = http.cookies.SimpleCookie(cookie_header)
             self._cookies = _Cookies(C)
             return self._cookies
@@ -152,8 +117,8 @@ class Request():
         if hasattr(self, '_post'):
             return self._post
         else:
-            content_type = self._headers.get('CONTENT_TYPE', '')
-            length = self._headers.get('CONTENT_LENGTH', 0)
+            content_type = self._environ.get('CONTENT_TYPE', '')
+            length = self._environ.get('CONTENT_LENGTH', 0)
             if length == '' or length is None:
                 length = 0
             else:

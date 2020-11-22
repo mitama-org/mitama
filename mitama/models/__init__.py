@@ -379,7 +379,7 @@ class PermissionMixin(object):
         for perm in perms:
             if perm.is_target(target) or perm.is_target(None):
                 return True
-        if node.__class__.__name__ == 'User':
+        if isinstance(node, User):
             parents = node.parents()
             for group in parents:
                 if cls.is_accepted(group, target):
@@ -399,15 +399,23 @@ class PermissionMixin(object):
             return True
         if self.target == target:
             return True
-        if isinstance(target, User) or isinstance(target, Group):
-            if self.targetUpPropagate:
-                return self.target.is_ancestor(target)
-            elif self.targetDownPropagate:
-                return self.target.is_descendant(target)
-            else:
-                return self.target == target
-        elif self.target == target:
-            return True
+        if isinstance(self.target, Group):
+            if isinstance(target, User):
+                if self.targetUpPropagate:
+                    return self.target.is_in(target) or self.target.is_ancestor(target)
+                elif self.targetDownPropagate:
+                    return self.target.is_descendant(target)
+                else:
+                    return self.target == target
+            elif isinstance(target, Group):
+                if self.targetUpPropagate:
+                    return self.target.is_ancestor(target)
+                elif self.targetDownPropagate:
+                    return self.target.is_descendant(target)
+                else:
+                    return self.target == target
+            elif self.target == target:
+                return True
         return False
     @classmethod
     def is_forbidden(cls, node, target = None):

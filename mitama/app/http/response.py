@@ -45,7 +45,7 @@ class Response(ResponseBase):
                 content_type = 'text/html'
         self.content_type = content_type
         self.body = body
-    def start_wsgi(self, request, start_response):
+    def start(self, request, start_response):
         headers = list()
         for kv in self.headers.items():
             headers.append(kv)
@@ -60,20 +60,6 @@ class Response(ResponseBase):
             return [self.body]
         else:
             return []
-    def start(self, request, stream):
-        stream.write(('%s %s %s\r\n' % (self._version, self._status, self._reason)).encode())
-        for k,v in self.headers.items():
-            stream.write(('%s: %s\r\n' % (k, v)).encode())
-        cookies = self._cookies.output().encode()
-        if len(cookies) > 0:
-            stream.write(cookies)
-            stream.write(b'\r\n')
-        stream.write(('Content-Type: %s\r\n' % self.content_type).encode())
-        stream.write('\r\n'.encode())
-        if callable(self.body):
-            stream.write(self.body(request))
-        elif self.body is not None:
-            stream.write(self.body)
     @classmethod
     def render(cls, template, values = {}, **kwargs):
         '''HTMLを描画するレスポンスを返却します

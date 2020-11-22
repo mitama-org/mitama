@@ -14,7 +14,7 @@ class Router():
     routesの中にRouterインスタンスを指定することもできます。
     '''
     _app = None
-    def __init__(self, routes = [], middlewares = [], prefix = ''):
+    def __init__(self, routes = [], middlewares = []):
         '''初期化処理
 
         :param routes: Router、またはRouteのリスト

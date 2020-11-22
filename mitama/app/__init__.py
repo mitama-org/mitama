@@ -3,6 +3,7 @@ from .router import Router
 from .builder import Builder
 from .registry import AppRegistry
 from .app import App, _MainApp
+from .hook import HookRegistry
 from .http import Request, Response
 from pathlib import Path
 from mimetypes import add_type, guess_type
