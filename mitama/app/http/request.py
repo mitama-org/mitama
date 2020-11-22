@@ -94,7 +94,7 @@ class Request():
         return self._environ.get('PATH_INFO', '/')
     @property
     def query(self):
-        return self._environ.get('QUERY_STRING', '')
+        return parse_qs(self._environ.get('QUERY_STRING', ''))
     @property
     def version(self):
         return self._environ['SERVER_PROTOCOL']

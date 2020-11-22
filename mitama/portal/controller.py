@@ -16,7 +16,7 @@ class SessionController(Controller):
                 result = User.password_auth(post.get('screen_name'), post.get('password'))
                 sess = request.session()
                 sess['jwt_token'] = User.get_jwt(result)
-                redirect_to = request.query.get('redirect_to', '/')
+                redirect_to = request.query.get('redirect_to', ['/'])[0]
                 return Response.redirect(
                     redirect_to
                 )
