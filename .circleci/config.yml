@@ -9,8 +9,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install Pytest
-          command: pip install pytest
+          name: Install Unittest
+          command: pip install unittest
       - run:
           name: Install Dependencies
           command: pip install --user ./
