@@ -1,5 +1,6 @@
 from http.server import BaseHTTPRequestHandler
 import http.cookies
+import json
 from abc import ABCMeta, abstractmethod
 
 class ResponseBase(metaclass = ABCMeta):
@@ -60,6 +61,11 @@ class Response(ResponseBase):
             return [self.body]
         else:
             return []
+    @classmethod
+    def json(cls, d, **kwargs):
+        if 'content_type' not in kwargs:
+            kwargs['content_type'] = 'application/json'
+        return cls(body = json.dumps(d).encode(), **kwargs)
     @classmethod
     def render(cls, template, values = {}, **kwargs):
         '''HTMLを描画するレスポンスを返却します
