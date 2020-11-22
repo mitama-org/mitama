@@ -13,7 +13,7 @@ jobs:
           command: pip install --user ./
       - run:
           name: Test
-          command: python -m unittest ./tests/*.py
+          command: python -m unittest tests/*.py
 
 workflows:
   main:
