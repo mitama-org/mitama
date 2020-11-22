@@ -4,7 +4,7 @@ import http.cookies
 import io
 import json
 import wsgiref.util as wsgiutil
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlencode
 from yarl import URL
 
 class _Cookies():
@@ -88,7 +88,7 @@ class Request():
         return self._environ['REQUEST_METHOD']
     @property
     def raw_path(self):
-        return self.path + ('?'+self.query if 'QUERY_STRING' in self._environ else '')
+        return self.path + ('?'+'&'.join(['%s=%s' % (kv[0], kv[1][0]) for kv in self.query.items()]) if 'QUERY_STRING' in self._environ else '')
     @property
     def path(self):
         return self._environ.get('PATH_INFO', '/')
