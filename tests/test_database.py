@@ -24,3 +24,9 @@ class TestBaseDatabase(unittest.TestCase):
         id = a._id
         a.update()
         self.assertEqual(ModelA.retrieve(id).name, 'world')
+    def test_to_dict(self):
+        a = ModelA.query.one()
+        self.assertEqual(a.to_dict(), {
+            '_id': a._id,
+            'name': a.name,
+        })

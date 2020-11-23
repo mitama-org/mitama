@@ -44,3 +44,149 @@ def static_files(*paths):
             return Response.render(template, status = 404)
     return StaticFileController
 
+class UserCRUDController(Controller):
+    def create(self, request):
+        post = request.post()
+        try:
+            user = User()
+            user.screen_name = post['screen_name']
+            user.name = post['name']
+            user.set_password(post['password'])
+            user.create()
+            return Response.json(user.to_dict())
+        except KeyError as err:
+            error = err
+            return Response.json({
+                'error': err.__class__.__name__,
+                'message': err.message
+                'args': err.args
+            })
+    def retrieve(self, request):
+        try:
+            id = request.params['id']
+            if isdigit(id):
+                user = User.retrieve(int(id))
+            else:
+                user = User.retrieve(screen_name = id)
+            return Response.json(user.to_dict())
+        except KeyError as err:
+            error = err
+            return Response.json({
+                'error': err.__class__.__name__,
+                'message': err.message
+                'args': err.args
+            })
+    def update(self, request):
+        try:
+            post = request.post()
+            id = request.params['id']
+            if isdigit(id):
+                user = User.retrieve(int(id))
+            else:
+                user = User.retrieve(screen_name = id)
+            if 'screen_name' in post: user.screen_name = post['screen_name']
+            if 'name' in post: user.name = post['name']
+            if 'password' in post: user.set_password(post['password'])
+            user.update()
+            return Response.json(user.to_dict())
+        except KeyError as err:
+            error = err
+            return Response.json({
+                'error': err.__class__.__name__,
+                'message': err.message
+                'args': err.args
+            })
+    def delete(self, request):
+        try:
+            id = request.params['id']
+            if isdigit(id):
+                user = User.retrieve(int(id))
+            else:
+                user = User.retrieve(screen_name = id)
+            user.delete()
+            return Response.json({
+                '_id': user._id
+            })
+        except Exception as err:
+            error = err
+            return Response.json({
+                'error': err.__class__.__name__,
+                'message': err.message
+                'args': err.args
+            })
+    def list(self, request):
+        users = User.list()
+        return Response.json([user.to_dict for user in users])
+
+class GroupCRUDController(Controller):
+    def create(self, request):
+        post = request.post()
+        try:
+            group = Group()
+            group.screen_name = post['screen_name']
+            group.name = post['name']
+            group.create()
+            return Response.json(group.to_dict())
+        except KeyError as err:
+            error = err
+            return Response.json({
+                'error': err.__class__.__name__,
+                'message': err.message
+                'args': err.args
+            })
+    def retrieve(self, request):
+        try:
+            id = request.params['id']
+            if isdigit(id):
+                group = Group.retrieve(int(id))
+            else:
+                group = Group.retrieve(screen_name = id)
+            return Response.json(group.to_dict())
+        except KeyError as err:
+            error = err
+            return Response.json({
+                'error': err.__class__.__name__,
+                'message': err.message
+                'args': err.args
+            })
+    def update(self, request):
+        try:
+            post = request.post()
+            id = request.params['id']
+            if isdigit(id):
+                group = Group.retrieve(int(id))
+            else:
+                group = Group.retrieve(screen_name = id)
+            if 'screen_name' in post: group.screen_name = post['screen_name']
+            if 'name' in post: group.name = post['name']
+            group.update()
+            return Response.json(group.to_dict())
+        except KeyError as err:
+            error = err
+            return Response.json({
+                'error': err.__class__.__name__,
+                'message': err.message
+                'args': err.args
+            })
+    def delete(self, request):
+        try:
+            id = request.params['id']
+            if isdigit(id):
+                group = Group.retrieve(int(id))
+            else:
+                group = Group.retrieve(screen_name = id)
+            group.delete()
+            return Response.json({
+                '_id': group._id
+            })
+        except Exception as err:
+            error = err
+            return Response.json({
+                'error': err.__class__.__name__,
+                'message': err.message
+                'args': err.args
+            })
+    def list(self, request):
+        groups = Group.list()
+        return Response.json([group.to_dict() for group in groups])
+
