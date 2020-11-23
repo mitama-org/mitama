@@ -8,7 +8,7 @@
     * Flaskのsqlalchemy拡張が参考に成る
 '''
 
-from sqlalchemy.orm import class_mapper
+from sqlalchemy.orm import class_mapper, ColumnProperty
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.types import TypeDecorator
 from .types import Column, Integer, String, Node, Group, LargeBinary
@@ -17,6 +17,16 @@ import re
 
 class Model():
     _id = Column(Integer, primary_key = True)
+    @classmethod
+    def attribute_names(cls):
+        return [prop.key for prop in class_mapper(cls).iterate_properties if isinstance(prop, ColumnProperty)]
+    def to_dict(self):
+        attrs = self.attribute_names()
+        d = dict()
+        for k, v in self.__dict__.items():
+            if k in attrs:
+                d[k] = v
+        return d
     @_classproperty
     def type(cls):
         class Type(TypeDecorator):
