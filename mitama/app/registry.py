@@ -1,7 +1,7 @@
 from mitama._extra import _Singleton
-from mitama.app.router import Router
-from mitama.app.method import group
 from mitama.conf import get_from_project_dir
+from .router import Router
+from .method import group
 import sys
 import os
 import importlib

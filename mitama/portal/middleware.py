@@ -1,6 +1,6 @@
-from mitama.http import Response
-from mitama.nodes import User
+from mitama.models import User
 from mitama.app import Middleware
+from mitama.app.http import Response
 
 class InitializeMiddleware(Middleware):
     def process(self, request, handler):

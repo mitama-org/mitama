@@ -9,17 +9,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install Pytest
-          command: pip install pytest
-      - run:
           name: Install Dependencies
           command: pip install --user ./
       - run:
           name: Test
-          command: |
-            for f in ./tests/unit/*; do
-              pytest $f
-            done
+          command: python -m unittest tests/*.py
 
 workflows:
   main:

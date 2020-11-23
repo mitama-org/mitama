@@ -13,7 +13,7 @@ from sqlalchemy.orm.exc import UnmappedClassError
 from sqlalchemy.sql import func
 from sqlalchemy import orm, or_, and_, desc, asc
 from .model import Model
-from .driver.sqlite3 import get_engine, get_app_engine
+from .driver.sqlite3 import get_engine, get_app_engine, get_test_engine
 from mitama._extra import _Singleton
 import inspect
 
@@ -37,6 +37,9 @@ class _Database(_Singleton):
     def __init__(self, model = None, metadata = None, query_class = orm.Query):
         self.Query = query_class
         self.Model = self.make_declarative_base(model, metadata)
+    @classmethod
+    def test(cls):
+        return cls(get_test_engine())
     def set_engine(self, engine):
         self.engine = engine
         self.session = scoped_session(
