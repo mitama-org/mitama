@@ -1,6 +1,7 @@
 import os
 from mitama.app import Controller
 from mitama.app.http import Request, Response
+from mitama.models import User, Group
 from jinja2 import *
 from mimetypes import add_type, guess_type
 from pathlib import Path
@@ -58,7 +59,7 @@ class UserCRUDController(Controller):
             error = err
             return Response.json({
                 'error': err.__class__.__name__,
-                'message': err.message
+                'message': err.message,
                 'args': err.args
             })
     def retrieve(self, request):
@@ -73,7 +74,7 @@ class UserCRUDController(Controller):
             error = err
             return Response.json({
                 'error': err.__class__.__name__,
-                'message': err.message
+                'message': err.message,
                 'args': err.args
             })
     def update(self, request):
@@ -93,7 +94,7 @@ class UserCRUDController(Controller):
             error = err
             return Response.json({
                 'error': err.__class__.__name__,
-                'message': err.message
+                'message': err.message,
                 'args': err.args
             })
     def delete(self, request):
@@ -111,7 +112,7 @@ class UserCRUDController(Controller):
             error = err
             return Response.json({
                 'error': err.__class__.__name__,
-                'message': err.message
+                'message': err.message,
                 'args': err.args
             })
     def list(self, request):
@@ -131,7 +132,7 @@ class GroupCRUDController(Controller):
             error = err
             return Response.json({
                 'error': err.__class__.__name__,
-                'message': err.message
+                'message': err.message,
                 'args': err.args
             })
     def retrieve(self, request):
@@ -146,7 +147,7 @@ class GroupCRUDController(Controller):
             error = err
             return Response.json({
                 'error': err.__class__.__name__,
-                'message': err.message
+                'message': err.message,
                 'args': err.args
             })
     def update(self, request):
@@ -165,7 +166,7 @@ class GroupCRUDController(Controller):
             error = err
             return Response.json({
                 'error': err.__class__.__name__,
-                'message': err.message
+                'message': err.message,
                 'args': err.args
             })
     def delete(self, request):
@@ -183,7 +184,7 @@ class GroupCRUDController(Controller):
             error = err
             return Response.json({
                 'error': err.__class__.__name__,
-                'message': err.message
+                'message': err.message,
                 'args': err.args
             })
     def list(self, request):
