@@ -1,25 +1,26 @@
 #!/usr/bin/python
-'''サーバー起動コマンド
+"""サーバー起動コマンド
 
 ポート番号を引数に取ってHTTPサーバーを起動するコマンド
 実行されてないマイグレーションもこいつが実行する
-'''
+"""
 import mitama.models
+from mitama.app import AppRegistry, _MainApp
 from mitama.app.http import run_app
-from mitama.app import _MainApp, AppRegistry
 from mitama.conf import get_from_project_dir
 
+
 class Command:
-    def handle(self, argv = None):
+    def handle(self, argv=None):
         config = get_from_project_dir()
         try:
             port = argv[0]
         except IndexError:
-            if hasattr(config, 'port'):
+            if hasattr(config, "port"):
                 port = config.port
             else:
-                port = '8080'
-        if not hasattr(config, 'ssl'):
+                port = "8080"
+        if not hasattr(config, "ssl"):
             config.ssl = False
         app_registry = AppRegistry()
         app_registry.load_config()
