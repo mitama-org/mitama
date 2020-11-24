@@ -5,6 +5,7 @@ from mitama.models import User, Group
 from jinja2 import *
 from mimetypes import add_type, guess_type
 from pathlib import Path
+import magic
 
 add_type('application/json', '.map')
 
@@ -65,7 +66,7 @@ class UserCRUDController(Controller):
     def retrieve(self, request):
         try:
             id = request.params['id']
-            if isdigit(id):
+            if id.isdigit():
                 user = User.retrieve(int(id))
             else:
                 user = User.retrieve(screen_name = id)
@@ -77,11 +78,27 @@ class UserCRUDController(Controller):
                 'message': err.message,
                 'args': err.args
             })
+    def icon(self, request):
+        try:
+            id = request.params['id']
+            if id.isdigit():
+                user = User.retrieve(int(id))
+            else:
+                user = User.retrieve(screen_name = id)
+            f = magic.Magic(mime = True, uncompress = True)
+            mime = f.from_buffer(group.icon)
+            return Response(body = user.icon, content_type = mime)
+        except KeyError as err:
+            return Response.error({
+                'error': err.__class__.__name__,
+                'message': err.message,
+                'args': err.args
+            })
     def update(self, request):
         try:
             post = request.post()
             id = request.params['id']
-            if isdigit(id):
+            if id.isdigit():
                 user = User.retrieve(int(id))
             else:
                 user = User.retrieve(screen_name = id)
@@ -100,7 +117,7 @@ class UserCRUDController(Controller):
     def delete(self, request):
         try:
             id = request.params['id']
-            if isdigit(id):
+            if id.isdigit():
                 user = User.retrieve(int(id))
             else:
                 user = User.retrieve(screen_name = id)
@@ -138,7 +155,7 @@ class GroupCRUDController(Controller):
     def retrieve(self, request):
         try:
             id = request.params['id']
-            if isdigit(id):
+            if id.isdigit():
                 group = Group.retrieve(int(id))
             else:
                 group = Group.retrieve(screen_name = id)
@@ -150,11 +167,27 @@ class GroupCRUDController(Controller):
                 'message': err.message,
                 'args': err.args
             })
+    def icon(self, request):
+        try:
+            id = request.params['id']
+            if id.isdigit():
+                group = Group.retrieve(int(id))
+            else:
+                group = Group.retrieve(screen_name = id)
+            f = magic.Magic(mime = True, uncompress = True)
+            mime = f.from_buffer(group.icon)
+            return Response(body = group.icon, content_type = mime)
+        except KeyError as err:
+            return Response.error({
+                'error': err.__class__.__name__,
+                'message': err.message,
+                'args': err.args
+            })
     def update(self, request):
         try:
             post = request.post()
             id = request.params['id']
-            if isdigit(id):
+            if id.isdigit():
                 group = Group.retrieve(int(id))
             else:
                 group = Group.retrieve(screen_name = id)
@@ -172,7 +205,7 @@ class GroupCRUDController(Controller):
     def delete(self, request):
         try:
             id = request.params['id']
-            if isdigit(id):
+            if id.isdigit():
                 group = Group.retrieve(int(id))
             else:
                 group = Group.retrieve(screen_name = id)

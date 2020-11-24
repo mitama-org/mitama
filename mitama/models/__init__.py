@@ -57,6 +57,12 @@ class Node(object):
         for fn in self._screen_name_proxy:
             screen_name = fn(screen_name)
         return screen_name
+    def to_dict(self):
+        return {
+            '_id': self._id,
+            'name': self.name,
+            'screen_name': self.screen_name,
+        }
     @property
     def icon(self):
         if self._icon != None:
@@ -140,6 +146,11 @@ class User(Node, db.Model):
     '''
     __tablename__ = 'mitama_user'
     password = Column(String(255))
+    def to_dict(self, only_profile = False):
+        profile = super().to_dict()
+        if not only_profile:
+            profile['parents'] = [p.to_dict(True) for p in self.parents()]
+        return profile
     def load_noimage(self):
         return load_noimage_user()
     def delete(self):
@@ -227,6 +238,12 @@ class Group(Node, db.Model):
     :param icon: アイコン
     '''
     __tablename__ = 'mitama_group'
+    def to_dict(self, only_profile = False):
+        profile = super().to_dict()
+        if not only_profile:
+            profile['parents'] = [n.to_dict(True) for n in self.parents()]
+            profile['children'] = [n.to_dict(True) for n in self.children()]
+        return profile
     def load_noimage(self):
         return load_noimage_group()
     @classmethod

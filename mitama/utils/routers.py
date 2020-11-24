@@ -13,8 +13,10 @@ def retrieve_api_router(middlewares = []):
     return Router([
         get('/users', UserCRUDController, 'list'),
         get('/users/<id>', UserCRUDController, 'retrieve'),
+        get('/users/<id>/icon', UserCRUDController, 'icon'),
         get('/groups', GroupCRUDController, 'list'),
         get('/groups/<id>', GroupCRUDController, 'retrieve'),
+        get('/groups/<id>/icon', GroupCRUDController, 'icon'),
     ], middlewares)
 
 def update_api_router(middlewares = [SessionMiddleware]):

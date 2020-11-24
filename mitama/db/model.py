@@ -24,7 +24,7 @@ class Model():
         attrs = self.attribute_names()
         d = dict()
         for k, v in self.__dict__.items():
-            if k in attrs:
+            if k in attrs and (k == '_id' or k[0] != '_'):
                 d[k] = v
         return d
     @_classproperty
