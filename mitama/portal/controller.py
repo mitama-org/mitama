@@ -37,14 +37,14 @@ class SessionController(Controller):
     def logout(self, request):
         sess = request.session()
         sess['jwt_token'] = None
-        redirect_to = request.query.get('redirect_to', '/')
+        redirect_to = request.query.get('redirect_to', ['/'])[0]
         return Response.redirect(redirect_to)
 
 class RegisterController(Controller):
     def signup(self, request):
         sess = request.session()
         template = self.view.get_template('signup.html')
-        invite = Invite.query.filter(Invite.token == request.query["token"]).first()
+        invite = Invite.query.filter(Invite.token == request.query["token"][0]).first()
         if request.method == "POST":
             try:
                 data = request.post()
