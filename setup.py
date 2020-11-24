@@ -15,7 +15,7 @@ setup(
         "yarl",
         "pysaml2",
     ],
-    extra_requires={"develop": ["unittest"]},
+    extra_requires={"develop": ["unittest", "flake8", "isort", "black"]},
     use_scm_version=True,
     setup_requires=["setuptools_scm"],
     packages=find_packages(),
