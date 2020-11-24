@@ -1,5 +1,6 @@
-from . import Metadata, urls
 from mitama.app import App
+
+from . import Metadata, urls
 
 meta = Metadata()
 app = App(meta)

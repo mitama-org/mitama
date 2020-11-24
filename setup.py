@@ -1,38 +1,40 @@
 #!/usr/bin/python
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
-    name = 'mitama',
-    install_requires = ['sqlalchemy', 'bcrypt', 'pyjwt', 'jinja2', 'cryptography', 'python-magic', 'watchdog', 'yarl', 'pysaml2'],
-    extra_requires = {
-        'develop': ['unittest']
-    },
-    use_scm_version = True,
-    setup_requires = [
-        'setuptools_scm'
+    name="mitama",
+    install_requires=[
+        "sqlalchemy",
+        "bcrypt",
+        "pyjwt",
+        "jinja2",
+        "cryptography",
+        "python-magic",
+        "watchdog",
+        "yarl",
+        "pysaml2",
     ],
-    packages = find_packages(),
-    package_data = {
-        'mitama.portal': [
-            'templates/*.html',
-            'templates/**/*.html',
-            'static/*',
+    extra_requires={"develop": ["unittest"]},
+    use_scm_version=True,
+    setup_requires=["setuptools_scm"],
+    packages=find_packages(),
+    package_data={
+        "mitama.portal": [
+            "templates/*.html",
+            "templates/**/*.html",
+            "static/*",
         ],
-        'mitama.skeleton': [
-            'templates/*.html',
-            'static/*',
+        "mitama.skeleton": [
+            "templates/*.html",
+            "static/*",
         ],
-        'mitama.http': [
-            'templates/*.html',
+        "mitama.http": [
+            "templates/*.html",
         ],
-        'mitama.app': [
-            'static/*',
-        ]
+        "mitama.app": [
+            "static/*",
+        ],
     },
-    entry_points = {
-        'console_scripts': [
-            'mitama = mitama.commands:exec'
-        ]
-    }
+    entry_points={"console_scripts": ["mitama = mitama.commands:exec"]},
 )
