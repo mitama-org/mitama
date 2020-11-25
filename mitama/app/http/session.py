@@ -106,7 +106,7 @@ class EncryptedCookieStorage:
         self._encoder = encoder
         self._decoder = decoder
         if isinstance(secret_key, str):
-            secret_key = secret_key.encode('utf-8')
+            secret_key = secret_key.encode("utf-8")
         elif isinstance(secret_key, (bytes, bytearray)):
             pass
         self._fernet = fernet.Fernet(secret_key)
