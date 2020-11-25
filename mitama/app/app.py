@@ -154,8 +154,18 @@ def _session_middleware():
     from mitama.app import Middleware
     from mitama.app.http.session import EncryptedCookieStorage
 
-    class SessionMiddleware(Middleware):
+    if "MITAMA_SESSION_KEY" in os.environ:
+        fernet_key = os.environ["MITAMA_SESSION_KEY"]
+    elif os.path.exists(".tmp/MITAMA_SESSION_KEY"):
+        with open(".tmp/MITAMA_SESSION_KEY") as f:
+            fernet_key = f.read()
+    else:
         fernet_key = fernet.Fernet.generate_key()
+        os.mkdir(".tmp")
+        with open(".tmp/MITAMA_SESSION_KEY") as f:
+            f.write(fernet_key)
+    class SessionMiddleware(Middleware):
+        fernet_key = fernet_key
 
         def __init__(self):
             secret_key = base64.urlsafe_b64decode(self.fernet_key)
