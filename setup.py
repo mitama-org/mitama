@@ -14,6 +14,7 @@ setup(
         "watchdog",
         "yarl",
         "pysaml2",
+        "tzlocal",
     ],
     extra_requires={"develop": ["unittest", "flake8", "isort", "black"]},
     use_scm_version=True,
