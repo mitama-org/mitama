@@ -161,9 +161,7 @@ def _session_middleware():
             session_key = f.read()
     else:
         key = fernet.Fernet.generate_key()
-        session_key =  base64.urlsafe_b64encode(
-            key
-        ).decode("utf-8")
+        session_key = base64.urlsafe_b64encode(key).decode("utf-8")
         if not os.path.exists(".tmp"):
             os.mkdir(".tmp")
         with open(".tmp/MITAMA_SESSION_KEY", "w") as f:
@@ -173,7 +171,7 @@ def _session_middleware():
         fernet_key = session_key
 
         def __init__(self):
-            secret_key = base64.urlsafe_b64decode(self.fernet_key.encode('utf-8'))
+            secret_key = base64.urlsafe_b64decode(self.fernet_key.encode("utf-8"))
             cookie_storage = EncryptedCookieStorage(secret_key)
             self.storage = cookie_storage
 
