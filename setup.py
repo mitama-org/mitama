@@ -25,15 +25,16 @@ setup(
             "templates/**/*.html",
             "static/*",
         ],
-        "mitama.skeleton": [
-            "templates/*.html",
-            "static/*",
-        ],
         "mitama.http": [
             "templates/*.html",
         ],
         "mitama.app": [
             "static/*",
+        ],
+        "mitama": [
+            "skeleton/*",
+            "skeleton/**/*",
+            "skeleton/**/**/*",
         ],
     },
     entry_points={"console_scripts": ["mitama = mitama.commands:exec"]},
