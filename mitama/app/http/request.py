@@ -73,7 +73,7 @@ class Request:
     MessageClass = http.client.HTTPMessage
 
     def __init__(self, environ):
-        self._environ = environ
+        self.environ = environ
         self._rfile = environ["wsgi.input"]
         self._data = dict()
 
@@ -91,35 +91,35 @@ class Request:
 
     @property
     def scheme(self):
-        return wsgiutil.guess_scheme(self._environ)
+        return wsgiutil.guess_scheme(self.environ)
 
     @property
     def host(self):
-        return self._environ["HTTP_HOST"]
+        return self.environ["HTTP_HOST"]
 
     @property
     def method(self):
-        return self._environ["REQUEST_METHOD"]
+        return self.environ["REQUEST_METHOD"]
 
     @property
     def raw_path(self):
         return self.path + (
             "?" + "&".join(["%s=%s" % (kv[0], kv[1][0]) for kv in self.query.items()])
-            if "QUERY_STRING" in self._environ
+            if "QUERY_STRING" in self.environ
             else ""
         )
 
     @property
     def path(self):
-        return self._environ.get("PATH_INFO", "/")
+        return self.environ.get("PATH_INFO", "/")
 
     @property
     def query(self):
-        return parse_qs(self._environ.get("QUERY_STRING", ""))
+        return parse_qs(self.environ.get("QUERY_STRING", ""))
 
     @property
     def version(self):
-        return self._environ["SERVER_PROTOCOL"]
+        return self.environ["SERVER_PROTOCOL"]
 
     @property
     def headers(self):
@@ -127,24 +127,32 @@ class Request:
 
     @property
     def url(self):
-        return wsgiutil.request_uri(self._environ)
+        return wsgiutil.request_uri(self.environ)
 
     @property
     def cookies(self):
         if hasattr(self, "_cookies"):
             return self._cookies
         else:
-            cookie_header = self._environ.get("HTTP_COOKIE", "")
+            cookie_header = self.environ.get("HTTP_COOKIE", "")
             C = http.cookies.SimpleCookie(cookie_header)
             self._cookies = _Cookies(C)
             return self._cookies
 
+    @property
+    def body(self):
+        if hasattr(self, "_body"):
+            return self._body
+        else:
+            length = self.environ.get("CONTENT_LENGTH", 0)
+            self._body = self._rfile.read(int(length))
+        return self._body
     def post(self):
         if hasattr(self, "_post"):
             return self._post
         else:
-            content_type = self._environ.get("CONTENT_TYPE", "")
-            length = self._environ.get("CONTENT_LENGTH", 0)
+            content_type = self.environ.get("CONTENT_TYPE", "")
+            length = self.environ.get("CONTENT_LENGTH", 0)
             if length == "" or length is None:
                 length = 0
             else:
@@ -152,11 +160,12 @@ class Request:
             if content_type.startswith(
                 "multipart/form-data"
             ) or content_type.startswith("application/x-www-form-urlencoded"):
+                stream = io.StringIO(self.body)
                 parsed_body = _RequestPayload.parse_body(
-                    self._rfile, content_type, length
+                    stream, content_type, length
                 )
             elif content_type == "application/json":
-                payload = self._rfile.read(length)
+                payload = self.body
                 parsed_body = json.loads(payload)
             else:
                 parsed_body = {}
