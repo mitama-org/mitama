@@ -1,4 +1,5 @@
-from mitama.app import App, Router, static_files
+from mitama.app import App, Router
+from mitama.utils.controllers import static_files
 from mitama.app.method import view
 
 from .controller import WelcomeController

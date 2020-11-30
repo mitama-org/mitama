@@ -1,5 +1,5 @@
 from mitama.app import Controller
-from mitama.http import Response
+from mitama.app.http import Response
 
 
 class WelcomeController(Controller):
