@@ -1,4 +1,3 @@
-import base64
 import json
 import time
 from collections.abc import MutableMapping
@@ -142,7 +141,7 @@ class EncryptedCookieStorage:
                     ).decode("utf-8")
                 )
                 return Session(None, data=data, new=False, max_age=self.max_age)
-            except:
+            except (TypeError, fernet.InvalidToken):
                 return Session(None, data=None, new=True, max_age=self.max_age)
 
     def save_session(self, request, response, session):

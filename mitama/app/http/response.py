@@ -13,7 +13,7 @@ class ResponseBase(metaclass=ABCMeta):
         if reason is None:
             try:
                 self._reason = BaseHTTPRequestHandler.responses[self._status][0]
-            except:
+            except KeyError:
                 self._reason = ""
         else:
             self._reason = reason
@@ -138,12 +138,16 @@ class StreamResponse(ResponseBase):
         if len(cookies) > 0:
             headers.extend([("Set-Cookie", cookie) for cookie in cookies.strip("\r\n")])
         headers.append(("Content-Type", self.content_type))
-        start_response(("%s %s" % (self._status, self._reason)), headers)
-        for chunk in self.body:
-            if callable(chunk):
-                yield chunk(request)
-            elif chunk is not None:
-                yield chunk
+
+        def content():
+            nonlocal self, start_response, request, headers
+            start_response(("%s %s" % (self._status, self._reason)), headers)
+            for chunk in self.body:
+                if callable(chunk):
+                    yield chunk(request)
+                elif chunk is not None:
+                    yield chunk
+        return content()
 
     def start(self, request, stream):
         stream.write(
