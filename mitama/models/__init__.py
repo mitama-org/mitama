@@ -26,6 +26,7 @@ from mitama.db.types import Column, Group, Integer, LargeBinary
 from mitama.db.types import Node as NodeType
 from mitama.db.types import String
 from mitama.noimage import load_noimage_group, load_noimage_user
+from mitama.conf import get_from_project_dir
 
 db = _CoreDatabase()
 hook_registry = HookRegistry()
@@ -214,12 +215,31 @@ class User(Node, db.Model):
         else:
             raise AuthorizationError("Wrong password")
 
+    def valid_password(self, password):
+        """パスワードが安全か検証します
+
+        :param password: パスワードのプレーンテキスト
+        :return: 検証済みパスワード
+        """
+        config = get_from_project_dir()
+        MIN_PASSWORD_LEN = config.password_validation.get('MIN_PASSWORD_LEN', None)
+        COMPLICATED_PASSWORD = config.password_validation.get('COMPLICATED_PASSWORD', False)
+
+        if MIN_PASSWORD_LEN and len(password) < MIN_PASSWORD_LEN:
+            raise ValueError('パスワードは{}文字以上である必要があります'.format(MIN_PASSWORD_LEN))
+
+        if COMPLICATED_PASSWORD and (not any(c.isdigit() for c in password)) or (not any(c.isalpha() for c in password)):
+            raise ValueError('パスワードは数字とアルファベットの両方を含む必要があります')
+
+        return password
+
     def set_password(self, password):
         """パスワードをハッシュ化します
 
         :param password: パスワードのプレーンテキスト
         :return: パスワードハッシュ
         """
+        password = self.valid_password(password)
         salt = bcrypt.gensalt()
         password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
         self.password = bcrypt.hashpw(password, salt)

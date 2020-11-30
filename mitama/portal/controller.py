@@ -71,6 +71,9 @@ class RegisterController(Controller):
                 return Response.redirect(self.app.convert_url("/"))
             except Exception as err:
                 error = str(err)
+                icon = (
+                    data.get("icon").file.read() if "icon" in data else load_noimage_user()
+                )
                 return Response.render(
                     template,
                     {
@@ -78,7 +81,7 @@ class RegisterController(Controller):
                         "name": data.get("name", invite.name),
                         "screen_name": data.get("screen_name", invite.screen_name),
                         "password": data.get("password", ""),
-                        "icon": data.get("icon").file.read(),
+                        "icon": icon,
                         "editable": invite.editable,
                     },
                 )
