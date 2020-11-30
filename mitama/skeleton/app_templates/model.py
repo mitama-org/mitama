@@ -1,5 +1,5 @@
 from mitama.db import BaseDatabase
-from mitama.db.types import *
+# from mitama.db.types import *
 
 
 class Database(BaseDatabase):
