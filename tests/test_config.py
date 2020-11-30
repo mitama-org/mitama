@@ -9,7 +9,7 @@ from mitama.conf import Config, get_from_project_dir
 class TestConfig(unittest.TestCase):
     def test_initialize(self):
         conf = Config(
-            Path(os.path.dirname(__file__)) / "test_apps", {"a": "alice", "b": "bob"}
+            Path(os.path.dirname(__file__)) / "test_apps", {"password_validation": {}, "a": "alice", "b": "bob"}
         )
         self.assertEqual(
             conf._project_dir, Path(os.path.dirname(__file__)) / "test_apps"
@@ -23,9 +23,9 @@ class TestConfig(unittest.TestCase):
 
     def test_to_dict(self):
         conf = Config(
-            Path(os.path.dirname(__file__)) / "test_apps", {"a": "alice", "b": "bob"}
+            Path(os.path.dirname(__file__)) / "test_apps", {"password_validation":{}, "a": "alice", "b": "bob"}
         )
-        self.assertEqual(conf.to_dict(), {"a": "alice", "b": "bob"})
+        self.assertEqual(conf.to_dict(), {"password_validation": {}, "a": "alice", "b": "bob"})
 
     def test_from_project_dir(self):
         p = Path(os.path.dirname(__file__)) / "test_apps"
