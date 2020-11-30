@@ -4,9 +4,7 @@ import http.cookies
 import io
 import json
 import wsgiref.util as wsgiutil
-from urllib.parse import parse_qs, urlencode
-
-from yarl import URL
+from urllib.parse import parse_qs
 
 
 class _Cookies:
@@ -147,9 +145,11 @@ class Request:
             length = self.environ.get("CONTENT_LENGTH", 0)
             self._body = self._rfile.read(int(length))
         return self._body
+
     def post(self):
         if hasattr(self, "_post"):
             return self._post
+
         else:
             content_type = self.environ.get("CONTENT_TYPE", "")
             length = self.environ.get("CONTENT_LENGTH", 0)
@@ -192,13 +192,12 @@ class Request:
             raise Exception("Bad Request")
         command, path = words[:2]
         if len(words) == 2:
-            close_connection = True
             if command != "GET":
                 raise Exception("Bad Request")
         try:
             headers = http.client.parse_headers(rfile, _class=cls.MessageClass)
-        except http.client.LineTooLong as err:
+        except http.client.LineTooLong:
             raise Exception("")
-        except http.client.HTTPException as err:
+        except http.client.HTTPException:
             raise Exception("")
         return cls(command, path, version, headers, ssl, rfile)
