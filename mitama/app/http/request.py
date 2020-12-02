@@ -160,7 +160,7 @@ class Request:
             if content_type.startswith(
                 "multipart/form-data"
             ) or content_type.startswith("application/x-www-form-urlencoded"):
-                stream = io.StringIO(self.body)
+                stream = io.BytesIO(self.body)
                 parsed_body = _RequestPayload.parse_body(
                     stream, content_type, length
                 )
