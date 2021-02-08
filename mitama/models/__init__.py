@@ -247,7 +247,8 @@ class User(Node, db.Model):
     def get_jwt(self):
         nonce = "".join([str(random.randint(0, 9)) for i in range(16)])
         result = jwt.encode({"id": self._id, "nonce": nonce}, secret, algorithm="HS256")
-        return result.decode()
+        #return result.decode()
+        return result
 
     @classmethod
     def check_jwt(cls, token):
@@ -257,7 +258,7 @@ class User(Node, db.Model):
         :return: Userインスタンス
         """
         try:
-            result = jwt.decode(token, secret, algorithm="HS256")
+            result = jwt.decode(token, secret, algorithms="HS256")
         except jwt.exceptions.InvalidTokenError as err:
             raise AuthorizationError("Invalid token.")
         return cls.retrieve(result["id"])
