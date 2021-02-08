@@ -83,9 +83,14 @@ class Model:
             return cls.query.filter().all()
 
     @classmethod
-    def retrieve(cls, id=None):
+    def retrieve(cls, id=None, **kwargs):
         if id != None:
             node = cls.query.filter(cls._id == id).one()
+        elif len(kwargs) > 0:
+            q = cls.query
+            for attr, value in kwargs.items():
+                q = q.filter(getattr(cls, attr) == value)
+            node = q.one()
         else:
-            raise Exception("Id not given")
+            raise Exception("Identity not given")
         return node
