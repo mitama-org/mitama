@@ -17,7 +17,6 @@ class ModelB(db.Model):
 db.create_all()
 
 
-
 class TestBaseDatabase(unittest.TestCase):
     def test_create_db(self):
         self.assertTrue(db.engine.dialect.has_table(db.engine, "model_a"))
@@ -37,12 +36,15 @@ class TestBaseDatabase(unittest.TestCase):
         self.assertEqual(ModelA.retrieve(id).name, "world")
 
     def test_retrieve(self):
-        a_1 = ModelA.retrieve(1)
-        a_2 = ModelA.retrieve(name = "hello")
+        a = ModelA()
+        a.name = "hogehoge"
+        a.create()
+        a_1 = ModelA.retrieve(a._id)
+        a_2 = ModelA.retrieve(name = "hogehoge")
         self.assertEqual(a_1, a_2)
 
     def test_to_dict(self):
-        a = ModelA.query.one()
+        a = ModelA.query.first()
         self.assertEqual(
             a.to_dict(),
             {

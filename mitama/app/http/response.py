@@ -73,7 +73,7 @@ class Response(ResponseBase):
         if callable(self.body):
             return [self.body(request)]
         elif self.body is not None:
-            return [self.body]
+            return [*self.body]
         else:
             return []
 

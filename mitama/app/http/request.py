@@ -121,7 +121,7 @@ class Request:
 
     @property
     def headers(self):
-        return self._headers
+        return self.environ
 
     @property
     def url(self):
