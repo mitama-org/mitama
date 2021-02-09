@@ -9,6 +9,7 @@
 """
 
 import re
+import uuid
 
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import ColumnProperty, class_mapper
@@ -18,9 +19,16 @@ from mitama._extra import _classproperty
 
 from .types import Column, Group, Integer, LargeBinary, Node, String
 
+def UUID(prefix = None):
+    def genUUID():
+        s = str(uuid.uuid4())
+        if prefix is not None:
+            s = prefix + "-" + s
+        return s
+    return genUUID
 
 class Model:
-    _id = Column(Integer, primary_key=True)
+    _id = Column(String, default=UUID(), primary_key=True, nullable=False)
 
     @classmethod
     def attribute_names(cls):
