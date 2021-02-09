@@ -54,20 +54,23 @@ class Node(TypeDecorator):
     impl = Integer
 
     def process_bind_param(self, value, dialect):
-        if value.__class__.__name__ == "Group":
-            return value._id * 2
-        elif value.__class__.__name__ == "User":
-            return value._id * 2 - 1
+        if value.__class__.__name__ == "Group" or value.__class__.__name__ == "User":
+            return value._id
+        elif type(value) == str and value.split("-")[0] in ["user", "group"]:
+            return value
         else:
             raise TypeError("Appending object must be Group or User instance")
 
     def process_result_value(self, value, dialect):
-        if value % 2 == 1:
+        prefix = value.split("-")[0]
+        if prefix == "user":
             from mitama.models import User
 
-            node = User.retrieve((value + 1) / 2)
-        else:
+            node = User.retrieve(value)
+        elif prefix == "group":
             from mitama.models import Group
 
-            node = Group.retrieve(value / 2)
+            node = Group.retrieve(value)
+        else:
+            raise TypeError("Invalid ID format")
         return node

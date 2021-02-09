@@ -25,6 +25,7 @@ from mitama.db import _CoreDatabase, func, orm
 from mitama.db.types import Column, Group, Integer, LargeBinary
 from mitama.db.types import Node as NodeType
 from mitama.db.types import String
+from mitama.db.model import UUID
 from mitama.noimage import load_noimage_group, load_noimage_user
 from mitama.conf import get_from_project_dir
 
@@ -169,6 +170,7 @@ class User(Node, db.Model):
     """
 
     __tablename__ = "mitama_user"
+    _id = Column(String, default=UUID("user"), primary_key = True, nullable=False)
     password = Column(String(255))
 
     def to_dict(self, only_profile=False):
@@ -274,6 +276,7 @@ class Group(Node, db.Model):
     """
 
     __tablename__ = "mitama_group"
+    _id = Column(String, default=UUID("group"), primary_key=True, nullable=False)
 
     def to_dict(self, only_profile=False):
         profile = super().to_dict()
