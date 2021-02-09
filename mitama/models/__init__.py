@@ -197,6 +197,9 @@ class User(Node, db.Model):
         super().create()
         hook_registry.create_user(self)
 
+    def password_check(self, password):
+        password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
+        return bcrypt.checkpw(password, self.password)
     @classmethod
     def password_auth(cls, screen_name, password):
         """ログイン名とパスワードで認証します
@@ -536,6 +539,5 @@ class PermissionMixin(object):
             return not cls.is_accepted(node)
         else:
             return not cls.is_accepted(node, target)
-
 
 db.create_all()
