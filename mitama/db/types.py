@@ -18,8 +18,10 @@ class User(TypeDecorator):
     def process_bind_param(self, value, dialect):
         if value == None:
             return None
-        else:
+        elif value.__class__.__name__ == "User":
             return value._id
+        else:
+            return value
 
     def process_result_value(self, value, dialect):
         from mitama.models import User
@@ -37,8 +39,10 @@ class Group(TypeDecorator):
     def process_bind_param(self, value, dialect):
         if value == None:
             return None
-        else:
+        elif value.__class__.__name__ == "Group":
             return value._id
+        else:
+            return value
 
     def process_result_value(self, value, dialect):
         from mitama.models import Group
