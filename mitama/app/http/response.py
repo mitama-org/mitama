@@ -1,5 +1,6 @@
 import http.cookies
 import json
+import types
 from abc import ABCMeta, abstractmethod
 from http.server import BaseHTTPRequestHandler
 
@@ -72,8 +73,10 @@ class Response(ResponseBase):
         start_response(("%s %s" % (self._status, self._reason)), headers)
         if callable(self.body):
             return [self.body(request)]
-        elif self.body is not None:
+        elif isinstance(self.body, types.GeneratorType):
             return [*self.body]
+        elif self.body is not None:
+            return [self.body]
         else:
             return []
 
