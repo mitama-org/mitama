@@ -7,6 +7,8 @@ from mitama.app.http import Response
 from mitama.models import AuthorizationError, Group, User
 from mitama.noimage import load_noimage_group, load_noimage_user
 
+from .forms import *
+
 from .model import (
     Admin,
     CreateGroupPermission,
