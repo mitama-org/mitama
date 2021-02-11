@@ -10,8 +10,9 @@ class ValidationError(Exception):
     def setTemplate(cls, template = "Something is wrong with {{ label }}"):
         cls.template = Template(template)
 
-    def get_message(self):
-        return self.template[self.error_type].render(
+    @property
+    def message(self):
+        return self.template.render(
             label = self.label,
             data = self.data
         )

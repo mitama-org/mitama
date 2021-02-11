@@ -33,3 +33,38 @@ class TestForm(unittest.TestCase):
                 "email" :"hoge@hoge"
             })
         self.assertEqual(form["email"], "hoge@hoge")
+
+    def test_emtpy_error_msg(self):
+        try:
+            form = AForm({
+                "name": "hoge"
+            })
+        except EmptyError as err:
+            self.assertEqual(err.message, "ログイン名 is required, but it is emtpy.")
+
+        EmptyError.setTemplate("{{ label }}がからです")
+        try:
+            form = AForm({
+                "name": "hoge"
+            })
+        except EmptyError as err:
+            self.assertEqual(err.message, "ログイン名がからです")
+
+    def test_format_error_msg(self):
+        try:
+            form = AForm({
+                "screen_name": "hoge",
+                "email": "hoge"
+            })
+        except FormatError as err:
+            self.assertEqual(err.message, "Invalid format for メールアドレス.")
+
+        FormatError.setTemplate("{{ label }}がへんです")
+        try:
+            form = AForm({
+                "screen_name": "hoge",
+                "email": "hoge"
+            })
+        except FormatError as err:
+            self.assertEqual(err.message, "メールアドレスがへんです")
+
