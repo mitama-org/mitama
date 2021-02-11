@@ -6,8 +6,17 @@ from mitama.app import AppRegistry, Controller
 from mitama.app.http import Response
 from mitama.models import AuthorizationError, Group, User
 from mitama.app.forms import ValidationError
+from mitama.noimage import load_noimage_group, load_noimage_user
 
-from .forms import *
+from .forms import (
+    LoginForm,
+    RegisterForm,
+    InviteForm,
+    UserUpdateForm,
+    GroupCreateForm,
+    GroupUpdateForm,
+    AppUpdateForm,
+)
 
 from .model import (
     Admin,
@@ -36,7 +45,7 @@ class SessionController(Controller):
                 redirect_to = request.query.get("redirect_to", ["/"])[0]
                 return Response.redirect(redirect_to)
             except ValidationError as err:
-                return Response.render(template, {"error": error.message}, status=401)
+                return Response.render(template, {"error": err.message}, status=401)
         return Response.render(template, status=401)
 
     def logout(self, request):
@@ -106,8 +115,8 @@ class RegisterController(Controller):
                 user.create()
                 UpdateUserPermission.accept(user, user)
                 admin = Group()
-                admin.screen_name='_admin'
-                admin.name='Admin'
+                admin.screen_name = '_admin'
+                admin.name = 'Admin'
                 admin.create()
                 admin.append(user)
                 Admin.accept(admin)
@@ -161,7 +170,7 @@ class UsersController(Controller):
                         "invites": invites,
                         "name": form["name"],
                         "screen_name": form["screen_name"],
-                        "icon": icon,
+                        "icon": form["icon"],
                         "error": error,
                     },
                 )
@@ -218,7 +227,7 @@ class UsersController(Controller):
                         "user": user,
                         "screen_name": form["screen_name"] or user.screen_name,
                         "name": form["name"] or user.name,
-                        "icon": icon,
+                        "icon": form["icon"],
                     },
                 )
         return Response.render(
@@ -252,7 +261,7 @@ class UsersController(Controller):
 class GroupsController(Controller):
     def create(self, req):
         if CreateGroupPermission.is_forbidden(req.user):
-            return self.app.error(request, 403)
+            return self.app.error(req, 403)
         template = self.view.get_template("group/create.html")
         groups = Group.list()
         if req.method == "POST":
@@ -397,7 +406,7 @@ class GroupsController(Controller):
                         print(err)
                         pass
             group.append_all(nodes)
-        except Exception as err:
+        except Exception:
             pass
         finally:
             return Response.redirect(
@@ -413,7 +422,7 @@ class GroupsController(Controller):
             else:
                 child = User.retrieve((cid + 1) / 2)
             group.remove(child)
-        except Exception as err:
+        except Exception:
             pass
         finally:
             return Response.redirect(
@@ -466,7 +475,7 @@ class AppsController(Controller):
         apps = AppRegistry()
         if req.method == "POST":
             apps.reset()
-            form = AppUpdate(req.post())
+            form = AppUpdateForm(req.post())
             try:
                 prefix = form["prefix"]
                 data = dict()
