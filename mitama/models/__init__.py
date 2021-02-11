@@ -445,6 +445,8 @@ class PermissionMixin(object):
         :param node: UserまたはGroupのインスタンス
         :param target: 許可対象
         """
+        if cls.is_accepted(node, target):
+            return
         perm = cls()
         perm.node = node
         if hasattr(cls, "target") and target != None:
@@ -458,6 +460,8 @@ class PermissionMixin(object):
         :param node: UserまたはGroupのインスタンス
         :param target: 許可対象
         """
+        if cls.is_forbidden(node, target):
+            return
         if hasattr(cls, "target"):
             perm = (
                 cls.query.filter(cls.node == node).filter(cls.target == target).first()
