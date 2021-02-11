@@ -1,16 +1,16 @@
 from jinja2 import Template
 
-class ValidationError(Error):
+class ValidationError(Exception):
     template = Template("Something wrong with {{ label }}")
     def __init__(self, label="", data=""):
         self.label = label
         self.data = data
 
     @classmethod
-    def setTemplate(cls, template = "Something is wrong with {{ label }}")
+    def setTemplate(cls, template = "Something is wrong with {{ label }}"):
         cls.template = Template(template)
 
-    def get message(self):
+    def get_message(self):
         return self.template[self.error_type].render(
             label = self.label,
             data = self.data
