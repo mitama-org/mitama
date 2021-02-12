@@ -5,7 +5,18 @@ from uuid import uuid4
 from mitama.app import AppRegistry, Controller
 from mitama.app.http import Response
 from mitama.models import AuthorizationError, Group, User
+from mitama.app.forms import ValidationError
 from mitama.noimage import load_noimage_group, load_noimage_user
+
+from .forms import (
+    LoginForm,
+    RegisterForm,
+    InviteForm,
+    UserUpdateForm,
+    GroupCreateForm,
+    GroupUpdateForm,
+    AppUpdateForm,
+)
 
 from .model import (
     Admin,
@@ -24,17 +35,17 @@ class SessionController(Controller):
         template = self.view.get_template("login.html")
         if request.method == "POST":
             try:
-                post = request.post()
+                form = LoginForm(request.post())
                 result = User.password_auth(
-                    post.get("screen_name"), post.get("password")
+                    form["screen_name"],
+                    form["password"]
                 )
                 sess = request.session()
                 sess["jwt_token"] = User.get_jwt(result)
                 redirect_to = request.query.get("redirect_to", ["/"])[0]
                 return Response.redirect(redirect_to)
-            except AuthorizationError as err:
-                error = "パスワード、またはログイン名が間違っています"
-                return Response.render(template, {"error": error}, status=401)
+            except ValidationError as err:
+                return Response.render(template, {"error": err.message}, status=401)
         return Response.render(template, status=401)
 
     def logout(self, request):
@@ -51,15 +62,13 @@ class RegisterController(Controller):
         invite = Invite.query.filter(Invite.token == request.query["token"][0]).first()
         if request.method == "POST":
             try:
-                data = request.post()
+                form = RegisterForm(request.post())
                 user = User()
-                user.set_password(data["password"])
+                user.set_password(form["password"])
                 if invite.editable:
-                    user.screen_name = data.get("screen_name", "")
-                    user.name = data.get("name", "")
-                    user.icon = (
-                        data["icon"].file.read() if "icon" in data else invite.icon
-                    )
+                    user.screen_name = form["screen_name"]
+                    user.name = form["name"]
+                    user.icon = form["icon"] or invite.icon
                 else:
                     user.screen_name = invite.screen_name
                     user.name = invite.name
@@ -69,18 +78,15 @@ class RegisterController(Controller):
                 UpdateUserPermission.accept(user, user)
                 sess["jwt_token"] = User.get_jwt(user)
                 return Response.redirect(self.app.convert_url("/"))
-            except Exception as err:
-                error = str(err)
-                icon = (
-                    data.get("icon").file.read() if "icon" in data else load_noimage_user()
-                )
+            except ValidationError as err:
+                icon = form["icon"]
                 return Response.render(
                     template,
                     {
-                        "error": error,
-                        "name": data.get("name", invite.name),
-                        "screen_name": data.get("screen_name", invite.screen_name),
-                        "password": data.get("password", ""),
+                        "error": err.messsage,
+                        "name": form["name"] or invite.name,
+                        "screen_name": form["screen_name"] or invite.screen_name,
+                        "password": form["password"] or "",
                         "icon": icon,
                         "editable": invite.editable,
                     },
@@ -100,28 +106,30 @@ class RegisterController(Controller):
         template = self.app.view.get_template("setup.html")
         if request.method == "POST":
             try:
-                data = request.post()
+                form = RegisterForm(request.post())
                 user = User()
-                user.screen_name = data["screen_name"]
-                user.name = data["name"]
-                user.set_password(data["password"])
-                user.icon = (
-                    data["icon"].file.read() if "icon" in data else load_noimage_user()
-                )
+                user.screen_name = form["screen_name"]
+                user.name = form["name"]
+                user.set_password(form["password"])
+                user.icon = form["icon"]
                 user.create()
-                Admin.accept(user)
-                CreateUserPermission.accept(user)
-                UpdateUserPermission.accept(user)
-                DeleteUserPermission.accept(user)
-                CreateGroupPermission.accept(user)
-                UpdateGroupPermission.accept(user)
-                DeleteGroupPermission.accept(user)
                 UpdateUserPermission.accept(user, user)
+                admin = Group()
+                admin.screen_name = '_admin'
+                admin.name = 'Admin'
+                admin.create()
+                admin.append(user)
+                Admin.accept(admin)
+                CreateUserPermission.accept(admin)
+                UpdateUserPermission.accept(admin)
+                DeleteUserPermission.accept(admin)
+                CreateGroupPermission.accept(admin)
+                UpdateGroupPermission.accept(admin)
+                DeleteGroupPermission.accept(admin)
                 sess["jwt_token"] = User.get_jwt(user)
                 return Response.redirect(self.app.convert_url("/"))
-            except Exception as err:
-                error = str(err)
-                return Response.render(template, {"error": error})
+            except ValidationError as err:
+                return Response.render(template, {"error": err.message})
         return Response.render(template)
 
 
@@ -141,17 +149,14 @@ class UsersController(Controller):
         template = self.view.get_template("user/create.html")
         invites = Invite.list()
         if req.method == "POST":
-            post = req.post()
+            form = InviteForm(req.post())
             try:
-                icon = (
-                    post["icon"].file.read() if "icon" in post else load_noimage_user()
-                )
                 invite = Invite()
-                invite.name = post.get("name", "")
-                invite.screen_name = post.get("screen_name", "")
-                invite.icon = icon
+                invite.name = form["name"]
+                invite.screen_name = form["screen_name"]
+                invite.icon = form["icon"]
                 invite.token = str(uuid4())
-                invite.editable = "editable" in post
+                invite.editable = form["editable"]
                 invite.create()
                 invites = Invite.list()
                 return Response.render(
@@ -163,9 +168,9 @@ class UsersController(Controller):
                     template,
                     {
                         "invites": invites,
-                        "name": post.get("name", ""),
-                        "screen_name": post.get("screen_name", ""),
-                        "icon": icon,
+                        "name": form["name"],
+                        "screen_name": form["screen_name"],
+                        "icon": form["icon"],
                         "error": error,
                     },
                 )
@@ -197,42 +202,12 @@ class UsersController(Controller):
         if UpdateUserPermission.is_forbidden(req.user, user):
             return self.app.error(req, 403)
         if req.method == "POST":
-            post = req.post()
+            form = req.post()
             try:
-                icon = post["icon"].file.read() if "icon" in post else user.icon
-                user.screen_name = post["screen_name"]
-                user.name = post["name"]
-                user.icon = icon
+                user.screen_name = form["screen_name"]
+                user.name = form["name"]
+                user.icon = form["icon"] or user.icon
                 user.update()
-                if Admin.is_accepted(req.user):
-                    if "user_create" in post:
-                        CreateUserPermission.accept(user)
-                    else:
-                        CreateUserPermission.forbit(user)
-                    if "user_update" in post:
-                        UpdateUserPermission.accept(user)
-                    else:
-                        UpdateUserPermission.forbit(user)
-                    if "user_delete" in post:
-                        DeleteUserPermission.accept(user)
-                    else:
-                        DeleteUserPermission.forbit(user)
-                    if "group_create" in post:
-                        CreateGroupPermission.accept(user)
-                    else:
-                        CreateGroupPermission.forbit(user)
-                    if "group_update" in post:
-                        UpdateGroupPermission.accept(user)
-                    else:
-                        UpdateGroupPermission.forbit(user)
-                    if "group_delete" in post:
-                        DeleteGroupPermission.accept(user)
-                    else:
-                        DeleteGroupPermission.forbit(user)
-                    if "admin" in post:
-                        Admin.accept(user)
-                    else:
-                        Admin.forbit(user)
                 return Response.render(
                     template,
                     {
@@ -250,9 +225,9 @@ class UsersController(Controller):
                     {
                         "error": error,
                         "user": user,
-                        "screen_name": post.get("screen_name", user.screen_name),
-                        "name": post.get("name", user.name),
-                        "icon": icon,
+                        "screen_name": form["screen_name"] or user.screen_name,
+                        "name": form["name"] or user.name,
+                        "icon": form["icon"],
                     },
                 )
         return Response.render(
@@ -286,19 +261,19 @@ class UsersController(Controller):
 class GroupsController(Controller):
     def create(self, req):
         if CreateGroupPermission.is_forbidden(req.user):
-            return self.app.error(request, 403)
+            return self.app.error(req, 403)
         template = self.view.get_template("group/create.html")
         groups = Group.list()
         if req.method == "POST":
-            post = req.post()
+            form = GroupCreateForm(req.post())
             try:
                 group = Group()
-                group.name = post["name"]
-                group.screen_name = post["screen_name"]
-                group.icon = post["icon"].file.read() if "icon" in post else None
+                group.name = form["name"]
+                group.screen_name = form["screen_name"]
+                group.icon = form["icon"]
                 group.create()
-                if "parent" in post and post["parent"] != "":
-                    Group.retrieve(int(post["parent"])).append(group)
+                if "parent" in form and form["parent"] != "":
+                    Group.retrieve(int(form["parent"])).append(group)
                 group.append(req.user)
                 UpdateGroupPermission.accept(req.user, group)
                 return Response.redirect(self.app.convert_url("/groups"))
@@ -337,39 +312,39 @@ class GroupsController(Controller):
         if UpdateGroupPermission.is_forbidden(req.user, group):
             return self.app.error(req, 403)
         if req.method == "POST":
-            post = req.post()
+            form = GroupUpdateForm(req.post())
             try:
-                icon = post["icon"].file.read() if "icon" in post else group.icon
-                group.screen_name = post["screen_name"]
-                group.name = post["name"]
+                icon = form["icon"] or group.icon
+                group.screen_name = form["screen_name"]
+                group.name = form["name"]
                 group.icon = icon
                 group.update()
                 if Admin.is_accepted(req.user):
-                    if "user_create" in post:
+                    if form["user_create"]:
                         CreateUserPermission.accept(group)
                     else:
                         CreateUserPermission.forbit(group)
-                    if "user_update" in post:
+                    if form["user_update"]:
                         UpdateUserPermission.accept(group)
                     else:
                         UpdateUserPermission.forbit(group)
-                    if "user_delete" in post:
+                    if form["user_delete"]:
                         DeleteUserPermission.accept(group)
                     else:
                         DeleteUserPermission.forbit(group)
-                    if "group_create" in post:
+                    if form["group_create"]:
                         CreateGroupPermission.accept(group)
                     else:
                         CreateGroupPermission.forbit(group)
-                    if "group_update" in post:
+                    if form["group_update"]:
                         UpdateGroupPermission.accept(group)
                     else:
                         UpdateGroupPermission.forbit(group)
-                    if "group_delete" in post:
+                    if form["group_delete"]:
                         DeleteGroupPermission.accept(group)
                     else:
                         DeleteGroupPermission.forbit(group)
-                    if "admin" in post:
+                    if form["admin"]:
                         Admin.accept(group)
                     else:
                         Admin.forbit(group)
@@ -385,8 +360,8 @@ class GroupsController(Controller):
                         "icon": group.icon,
                     },
                 )
-            except Exception as err:
-                error = str(err)
+            except ValidationError as err:
+                error = err.message
                 return Response.render(
                     template,
                     {
@@ -394,8 +369,8 @@ class GroupsController(Controller):
                         "all_groups": groups,
                         "all_users": users,
                         "group": group,
-                        "screen_name": post.get("screen_name", ""),
-                        "name": post.get("name", ""),
+                        "screen_name": form["screen_name"],
+                        "name": form["name"],
                         "icon": group.icon,
                     },
                 )
@@ -412,26 +387,26 @@ class GroupsController(Controller):
         )
 
     def append(self, req):
-        post = req.post()
+        form = req.post()
         try:
             group = Group.retrieve(screen_name=req.params["id"])
             nodes = list()
-            if "user" in post:
-                for uid in post.getlist("user"):
+            if "user" in form:
+                for uid in form.getlist("user"):
                     try:
                         nodes.append(User.retrieve(int(uid)))
                     except Exception as err:
                         print(err)
                         pass
-            if "group" in post:
-                for gid in post.getlist("group"):
+            if "group" in form:
+                for gid in form.getlist("group"):
                     try:
                         nodes.append(Group.retrieve(int(gid)))
                     except Exception as err:
                         print(err)
                         pass
             group.append_all(nodes)
-        except Exception as err:
+        except Exception:
             pass
         finally:
             return Response.redirect(
@@ -447,7 +422,7 @@ class GroupsController(Controller):
             else:
                 child = User.retrieve((cid + 1) / 2)
             group.remove(child)
-        except Exception as err:
+        except Exception:
             pass
         finally:
             return Response.redirect(
@@ -500,9 +475,9 @@ class AppsController(Controller):
         apps = AppRegistry()
         if req.method == "POST":
             apps.reset()
-            post = req.post()
+            form = AppUpdateForm(req.post())
             try:
-                prefix = post["prefix"]
+                prefix = form["prefix"]
                 data = dict()
                 data["apps"] = dict()
                 for package, path in prefix.items():

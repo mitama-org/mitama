@@ -131,7 +131,7 @@
                         <div class='screen-name'>{{group_.screen_name}}</div>
                     </div>
                     <div class='actions'>
-                        <a href='/groups/{{group.screen_name}}/remove/{{group_.id * 2}}'><button>はずす</button></a>
+                        <a href='/groups/{{group.screen_name}}/remove/{{group_.id}}'><button>はずす</button></a>
                     </div>
                 </div>
                 {% endfor %}
@@ -147,11 +147,11 @@
                         <div class='screen-name'>{{user.screen_name}}</div>
                     </div>
                     <div class='actions'>
-                        <a href='/groups/{{group.screen_name}}/remove/{{user.id * 2 - 1}}'><button>はずす</button></a>
+                        <a href='/groups/{{group.screen_name}}/remove/{{user.id}}'><button>はずす</button></a>
                         {% if not group_update_permission(user, group) %}
-                        <a href='/groups/{{group.screen_name}}/accept/{{user.id * 2 - 1}}/update'><button>変更を許可</button></a>
+                        <a href='/groups/{{group.screen_name}}/accept/{{user.id}}/update'><button>変更を許可</button></a>
                         {% else %}
-                        <a href='/groups/{{group.screen_name}}/forbit/{{user.id * 2 - 1}}/update'><button>変更を拒否</button></a>
+                        <a href='/groups/{{group.screen_name}}/forbit/{{user.id}}/update'><button>変更を拒否</button></a>
                         {% endif %}
                     </div>
                 </div>

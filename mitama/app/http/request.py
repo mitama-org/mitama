@@ -97,7 +97,7 @@ class Request:
 
     @property
     def method(self):
-        return self.environ["REQUEST_METHOD"]
+        return self.environ["REQUEST_METHOD"].upper()
 
     @property
     def raw_path(self):
