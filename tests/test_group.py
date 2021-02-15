@@ -1,13 +1,19 @@
 import unittest
 
-from mitama.db import _CoreDatabase
+from mitama.db import Database, inspect
 
-db = _CoreDatabase.test()
+Database.test()
+db = Database()
 
 from mitama.models import Group, User
 
-
 class TestGroup(unittest.TestCase):
+    def test_create_db(self):
+        self.assertTrue(db.engine.dialect.has_table(db.engine, "mitama_user"))
+        self.assertTrue(db.engine.dialect.has_table(db.engine, "mitama_group"))
+        ins = inspect(Group)
+        self.assertTrue("_id" in ins.mapper.column_attrs)
+
     def test_group(self):
         group = Group()
         group.name = "team1"

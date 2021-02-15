@@ -21,7 +21,7 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.schema import UniqueConstraint
 
 from mitama.app.hook import HookRegistry
-from mitama.db import _CoreDatabase, func, orm
+from mitama.db import Database, func, ForeignKey, relationship, Table, backref
 from mitama.db.types import Column, Group, Integer, LargeBinary
 from mitama.db.types import Node as NodeType
 from mitama.db.types import String
@@ -29,7 +29,7 @@ from mitama.db.model import UUID
 from mitama.noimage import load_noimage_group, load_noimage_user
 from mitama.conf import get_from_project_dir
 
-db = _CoreDatabase()
+db = Database(prefix='mitama')
 hook_registry = HookRegistry()
 
 secret = secrets.token_hex(32)
@@ -39,10 +39,12 @@ class AuthorizationError(Exception):
     pass
 
 
-class Relation(db.Model):
-    parent = Column(Group)
-    child = Column(NodeType)
-
+user_group_relation = Table(
+    "mitama_user_group",
+    db.metadata,
+    Column("group_id", String, ForeignKey("mitama_group._id")),
+    Column("user_id", String, ForeignKey("mitama_user._id")),
+)
 
 class Node(object):
     _icon = Column(LargeBinary)
@@ -122,30 +124,6 @@ class Node(object):
         mime = f.from_buffer(self.icon)
         return "data:" + mime + ";base64," + base64.b64encode(self.icon).decode()
 
-    def parents(self):
-        rels = Relation.query.filter(Relation.child == self).all()
-        parent = list()
-        for rel in rels:
-            parent.append(rel.parent)
-        return parent
-
-    def is_ancestor(self, node):
-        if not isinstance(node, Group) and not isinstance(node, User):
-            raise TypeError("Checking object must be Group or User instance")
-        layer = self.parents()
-        while len(layer) > 0:
-            if isinstance(node, Group) and node in layer:
-                return True
-            else:
-                for node_ in layer:
-                    if isinstance(node, User) and node_.is_in(node):
-                        return True
-            layer_ = list()
-            for node_ in layer:
-                layer_.extend(node_.parents())
-            layer = layer_
-        return False
-
     @classmethod
     def add_name_proxy(cls, fn):
         cls._name_proxy.append(fn)
@@ -169,14 +147,18 @@ class User(Node, db.Model):
     :param icon: アイコン
     """
 
-    __tablename__ = "mitama_user"
     _id = Column(String, default=UUID("user"), primary_key = True, nullable=False)
     password = Column(String(255))
+    groups = relationship(
+        "Group",
+        secondary=user_group_relation,
+        back_populates="users"
+    )
 
     def to_dict(self, only_profile=False):
         profile = super().to_dict()
-        if not only_profile:
-            profile["parents"] = [p.to_dict(True) for p in self.parents()]
+        #if not only_profile:
+        #    profile["groups"] = [p.to_dict(True) for p in self.parents()]
         return profile
 
     def load_noimage(self):
@@ -268,6 +250,23 @@ class User(Node, db.Model):
             raise AuthorizationError("Invalid token.")
         return cls.retrieve(result["id"])
 
+    def is_ancestor(self, node):
+        if not isinstance(node, Group) and not isinstance(node, User):
+            raise TypeError("Checking object must be Group or User instance")
+        layer = self.groups
+        while len(layer) > 0:
+            if isinstance(node, Group) and node in layer:
+                return True
+            else:
+                for node_ in layer:
+                    if isinstance(node, User) and node_.is_in(node):
+                        return True
+            layer_ = list()
+            for node_ in layer:
+                layer_.extend(node_.groups)
+            layer = layer_
+        return False
+
 
 class Group(Node, db.Model):
     """グループのモデルクラスです
@@ -278,14 +277,23 @@ class Group(Node, db.Model):
     :param icon: アイコン
     """
 
-    __tablename__ = "mitama_group"
     _id = Column(String, default=UUID("group"), primary_key=True, nullable=False)
+    users = relationship(
+        "User",
+        secondary=user_group_relation,
+        back_populates="groups"
+    )
+    parent_id = Column(String, ForeignKey("mitama_group._id"))
+    children = relationship(
+        "Group",
+        backref=backref("parent", remote_side=[_id])
+    )
 
     def to_dict(self, only_profile=False):
         profile = super().to_dict()
-        if not only_profile:
-            profile["parents"] = [n.to_dict(True) for n in self.parents()]
-            profile["children"] = [n.to_dict(True) for n in self.children()]
+        #if not only_profile:
+        #    profile["parents"] = [n.to_dict(True) for n in self.parents()]
+        #    profile["children"] = [n.to_dict(True) for n in self.children()]
         return profile
 
     def load_noimage(self):
@@ -306,75 +314,82 @@ class Group(Node, db.Model):
         return groups
 
     def append(self, node):
-        if not isinstance(node, Group) and not isinstance(node, User):
+        if isinstance(node, User):
+            self.users.append(node)
+        elif isinstance(node, Group):
+            self.children.append(node)
+        else:
             raise TypeError("Appending object must be Group or User instance")
-        rel = Relation()
-        rel.parent = self
-        rel.child = node
-        rel.create()
+        self.query.session.commit()
 
     def append_all(self, nodes):
         for node in nodes:
-            if not isinstance(node, Group) and not isinstance(node, User):
+            if isinstance(node, User):
+                self.users.append(node)
+            elif isinstance(node, Group):
+                self.children.append(node)
+            else:
                 raise TypeError("Appending object must be Group or User instance")
-            rel = Relation()
-            rel.parent = self
-            rel.child = node
-            Relation.query.session.add(rel)
-        Relation.query.session.commit()
+        self.query.session.commit()
 
     def remove(self, node):
         if not isinstance(node, Group) and not isinstance(node, User):
             raise TypeError("Removing object must be Group or User instance")
-        rel = (
-            Relation.query.filter(Relation.parent == self)
-            .filter(Relation.child == node)
-            .first()
-        )
-        rel.delete()
+        self.children.remove(node)
+        self.query.session.commit()
 
     def remove_all(self, nodes):
         for node in nodes:
             if not isinstance(node, Group) and not isinstance(node, User):
                 raise TypeError("Appending object must be Group or User instance")
-        rels = (
-            Relation.query.filter(Relation.parent == self)
-            .filter(Relation.child in nodes)
-            .all()
-        )
-        Relation.query.session.delete(rels)
-        Relation.query.session.commit()
+        self.children.remove_all(nodes)
+        self.query.session.commit()
 
-    def children(self):
-        rels = Relation.query.filter(Relation.parent == self).all()
-        children = list()
-        for rel in rels:
-            children.append(rel.child)
-        return children
+    #def children(self):
+    #    rels = Relation.query.filter(Relation.parent == self).all()
+    #    children = list()
+    #    for rel in rels:
+    #        children.append(rel.child)
+    #    return children
+
+    def is_ancestor(self, node):
+        if not isinstance(node, Group) and not isinstance(node, User):
+            raise TypeError("Checking object must be Group or User instance")
+        layer = [self.parent]
+        while len(layer) > 0:
+            if isinstance(node, Group) and node in layer:
+                return True
+            else:
+                for node_ in layer:
+                    if isinstance(node, User) and node_.is_in(node):
+                        return True
+            layer_ = list()
+            for node_ in layer:
+                layer_.extend([node_.parent])
+            layer = layer_
+        return False
 
     def is_descendant(self, node):
-        if node.__class__.__name__ != "Group" and node.__class__.__name__ != "User":
+        if not isinstance(node, Group) and not isinstance(node, User):
             raise TypeError("Checking object must be Group or User instance")
-        layer = self.children()
+        #layer = self.children()
+        layer = self.children
         while len(layer) > 0:
             if node in layer:
                 return True
             layer_ = list()
             for node_ in layer:
-                if node_.__class__.__name__ == "Group":
-                    layer_.extend(node_.children())
+                layer_.extend(node_.children)
             layer = layer_
         return False
 
     def is_in(self, node):
-        if not isinstance(node, Group) and not isinstance(node, User):
+        if isinstance(node, User):
+            return node in self.users
+        elif isinstance(node, Group):
+            return node in self.children
+        else:
             raise TypeError("Checking object must be Group or User instance")
-        rels = (
-            Relation.query.filter(Relation.parent == self)
-            .filter(Relation.child == node)
-            .all()
-        )
-        return len(rels) != 0
 
     def delete(self):
         """グループを削除します"""

@@ -8,10 +8,15 @@ Databaseはシングルトンの接続のインスタンスを生成するクラ
 
 import inspect
 
-from sqlalchemy import and_, asc, desc, or_, orm
+from sqlalchemy import *
+from sqlalchemy.engine import *
+from sqlalchemy.schema import *
+from sqlalchemy.inspection import inspect
+from sqlalchemy.sql import *
+from sqlalchemy.types import *
+from sqlalchemy.orm import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative.api import DeclarativeMeta
-from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm.exc import UnmappedClassError
 from sqlalchemy.sql import func
 
@@ -27,28 +32,31 @@ class _QueryProperty:
 
     def __get__(self, obj, type):
         try:
-            mapper = orm.class_mapper(type)
+            mapper = class_mapper(type)
             if mapper:
                 return type.query_class(mapper, session=self.db.session())
         except UnmappedClassError:
             return None
 
 
-class _Database(_Singleton):
+class BaseDatabase():
     engine = None
+    metadata = None
     session = None
 
-    def __init__(self, model=None, metadata=None, query_class=orm.Query):
+    def __init__(self, model=None, metadata=None, query_class=Query):
         self.Query = query_class
         self.Model = self.make_declarative_base(model, metadata)
 
     @classmethod
     def test(cls):
-        return cls(get_test_engine())
+        cls.set_engine(get_test_engine())
 
-    def set_engine(self, engine):
-        self.engine = engine
-        self.session = scoped_session(
+    @classmethod
+    def set_engine(cls, engine):
+        cls.engine = engine
+        cls.metadata = MetaData(cls.engine)
+        cls.session = scoped_session(
             sessionmaker(autocommit=False, autoflush=False, bind=engine)
         )
 
@@ -59,6 +67,8 @@ class _Database(_Singleton):
             model = declarative_base(cls=model, name="Model", metadata=metadata)
         if metadata is not None and model.metadata is not metadata:
             model.metadata = metadata
+        else:
+            model.metadata = self.metadata
         if not getattr(model, "query_class", None):
             model.query_class = self.Query
         model.query = _QueryProperty(self)
@@ -68,30 +78,24 @@ class _Database(_Singleton):
         return self.session
 
     def create_all(self):
-        self.Model.metadata.create_all(self.engine)
+        self.metadata.create_all(self.engine)
 
 
-class _CoreDatabase(_Database):
-    def __init__(self, engine=None):
-        super().__init__()
-        if self.engine == None:
-            if engine == None:
-                self.set_engine(get_engine())
-            else:
-                self.set_engine(engine)
-
-
-class BaseDatabase(_Database):
+class Database(BaseDatabase):
     """アプリで利用するデータベースの操作を行うクラス
 
     アプリからデータベースを使うたい場合、このクラスを継承したクラスをアプリ内に定義します。
     """
 
-    def __init__(self, engine=None):
-        super().__init__()
+    def __init__(self, engine=None, prefix=None, model=None, metadata=None, query_class=Query):
+        super().__init__(
+            model = model,
+            metadata = metadata,
+            query_class = query_class
+        )
+        self.Model.prefix = prefix
         if self.engine == None:
             if engine == None:
-                package_name = inspect.getmodule(self.__class__).__package__
-                self.set_engine(get_app_engine(package_name))
+                self.set_engine(get_engine())
             else:
                 self.set_engine(engine)

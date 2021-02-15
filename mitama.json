@@ -1,0 +1,8 @@
+{
+  "password_validation": {},
+  "apps": {
+    "mitama.portal": {
+      "path": "/"
+    }
+  }
+}

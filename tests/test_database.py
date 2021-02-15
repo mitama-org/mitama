@@ -1,9 +1,10 @@
 import unittest
 
-from mitama.db import BaseDatabase
+from mitama.db import Database
 from mitama.db.types import Column, Integer, String
 
-db = BaseDatabase.test()
+Database.test()
+db = Database(prefix="test")
 
 
 class ModelA(db.Model):
@@ -14,13 +15,17 @@ class ModelB(db.Model):
     age = Column(Integer)
 
 
+from mitama.models import User, Group
+
 db.create_all()
 
 
 class TestBaseDatabase(unittest.TestCase):
     def test_create_db(self):
-        self.assertTrue(db.engine.dialect.has_table(db.engine, "model_a"))
-        self.assertTrue(db.engine.dialect.has_table(db.engine, "model_b"))
+        self.assertTrue(db.engine.dialect.has_table(db.engine, "test_model_a"))
+        self.assertTrue(db.engine.dialect.has_table(db.engine, "test_model_b"))
+        self.assertTrue(db.engine.dialect.has_table(db.engine, "mitama_user"))
+        self.assertTrue(db.engine.dialect.has_table(db.engine, "mitama_group"))
 
     def test_insert(self):
         a = ModelA()

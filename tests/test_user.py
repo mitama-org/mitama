@@ -1,8 +1,8 @@
 import unittest
 
-from mitama.db import _CoreDatabase
+from mitama.db import Database
 
-db = _CoreDatabase.test()
+db = Database.test()
 
 from mitama.models import User
 
