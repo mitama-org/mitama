@@ -7,8 +7,10 @@ import os
 
 from mitama.app import AppRegistry, _MainApp
 
-PROJECT_DIR = os.path.dirname(__file__)
-os.chdir(PROJECT_DIR)
+os.chdir(
+    os.path.dirname(__file__)
+)
+
 app_registry = AppRegistry()
 app_registry.load_config()
 app = _MainApp(app_registry)
