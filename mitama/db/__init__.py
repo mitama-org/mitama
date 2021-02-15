@@ -6,7 +6,7 @@ Databaseはシングルトンの接続のインスタンスを生成するクラ
 各アプリにはDatabaseを継承したクラスを定義してもらい、そいつのModelプロパティのベースクラスからモデルを作ってもらいます。
 """
 
-import inspect
+import inspect as _inspect
 
 from sqlalchemy import *
 from sqlalchemy.engine import *
@@ -34,19 +34,14 @@ class _QueryProperty:
         try:
             mapper = class_mapper(type)
             if mapper:
-                return type.query_class(mapper, session=self.db.session())
+                return Query([type]).with_session(self.db.session)
         except UnmappedClassError:
             return None
 
-
-class BaseDatabase():
+class DatabaseManager(_Singleton):
     engine = None
     metadata = None
     session = None
-
-    def __init__(self, model=None, metadata=None, query_class=Query):
-        self.Query = query_class
-        self.Model = self.make_declarative_base(model, metadata)
 
     @classmethod
     def test(cls):
@@ -56,9 +51,13 @@ class BaseDatabase():
     def set_engine(cls, engine):
         cls.engine = engine
         cls.metadata = MetaData(cls.engine)
-        cls.session = scoped_session(
-            sessionmaker(autocommit=False, autoflush=False, bind=engine)
-        )
+        cls.session = Session(autocommit=False, autoflush=False, bind=engine)
+
+class _Database():
+    def __init__(self, model=None, metadata=None, query_class=Query):
+        self.manager = DatabaseManager()
+        self.Query = query_class
+        self.Model = self.make_declarative_base(model, metadata)
 
     def make_declarative_base(self, model=None, metadata=None):
         if model == None:
@@ -74,28 +73,34 @@ class BaseDatabase():
         model.query = _QueryProperty(self)
         return model
 
+    @property
+    def engine(self):
+        return self.manager.engine
+
+    @property
+    def metadata(self):
+        return self.manager.metadata
+
+    @property
     def session(self):
-        return self.session
+        return self.manager.session
 
     def create_all(self):
         self.metadata.create_all(self.engine)
 
 
-class Database(BaseDatabase):
+class BaseDatabase(_Database):
     """アプリで利用するデータベースの操作を行うクラス
 
     アプリからデータベースを使うたい場合、このクラスを継承したクラスをアプリ内に定義します。
     """
 
-    def __init__(self, engine=None, prefix=None, model=None, metadata=None, query_class=Query):
+    def __init__(self, prefix=None, model=None, metadata=None, query_class=Query):
         super().__init__(
             model = model,
             metadata = metadata,
             query_class = query_class
         )
+        if prefix == None:
+            prefix = _inspect.getmodule(self.__class__).__package__
         self.Model.prefix = prefix
-        if self.engine == None:
-            if engine == None:
-                self.set_engine(get_engine())
-            else:
-                self.set_engine(engine)

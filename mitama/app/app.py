@@ -145,9 +145,6 @@ class App:
 
             return request, _handle, method
 
-    def install(self):
-        db.create_all()
-
 
 def _session_middleware():
     import base64

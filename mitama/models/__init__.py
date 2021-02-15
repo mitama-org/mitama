@@ -21,13 +21,16 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.schema import UniqueConstraint
 
 from mitama.app.hook import HookRegistry
-from mitama.db import Database, func, ForeignKey, relationship, Table, backref
+from mitama.db import BaseDatabase, func, ForeignKey, relationship, Table, backref
 from mitama.db.types import Column, Group, Integer, LargeBinary
 from mitama.db.types import Node as NodeType
 from mitama.db.types import String
 from mitama.db.model import UUID
 from mitama.noimage import load_noimage_group, load_noimage_user
 from mitama.conf import get_from_project_dir
+
+class Database(BaseDatabase):
+    pass
 
 db = Database(prefix='mitama')
 hook_registry = HookRegistry()
