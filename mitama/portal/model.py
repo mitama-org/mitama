@@ -2,12 +2,12 @@ from base64 import b64encode
 
 import magic
 
-from mitama.db import Database
+from mitama.db import BaseDatabase
 from mitama.db.types import *
 from mitama.models import Group, PermissionMixin, User
 
 
-db = Database(prefix='portal')
+db = BaseDatabase(prefix='portal')
 
 
 class Invite(db.Model):

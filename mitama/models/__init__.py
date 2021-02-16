@@ -304,17 +304,7 @@ class Group(Node, db.Model):
 
     @classmethod
     def tree(cls):
-        noparent = [
-            rel.child._id
-            for rel in db.session.query(Relation.child).group_by(Relation.child)
-            if isinstance(rel.child, Group)
-        ]
-        groups = [
-            group
-            for group in Group.query.filter().all()
-            if group._id not in noparent and isinstance(group, Group)
-        ]
-        return groups
+        return Group.query.filter(Group.parent == None).all()
 
     def append(self, node):
         if isinstance(node, User):
@@ -348,16 +338,11 @@ class Group(Node, db.Model):
         self.children.remove_all(nodes)
         self.query.session.commit()
 
-    #def children(self):
-    #    rels = Relation.query.filter(Relation.parent == self).all()
-    #    children = list()
-    #    for rel in rels:
-    #        children.append(rel.child)
-    #    return children
-
     def is_ancestor(self, node):
         if not isinstance(node, Group) and not isinstance(node, User):
             raise TypeError("Checking object must be Group or User instance")
+        if self.parent is None:
+            return False
         layer = [self.parent]
         while len(layer) > 0:
             if isinstance(node, Group) and node in layer:
@@ -501,7 +486,7 @@ class PermissionMixin(object):
             if perm.is_target(target) or perm.is_target(None):
                 return True
         if isinstance(node, User):
-            parents = node.parents()
+            parents = node.groups
             for group in parents:
                 if cls.is_accepted(group, target):
                     return True

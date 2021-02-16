@@ -23,7 +23,6 @@ class AppRegistry(_Singleton):
     _map = dict()
     _server = None
     _router = None
-    changed = False
 
     def __init__(self):
         super().__init__()
@@ -46,35 +45,29 @@ class AppRegistry(_Singleton):
 
         observer.schedule(Handler(), self.project_dir)
 
-    def append(self, app):
-        self._map.append(app)
-
     def __iter__(self):
         for app in self._map.values():
             yield app
 
-    def items():
+    def items(self):
         class Items:
             def __iter__(self_):
                 for key, app in self._map.items():
                     yield (key, app)
-        return Items
+        return Items()
 
     def __setitem__(self, path, app):
-        self.changed = True
         self._map[path] = app
-        self._map = sorted(self._map.items(), key = lambda x: -1 * (x[0].count('/')))
+        self._map = dict(sorted(self._map.items(), key = lambda x: -1 * (x[0].count('/'))))
 
     def __getitem__(self, path):
         return self._map[path]
 
     def __delitem__(self, path):
-        self.changed = True
         del self._map[path]
 
     def reset(self):
         """アプリの一覧をリセットします"""
-        self.changed = True
         self._map = dict()
 
     def load_package(self, app_name, path, project_dir):
@@ -99,7 +92,7 @@ class AppRegistry(_Singleton):
             app_dir = config._project_dir / app_name
             if not app_dir.is_dir():
                 os.mkdir(app_dir)
-            app = load_package(app_name, _app["path"], config._project_dir)
+            app = self.load_package(app_name, _app["path"], config._project_dir)
             self[_app["path"]] = app
 
 '''

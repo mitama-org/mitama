@@ -29,7 +29,7 @@
                                 <div class='screen-name'>{{ group.screen_name }}</div>
                             </div>
                         </a>
-                        {% set children = group.children()|group %}
+                        {% set children = group.children|group %}
                         {% if children.length != 0: %}
                         <div class='children'>
                             {{ loop(children) }}

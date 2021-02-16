@@ -20,7 +20,7 @@
         <div class="content">
             <h2 class="mini-title">所属</h2>
             <div class='group-list tight'>
-            {% for g in user.parents() %}
+            {% for g in user.groups %}
                 <div class='item'>
                     <div class='branch'></div>
                     <a href="{{ url("/groups/"+g.screen_name) }}" class="profile">

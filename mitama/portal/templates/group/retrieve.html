@@ -18,7 +18,7 @@
             </div>
             <div class='group-list'>
                 <div class="children">
-                {% for g in group.children()|group %}
+                {% for g in group.children|group %}
                     <div class='item'>
                         <div class='branch'></div>
                         <a href="{{ url("/groups/"+g.screen_name) }}" class="profile">
@@ -36,7 +36,7 @@
         <div class="content">
             <h2 class="mini-title">メンバー</h2>
             <div class="user-list tight">
-                {% for user in group.children()|user %}
+                {% for user in group.children|user %}
                     <a href="{{url("/users/"+user.screen_name)}}" class="item">
                         <img src='{{ dataurl(user.icon) }}' class='user-icon' />
                         <div class='detail'>

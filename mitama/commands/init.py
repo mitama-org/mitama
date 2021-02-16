@@ -6,14 +6,18 @@
 """
 import os
 import shutil
+import glob
 from pathlib import Path
 
 from mitama.conf import Config
 
 
 def init_project_dir(path):
-    src = Path(os.path.dirname(__file__)) / "../skeleton/project"
-    shutil.copytree(src, path, symlinks=False)
+    files = glob.glob(os.path.dirname(__file__) + "/../skeleton/project/*")
+    for file in files:
+        if os.path.isdir(file):
+            continue
+        shutil.copy(file, path, follow_symlinks=False)
 
 
 class Command:

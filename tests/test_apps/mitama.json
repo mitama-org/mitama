@@ -1,7 +1,7 @@
 {
-  "apps": {
-    "mitama.portal": {
-      "path": "/"
+    "apps": {
+        "mitama.portal": {
+            "path": "/"
+        }
     }
-  }
 }
