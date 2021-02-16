@@ -1,0 +1,81 @@
+{% macro input(name, value='', type='text', placeholder='', required=False) -%}
+    <input
+        type="{{ type }}"
+        value="{{ value|e }}"
+        name="{{ name }}"
+        placeholder={{ placeholder }}
+        {% if required %}
+        required
+        {% endif %}
+    />
+{%- endmacro %}
+
+{% macro checkbox(name, value='', label='', checked=False) -%}
+    <label>
+        <input
+            type="checkbox"
+            value="{{ value|e }}"
+            name="{{ name }}"
+            {% if checked %}
+            checked
+            {% endif %}
+        />
+        <span>
+            {{ label }}
+        </span>
+    </label>
+{%- endmacro %}
+
+{% macro radio(name, value='', label='', checked=False) -%}
+    <label>
+        <input
+            type="radio"
+            value="{{ value|e }}"
+            name="{{ name }}"
+            {% if checked %}
+            checked
+            {% endif %}
+        />
+        <span>
+            {{ label }}
+        </span>
+    </label>
+{%- endmacro %}
+
+{% macro textarea(name, value='', placeholder='') -%}
+    <textarea name="{{ name }}" placeholder="{{ placeholder }}">{{ value }}</textarea>
+{%- endmacro %}
+
+{% macro select(name, value='', options={}) -%}
+    <select name="{{ name }}">
+    {% for opt_name, opt_value in options.items() %}
+        <option
+            value="{{ opt_name }}"
+            {% if opt_name == value %}
+                selected
+            {% endif %}
+        >{{ opt_value }}</option>
+    {% endfor %}
+    </select>
+{%- endmacro %}
+
+{% macro combobox(name, value='', multiple=False, options={}) -%}
+    <input
+        name="{{ name }}"
+        value="{{ value }}"
+        list="__{{ name }}_field"
+        {% if multiple %}
+        multiple
+        {% endif %}
+    >
+    <datalist id="__{{ name }}_field">
+    {% for opt_name, opt_value in options.items() %}
+        <option
+            value="{{ opt_name }}"
+            {% if opt_name == value %}
+                selected
+            {% endif %}
+        >{{ opt_value }}</option>
+    {% endfor %}
+    </datalist>
+{%- endmacro %}

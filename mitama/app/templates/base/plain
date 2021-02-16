@@ -1,0 +1,20 @@
+{% import 'footers.macro.html' as footers %}
+{% import 'headers.macro.html' as headers %}
+{% import 'lists.macro.html' as lists %}
+{% import 'forms.macro.html' as forms %}
+{% import 'navs.macro.html' as navs %}
+{% import 'snippets.macro.html' as snippets %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <title>{{ title }} | {{ request.app.name }}</title>
+        {% block head %}
+        {% endblock %}
+    </head>
+    <body>
+        {% block body %}
+        {% endblock %}
+    </body>
+</html>
