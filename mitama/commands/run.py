@@ -22,7 +22,6 @@ class Command:
                 port = "8080"
         if not hasattr(config, "ssl"):
             config.ssl = False
-        app_registry = AppRegistry()
-        app_registry.load_config()
-        app = _MainApp(app_registry)
-        run_app(app, port)
+
+        app = importlib.__import__(".", fromlist=["app"])
+        run_app(app, app.port)

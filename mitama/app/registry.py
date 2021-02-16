@@ -53,9 +53,17 @@ class AppRegistry(_Singleton):
         for app in self._map.values():
             yield app
 
+    def items():
+        class Items:
+            def __iter__(self_):
+                for key, app in self._map.items():
+                    yield (key, app)
+        return Items
+
     def __setitem__(self, path, app):
         self.changed = True
         self._map[path] = app
+        self._map = sorted(self._map.items(), key = lambda x: -1 * (x[0].count('/')))
 
     def __getitem__(self, path):
         return self._map[path]
@@ -69,28 +77,32 @@ class AppRegistry(_Singleton):
         self.changed = True
         self._map = dict()
 
-    def load_config(self):
+    def load_package(self, app_name, path, project_dir):
+        if app_name not in sys.modules:
+            init = importlib.__import__(app_name, fromlist=["AppBuilder"])
+        else:
+            init = importlib.reload(app_name)
+        builder = init.AppBuilder()
+        builder.set_package(app_name)
+        builder.set_project_dir(project_dir / app_name)
+        builder.set_project_root_dir(project_dir)
+        builder.set_path(path)
+        builder.set_name(app_name)
+        app = builder.build()
+        return app
+
+    def load_config(self, config = get_from_project_dir()):
         """アプリの一覧をmitama.jsonから読み込み、配信します"""
-        config = get_from_project_dir()
         sys.path.append(str(config._project_dir))
         for app_name in config.apps:
             _app = config.apps[app_name]
             app_dir = config._project_dir / app_name
             if not app_dir.is_dir():
                 os.mkdir(app_dir)
-            if app_name not in sys.modules:
-                init = importlib.__import__(app_name, fromlist=["AppBuilder"])
-            else:
-                init = importlib.reload(app_name)
-            builder = init.AppBuilder()
-            builder.set_package(app_name)
-            builder.set_project_dir(config._project_dir / app_name)
-            builder.set_project_root_dir(config._project_dir)
-            builder.set_path(_app["path"])
-            builder.set_name(app_name)
-            app = builder.build()
+            app = load_package(app_name, _app["path"], config._project_dir)
             self[_app["path"]] = app
 
+'''
     def router(self):
         """アプリの情報に基づいてルーティングエンジンを生成します"""
         if self._router == None:
@@ -107,3 +119,4 @@ class AppRegistry(_Singleton):
             self._router = router
             self.changed = False
         return self._router
+'''

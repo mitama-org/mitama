@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 from jinja2 import *
 
-from .app import App, _MainApp
+from .app import App
 from .builder import Builder
 from .hook import HookRegistry
 from .http import Request
