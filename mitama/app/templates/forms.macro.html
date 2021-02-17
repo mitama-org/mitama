@@ -4,50 +4,92 @@
         value="{{ value|e }}"
         name="{{ name }}"
         placeholder={{ placeholder }}
+        class="form-control"
         {% if required %}
         required
         {% endif %}
+        {% for key, value in kwargs.items() %}
+        {{key}}="{{value}}"
+        {% endfor %}
     />
 {%- endmacro %}
 
-{% macro checkbox(name, value='', label='', checked=False) -%}
-    <label>
-        <input
-            type="checkbox"
-            value="{{ value|e }}"
-            name="{{ name }}"
-            {% if checked %}
-            checked
-            {% endif %}
-        />
-        <span>
-            {{ label }}
-        </span>
+{% macro checkbox(name, value='', label='', id=uuid(), checked=False) -%}
+    <input
+        type="checkbox"
+        value="{{ value|e }}"
+        name="{{ name }}"
+        id="{{id}}"
+        class="form-check-input"
+        {% if checked %}
+        checked
+        {% endif %}
+        {% for key, value in kwargs.items() %}
+        {{key}}="{{value}}"
+        {% endfor %}
+    />
+    <label
+        id="{{id}}"
+        class="form-check-label"
+    >
+        {{ label }}
     </label>
 {%- endmacro %}
 
-{% macro radio(name, value='', label='', checked=False) -%}
-    <label>
-        <input
-            type="radio"
-            value="{{ value|e }}"
-            name="{{ name }}"
-            {% if checked %}
-            checked
-            {% endif %}
-        />
-        <span>
-            {{ label }}
-        </span>
+{% macro radio(name, value='', label='', id=uuid() checked=False) -%}
+    <input
+        type="radio"
+        value="{{ value|e }}"
+        name="{{ name }}"
+        id="{{id}}"
+        class="form-check-input"
+        {% if checked %}
+        checked
+        {% endif %}
+        {% for key, value in kwargs.items() %}
+        {{key}}="{{value}}"
+        {% endfor %}
+    />
+    <label
+        id="{{id}}"
+        class="form-check-label"
+    >
+        {{ label }}
     </label>
+{%- endmacro %}
+
+{% macro range(name, value='', max='', min='', id=uuid()) %}
+    <label
+        for="{{id}}"
+        class="form-label"
+    >
+        {{ label }}
+    </label>
+    <input
+        class="form-range"
+        id="{{id}}"
+        min="{{min}}"
+        max="{{max}}"
+        value="{{value}}"
+        name="{{name}}"
+        {% for key, value in kwargs.items() %}
+        {{key}}="{{value}}"
+        {% endfor %}
+    />
 {%- endmacro %}
 
 {% macro textarea(name, value='', placeholder='') -%}
-    <textarea name="{{ name }}" placeholder="{{ placeholder }}">{{ value }}</textarea>
+    <textarea name="{{ name }}" class="form-control" placeholder="{{ placeholder }}">{{ value }}</textarea>
 {%- endmacro %}
 
 {% macro select(name, value='', options={}) -%}
-    <select name="{{ name }}">
+    <select
+        class="form-select"
+        name="{{ name }}"
+        {% for key, value in kwargs.items() %}
+        {{key}}="{{value}}"
+        {% endfor %}
+        >
     {% for opt_name, opt_value in options.items() %}
         <option
             value="{{ opt_name }}"
@@ -60,15 +102,20 @@
 {%- endmacro %}
 
 {% macro combobox(name, value='', multiple=False, options={}) -%}
+    {% set uuid = uuid()%}
     <input
         name="{{ name }}"
         value="{{ value }}"
-        list="__{{ name }}_field"
+        list="{{uuid}}"
+        class="form-control"
         {% if multiple %}
         multiple
         {% endif %}
+        {% for key, value in kwargs.items() %}
+        {{key}}="{{value}}"
+        {% endfor %}
     >
-    <datalist id="__{{ name }}_field">
+    <datalist id="{{uuid}}">
     {% for opt_name, opt_value in options.items() %}
         <option
             value="{{ opt_name }}"

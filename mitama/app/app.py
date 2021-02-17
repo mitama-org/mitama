@@ -6,6 +6,7 @@ from pathlib import Path
 import magic
 from jinja2 import Environment, ChoiceLoader, FileSystemLoader
 from yarl import URL
+import uuid
 
 from mitama.noimage import load_noimage_app
 
@@ -129,6 +130,7 @@ class App:
         self._view.filters["group"] = filter_group
         self._view.globals.update(
             url=self.convert_url, fullurl=self.convert_fullurl, dataurl=dataurl
+            uuid=uuid.uuid4
         )
         return self._view
 
