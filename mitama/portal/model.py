@@ -13,6 +13,7 @@ db = BaseDatabase(prefix='portal')
 class Invite(db.Model):
     icon = Column(LargeBinary)
     screen_name = Column(String)
+    email = Column(String)
     name = Column(String)
     token = Column(String, unique=True)
     editable = Column(Boolean)

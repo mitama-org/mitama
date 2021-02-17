@@ -18,18 +18,6 @@ from .forms import (
     AppUpdateForm,
 )
 
-from .model import (
-    Admin,
-    CreateGroupPermission,
-    CreateUserPermission,
-    DeleteGroupPermission,
-    DeleteUserPermission,
-    Invite,
-    UpdateGroupPermission,
-    UpdateUserPermission,
-)
-
-
 class SessionController(Controller):
     def login(self, request):
         template = self.view.get_template("login.html")
@@ -75,7 +63,6 @@ class RegisterController(Controller):
                     user.icon = invite.icon
                 user.create()
                 invite.delete()
-                UpdateUserPermission.accept(user, user)
                 sess["jwt_token"] = User.get_jwt(user)
                 return Response.redirect(self.app.convert_url("/"))
             except ValidationError as err:
@@ -103,31 +90,20 @@ class RegisterController(Controller):
 
     def setup(self, request):
         sess = request.session()
-        template = self.app.view.get_template("setup.html")
+        template = self.view.get_template("setup.html")
         if request.method == "POST":
             try:
-                form = RegisterForm(request.post())
-                user = User()
-                user.screen_name = form["screen_name"]
-                user.name = form["name"]
-                user.set_password(form["password"])
-                user.icon = form["icon"]
-                user.create()
-                UpdateUserPermission.accept(user, user)
-                admin = Group()
-                admin.screen_name = '_admin'
-                admin.name = 'Admin'
-                admin.create()
-                admin.append(user)
-                Admin.accept(admin)
-                CreateUserPermission.accept(admin)
-                UpdateUserPermission.accept(admin)
-                DeleteUserPermission.accept(admin)
-                CreateGroupPermission.accept(admin)
-                UpdateGroupPermission.accept(admin)
-                DeleteGroupPermission.accept(admin)
-                sess["jwt_token"] = User.get_jwt(user)
-                return Response.redirect(self.app.convert_url("/"))
+                form = SetupForm(request.post())
+                invite = Invite()
+                invite.email = form["email"]
+                invite.create()
+                self.send_mail(
+                    invite.email,
+                    "Mitamaへようこそ",
+                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.convert_fullurl("/signup?token=" + invite.token))
+                )
+                template = self.view.get_template("confirm.html")
+                return Response.render(template, {"error": err.message})
             except ValidationError as err:
                 return Response.render(template, {"error": err.message})
         return Response.render(template)
@@ -144,8 +120,6 @@ class HomeController(Controller):
 
 class UsersController(Controller):
     def create(self, req):
-        if CreateUserPermission.is_forbidden(req.user):
-            return self.app.error(req, 403)
         template = self.view.get_template("user/create.html")
         invites = Invite.list()
         if req.method == "POST":
@@ -157,7 +131,13 @@ class UsersController(Controller):
                 invite.icon = form["icon"]
                 invite.token = str(uuid4())
                 invite.editable = form["editable"]
+                invite.email = form["email"]
                 invite.create()
+                self.send_mail(
+                    invite.email,
+                    "Mitamaに招待されています",
+                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.convert_fullurl("/signup?token=" + invite.token))
+                )
                 invites = Invite.list()
                 return Response.render(
                     template, {"invites": invites, "icon": load_noimage_user()}
@@ -179,8 +159,6 @@ class UsersController(Controller):
         )
 
     def cancel(self, req):
-        if CreateUserPermission.is_forbidden(req.user):
-            return self.app.error(req, 403)
         invite = Invite.retrieve(req.params["id"])
         invite.delete()
         return Response.redirect(self.app.convert_url("/users/invite"))
@@ -192,15 +170,12 @@ class UsersController(Controller):
             template,
             {
                 "user": user,
-                "updatable": UpdateUserPermission.is_accepted(req.user, user),
             },
         )
 
     def update(self, req):
         template = self.view.get_template("user/update.html")
         user = User.retrieve(screen_name=req.params["id"])
-        if UpdateUserPermission.is_forbidden(req.user, user):
-            return self.app.error(req, 403)
         if req.method == "POST":
             form = req.post()
             try:
@@ -241,8 +216,6 @@ class UsersController(Controller):
         )
 
     def delete(self, req):
-        if DeleteUserPermission.is_forbidden(req.user):
-            return self.app.error(req, 403)
         template = self.view.get_template("user/delete.html")
         return Response.render(template)
 
@@ -253,15 +226,12 @@ class UsersController(Controller):
             template,
             {
                 "users": users,
-                "create_permission": CreateUserPermission.is_accepted(req.user),
             },
         )
 
 
 class GroupsController(Controller):
     def create(self, req):
-        if CreateGroupPermission.is_forbidden(req.user):
-            return self.app.error(req, 403)
         template = self.view.get_template("group/create.html")
         groups = Group.list()
         if req.method == "POST":
@@ -275,7 +245,6 @@ class GroupsController(Controller):
                 if "parent" in form and form["parent"] != "":
                     Group.retrieve(int(form["parent"])).append(group)
                 group.append(req.user)
-                UpdateGroupPermission.accept(req.user, group)
                 return Response.redirect(self.app.convert_url("/groups"))
             except Exception as err:
                 error = str(err)
@@ -294,7 +263,6 @@ class GroupsController(Controller):
             template,
             {
                 "group": group,
-                "updatable": UpdateGroupPermission.is_accepted(req.user, group),
             },
         )
 
@@ -309,8 +277,6 @@ class GroupsController(Controller):
         for u in User.list():
             if not group.is_in(u):
                 users.append(u)
-        if UpdateGroupPermission.is_forbidden(req.user, group):
-            return self.app.error(req, 403)
         if req.method == "POST":
             form = GroupUpdateForm(req.post())
             try:
@@ -319,35 +285,6 @@ class GroupsController(Controller):
                 group.name = form["name"]
                 group.icon = icon
                 group.update()
-                if Admin.is_accepted(req.user):
-                    if form["user_create"]:
-                        CreateUserPermission.accept(group)
-                    else:
-                        CreateUserPermission.forbit(group)
-                    if form["user_update"]:
-                        UpdateUserPermission.accept(group)
-                    else:
-                        UpdateUserPermission.forbit(group)
-                    if form["user_delete"]:
-                        DeleteUserPermission.accept(group)
-                    else:
-                        DeleteUserPermission.forbit(group)
-                    if form["group_create"]:
-                        CreateGroupPermission.accept(group)
-                    else:
-                        CreateGroupPermission.forbit(group)
-                    if form["group_update"]:
-                        UpdateGroupPermission.accept(group)
-                    else:
-                        UpdateGroupPermission.forbit(group)
-                    if form["group_delete"]:
-                        DeleteGroupPermission.accept(group)
-                    else:
-                        DeleteGroupPermission.forbit(group)
-                    if form["admin"]:
-                        Admin.accept(group)
-                    else:
-                        Admin.forbit(group)
                 return Response.render(
                     template,
                     {
@@ -431,27 +368,19 @@ class GroupsController(Controller):
 
     def accept(self, req):
         group = Group.retrieve(screen_name=req.params["id"])
-        if UpdateGroupPermission.is_forbidden(req.user, group):
-            return self.app.error(req, 403)
         user = User.retrieve(int(req.params["cid"]))
-        UpdateGroupPermission.accept(user, group)
         return Response.redirect(
             self.app.convert_url("/groups/" + group.screen_name + "/settings")
         )
 
     def forbit(self, req):
         group = Group.retrieve(screen_name=req.params["id"])
-        if UpdateGroupPermission.is_forbidden(req.user, group):
-            return self.app.error(req, 403)
         user = User.retrieve(int(req.params["cid"]))
-        UpdateGroupPermission.forbit(user, group)
         return Response.redirect(
             self.app.convert_url("/groups/" + group.screen_name + "/settings")
         )
 
     def delete(self, req):
-        if DeleteGroupPermission.is_forbidden(req.user):
-            return self.app.error(req, 403)
         template = self.view.get_template("group/delete.html")
         return Response.render(template)
 
@@ -462,7 +391,6 @@ class GroupsController(Controller):
             template,
             {
                 "groups": groups,
-                "create_permission": CreateGroupPermission.is_accepted(req.user),
             },
         )
 

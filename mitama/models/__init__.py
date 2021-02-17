@@ -13,12 +13,14 @@ import base64
 import hashlib
 import random
 import secrets
+import smtplib
 
 import bcrypt
 import jwt
 import magic
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.schema import UniqueConstraint
+from sqlalchemy import event
 
 from mitama.app.hook import HookRegistry
 from mitama.db import BaseDatabase, func, ForeignKey, relationship, Table, backref
@@ -151,6 +153,8 @@ class User(Node, db.Model):
     """
 
     _id = Column(String, default=UUID("user"), primary_key = True, nullable=False)
+    _project = None
+    email = Column(String, nullable=False)
     password = Column(String(255))
     groups = relationship(
         "Group",
@@ -160,8 +164,8 @@ class User(Node, db.Model):
 
     def to_dict(self, only_profile=False):
         profile = super().to_dict()
-        #if not only_profile:
-        #    profile["groups"] = [p.to_dict(True) for p in self.parents()]
+        if not only_profile:
+            profile["groups"] = [p.to_dict(True) for p in self.groups()]
         return profile
 
     def load_noimage(self):
@@ -185,6 +189,7 @@ class User(Node, db.Model):
     def password_check(self, password):
         password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
         return bcrypt.checkpw(password, self.password)
+
     @classmethod
     def password_auth(cls, screen_name, password):
         """ログイン名とパスワードで認証します
@@ -234,6 +239,9 @@ class User(Node, db.Model):
         password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
         self.password = bcrypt.hashpw(password, salt)
 
+    def mail(self, subject, body, type="html"):
+        self._project.send_mail(self.email, subject, body, type)
+
     def get_jwt(self):
         nonce = "".join([str(random.randint(0, 9)) for i in range(16)])
         result = jwt.encode({"id": self._id, "nonce": nonce}, secret, algorithm="HS256")
@@ -281,6 +289,7 @@ class Group(Node, db.Model):
     """
 
     _id = Column(String, default=UUID("group"), primary_key=True, nullable=False)
+    _project = None
     users = relationship(
         "User",
         secondary=user_group_relation,
@@ -294,9 +303,10 @@ class Group(Node, db.Model):
 
     def to_dict(self, only_profile=False):
         profile = super().to_dict()
-        #if not only_profile:
-        #    profile["parents"] = [n.to_dict(True) for n in self.parents()]
-        #    profile["children"] = [n.to_dict(True) for n in self.children()]
+        if not only_profile:
+            profile["parent"] = self.parent.to_dict()
+            profile["groups"] = [n.to_dict(True) for n in self.groups ]
+            profile["users"] = [n.to_dict(True) for n in self.users ]
         return profile
 
     def load_noimage(self):
@@ -394,157 +404,105 @@ class Group(Node, db.Model):
         super().create()
         hook_registry.create_group(self)
 
+    def mail(self, subject, body, type="html", to_all=False):
+        for user in self.users:
+            user.mail(subject, body, type)
+        if to_all:
+            for group in self.groups:
+                group.mail(subject, body, type, to_all)
 
-class PermissionMixin(object):
-    """パーミッションのモデルの実装を支援します
 
-    ホワイトリスト方式の許可システムを実装する上で役に立つ機能をまとめたクラスです。
-    このクラスとBaseDatabase.Modelを継承したクラスを定義するとパーミッションシステムを実現できます。
+class Role(db.Model):
+    __tablename__ = "mitama_role"
+    name = Column(String)
+    users = relationship(
+        "User",
+        secondary=role_user,
+        back_populates="roles"
+    )
+    groups = relationship(
+        "Group",
+        secondary=role_group,
+        back_populates="roles"
+    )
 
-    .. code-block:: python
 
-        class SomePermission(PermissionMixin, db.Model):
-            pass
 
-    継承先のクラスで :samp:`target` プロパティを定義した場合、特定のものに対してのみ許可する仕様にすることができます。
+role_user = Table(
+    "mitama_role_user",
+    db.metadata,
+    Column("role_id", ForeignKey("Role._id")),
+    Column("user_id", ForeignKey("User._id"))
+)
 
-    .. code-block:: python
+role_group = Table(
+    "mitama_role_group",
+    db.metadata,
+    Column("role_id", ForeignKey("Role._id")),
+    Column("group_id", ForeignKey("Group._id"))
+)
 
-        class SomePermission(PermissionMixin, db.Model):
-            target = Column(User)
+def permission(db_, permissions, init_func=None):
+    role_permission = Table(
+        "mitama_role_permission",
+        db_.metadata,
+        Column("role_id", ForeignKey("Role._id")),
+        Column("permission_id", ForeignKey("Permission._id")),
+    )
+    if init_func is not None:
+        event.listens(role_permission, 'after_create', init_func)
 
-    targetがUser、またはGroupの場合、targetUpPropagate、 targetDownPropagateを指定すれば、targetに対しても伝播をチェックすることができます。
+    class Permission(db_.Model):
+        name = Column(String)
+        screen_name = Column(String)
+        roles = relationship(
+            "Role",
+            secondary=role_permission,
+            back_populates="permissions"
+        )
 
-    :param _id: 固有のID
-    :param node: 許可するUser、またはGroupのインスタンス
-    :param targetUpPropagate: targetがUser、またはGroupの場合の上向き伝播
-    :param targetDownPropagate: targetがUser、またはGroupの場合の下向き伝播
-    :param upPropagate: 許可対象のUser、またはGroupの場合の上向き伝播
-    :param downPropagate: 許可対象のUser、またはGroupの場合の下向き伝播
-    """
+        @classmethod
+        def accept(cls, screen_name, role):
+            """特定のRoleに許可します """
+            if cls.is_accepted(screen_name, role):
+                return
+            permission = cls.retrieve(screen_name == permission)
+            permission.roles.append(role)
+            permission.save()
 
-    @declared_attr
-    def __tablename__(cls):
-        return "__" + cls.__name__.lower() + "_permission"
+        @classmethod
+        def forbit(cls, screen_name, role):
+            """UserまたはGroupの許可を取りやめます """
+            if cls.is_forbidden(screen_name, role):
+                return
+            permission = cls.retrieve(screen_name == permission)
+            permission.roles.remove(role)
+            permission.save()
 
-    @declared_attr
-    def __table_args__(cls):
-        if hasattr(cls, "target"):
-            unique = UniqueConstraint("node", "target", name="unique")
-        else:
-            unique = UniqueConstraint("node", name="unique")
-        return (unique,)
-
-    node = Column(NodeType)
-    targetUpPropagate = False
-    targetDownPropagate = False
-    upPropagate = False
-    downPropagate = False
-
-    @classmethod
-    def accept(cls, node, target=None):
-        """UserまたはGroupに許可します
-
-        :param node: UserまたはGroupのインスタンス
-        :param target: 許可対象
-        """
-        if cls.is_accepted(node, target):
-            return
-        perm = cls()
-        perm.node = node
-        if hasattr(cls, "target") and target != None:
-            perm.target = target
-        perm.create()
-
-    @classmethod
-    def forbit(cls, node, target=None):
-        """UserまたはGroupの許可を取りやめます
-
-        :param node: UserまたはGroupのインスタンス
-        :param target: 許可対象
-        """
-        if cls.is_forbidden(node, target):
-            return
-        if hasattr(cls, "target"):
-            perm = (
-                cls.query.filter(cls.node == node).filter(cls.target == target).first()
-            )
-        else:
-            perm = cls.query.filter(cls.node == node).first()
-        if perm != None:
-            perm.delete()
-
-    @classmethod
-    def is_accepted(cls, node, target=None):
-        """UserまたはGroupが許可されているか確認します
-
-        :param node: UserまたはGroupのインスタンス
-        :param target: 許可対象
-        """
-        perms = cls.query.filter(cls.node == node).all()
-        for perm in perms:
-            if perm.is_target(target) or perm.is_target(None):
-                return True
-        if isinstance(node, User):
-            parents = node.groups
-            for group in parents:
-                if cls.is_accepted(group, target):
-                    return True
-        for node_ in cls.query.all():
-            if node_.node == None:
-                continue
-            if (
-                node_.upPropagate
-                and not isinstance(node_.node, User)
-                and node_.node.is_ancestor(node)
-                and node_.is_target(target)
-            ):
-                return True
-            if (
-                node_.downPropagate
-                and not isinstance(node_.node, User)
-                and node_.node.is_descendant(node)
-                and node_.is_target(target)
-            ):
-                return True
-        return False
-
-    def is_target(self, target=None):
-        if not hasattr(self, "target"):
-            return True
-        if self.target == None:
-            return True
-        if self.target == target:
-            return True
-        if isinstance(self.target, Group):
-            if isinstance(target, User):
-                if self.targetUpPropagate:
-                    return self.target.is_in(target) or self.target.is_ancestor(target)
-                elif self.targetDownPropagate:
-                    return self.target.is_descendant(target)
+        @classmethod
+        def is_accepted(cls, screen_name, node):
+            """UserまたはGroupが許可されているか確認します
+            """
+            perm = cls.retrieve(screen_name == screen_name)
+            for role in perm.roles:
+                if isinstance(node, User):
+                    if node in role.users:
+                        return True
+                    for group in role.groups:
+                        if group.is_in(node):
+                            return True
                 else:
-                    return self.target == target
-            elif isinstance(target, Group):
-                if self.targetUpPropagate:
-                    return self.target.is_ancestor(target)
-                elif self.targetDownPropagate:
-                    return self.target.is_descendant(target)
-                else:
-                    return self.target == target
-            elif self.target == target:
-                return True
-        return False
+                    if node in role.groups:
+                        return True
+            return False
 
-    @classmethod
-    def is_forbidden(cls, node, target=None):
-        """UserまたはGroupが許可されていないか確認します
+        @classmethod
+        def is_forbidden(cls, screen_name, node):
+            """UserまたはGroupが許可されていないか確認します
+            """
+            return not cls.is_accepted(screen_name, node)
 
-        :param node: UserまたはGroupのインスタンス
-        :param target: 許可対象
-        """
-        if not hasattr(cls, "target"):
-            return not cls.is_accepted(node)
-        else:
-            return not cls.is_accepted(node, target)
+    return Permission
+
 
 db.create_all()

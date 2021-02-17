@@ -2,6 +2,10 @@ from mitama.app.forms import Form, FileField, Field
 from mitama.noimage import load_noimage_group, load_noimage_user
 
 
+class SetupForm(Form):
+    email = Field(label="メールアドレス", required=True)
+
+
 class LoginForm(Form):
     screen_name = Field(label="ログイン名", required=True)
     password = Field(label="パスワード", required=True)
@@ -15,6 +19,7 @@ class RegisterForm(Form):
 
 
 class InviteForm(Form):
+    email = Field(label="メールアドレス", required=True)
     icon = FileField(label="プロフィール画像", initial=load_noimage_user())
     name = Field(label="名前")
     screen_name = Field(label="ログイン名")
