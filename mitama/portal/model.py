@@ -7,11 +7,7 @@ from mitama.db.types import *
 from mitama.models import Group, PermissionMixin, User
 
 
-class Database(BaseDatabase):
-    pass
-
-
-db = Database()
+db = BaseDatabase(prefix='portal')
 
 
 class Invite(db.Model):

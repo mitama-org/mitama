@@ -1,3 +1,5 @@
+import re
+
 class _Singleton:
     _instance = None
 
@@ -16,3 +18,9 @@ class _classproperty:
         if cls is None:
             cls = type(obj)
         return self.fget(cls)
+
+
+def tosnake(s):
+    return re.sub(
+        "(.[A-Z])", lambda x: x.group(1)[0] + "_" + x.group(1)[1], s
+    ).lower()

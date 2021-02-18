@@ -1,13 +1,18 @@
 import unittest
 
-from mitama.db import _CoreDatabase
+from mitama.db import DatabaseManager, BaseDatabase, inspect
 
-db = _CoreDatabase.test()
+DatabaseManager.test()
+
+class Database(BaseDatabase):
+    pass
+
+db = Database()
 
 from mitama.models import Group, User
 
-
 class TestGroup(unittest.TestCase):
+
     def test_group(self):
         group = Group()
         group.name = "team1"

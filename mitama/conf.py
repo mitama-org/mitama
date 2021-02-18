@@ -15,6 +15,7 @@ class Config:
         self._project_dir = path
         self._sqlite_db_path = Path(self._project_dir) / "db.sqlite3"
         self.password_validation = {}
+        self.port = 8080
         for k in dic:
             try:
                 setattr(self, k, dic[k])

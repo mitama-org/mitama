@@ -4,8 +4,10 @@
 ポート番号を引数に取ってHTTPサーバーを起動するコマンド
 実行されてないマイグレーションもこいつが実行する
 """
-import mitama.models
-from mitama.app import AppRegistry, _MainApp
+import os
+import sys
+import importlib
+from mitama.app import AppRegistry
 from mitama.app.http import run_app
 from mitama.conf import get_from_project_dir
 
@@ -22,7 +24,8 @@ class Command:
                 port = "8080"
         if not hasattr(config, "ssl"):
             config.ssl = False
-        app_registry = AppRegistry()
-        app_registry.load_config()
-        app = _MainApp(app_registry)
-        run_app(app, port)
+
+        project_name = os.getcwd().split('/')[-1]
+        sys.path.append(str(config._project_dir))
+        app = importlib.import_module("__init__", package=".").app
+        run_app(app, app.port)

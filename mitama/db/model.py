@@ -8,14 +8,13 @@
     * Flaskのsqlalchemy拡張が参考に成る
 """
 
-import re
 import uuid
 
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import ColumnProperty, class_mapper
 from sqlalchemy.types import TypeDecorator
 
-from mitama._extra import _classproperty
+from mitama._extra import _classproperty, tosnake
 
 from .types import Column, Group, Integer, LargeBinary, Node, String
 
@@ -28,6 +27,7 @@ def UUID(prefix = None):
     return genUUID
 
 class Model:
+    prefix = None
     _id = Column(String, default=UUID(), primary_key=True, nullable=False)
 
     @classmethod
@@ -68,9 +68,7 @@ class Model:
 
     @declared_attr
     def __tablename__(cls):
-        return re.sub(
-            "(.[A-Z])", lambda x: x.group(1)[0] + "_" + x.group(1)[1], cls.__name__
-        ).lower()
+        return ("" if cls.prefix is None else cls.prefix + "_")  + tosnake(cls.__name__)
 
     def create(self):
         self.query.session.add(self)

@@ -1,11 +1,10 @@
 import unittest
 
-from mitama.db import _CoreDatabase
+from mitama.db import DatabaseManager
 
-db = _CoreDatabase.test()
+DatabaseManager.test()
 
 from mitama.models import User
-
 
 class TestUser(unittest.TestCase):
     def test_user(self):

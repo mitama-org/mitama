@@ -145,6 +145,14 @@ class App:
 
             return request, _handle, method
 
+    def uninstall(self):
+        db = DatabaseManager()
+        tables = db.engine.table_names()
+        prefix = _inspect.getmodule(self.__class__).__package__
+        for table in tables:
+            if table.startswith(prefix):
+                db.engine.execute("drop table :table", table=table)
+
 
 def _session_middleware():
     import base64
@@ -191,17 +199,3 @@ def _session_middleware():
 
     return SessionMiddleware
 
-
-class _MainApp(App):
-    def __init__(self, app_registry):
-        self.app_registry = app_registry
-        self._router = None
-        super().__init__(name="_mitama", path="/", package="_mitama")
-
-    @property
-    def router(self):
-        if self._router == None or self.app_registry.changed:
-            router = self.app_registry.router()
-            router.add_middleware(_session_middleware())
-            self._router = router
-        return self._router

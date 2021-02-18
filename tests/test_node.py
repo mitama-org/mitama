@@ -1,18 +1,16 @@
 import unittest
 
-from mitama.db import _CoreDatabase, BaseDatabase
+from mitama.db import Database
 
-db = _CoreDatabase.test()
+db = Database.test()
 
 from mitama.models import Group, User
 from mitama.db.types import Column, Node
 
-db_ = BaseDatabase.test()
-
-class ModelC(db_.Model):
+class ModelC(db.Model):
     node = Column(Node)
 
-db_.create_all()
+db.create_all()
 
 class TestNode(unittest.TestCase):
     def test_node(self):
