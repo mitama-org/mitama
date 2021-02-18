@@ -30,6 +30,7 @@ from mitama.db.types import String
 from mitama.db.model import UUID
 from mitama.noimage import load_noimage_group, load_noimage_user
 from mitama.conf import get_from_project_dir
+from mitama._extra import _classproperty
 
 class Database(BaseDatabase):
     pass
@@ -44,12 +45,10 @@ class AuthorizationError(Exception):
     pass
 
 
-user_group_relation = Table(
-    "mitama_user_group",
-    db.metadata,
-    Column("group_id", String, ForeignKey("mitama_group._id")),
-    Column("user_id", String, ForeignKey("mitama_user._id")),
-)
+class UserGroup(db.Model):
+    group_id = Column(String, ForeignKey("mitama_group._id", ondelete="CASCADE")),
+    user_id = Column(String, ForeignKey("mitama_user._id", ondelete="CASCADE")),
+
 
 class Node(object):
     _icon = Column(LargeBinary)
@@ -116,14 +115,6 @@ class Node(object):
             raise Exception("")
         return node
 
-    """
-    def __eq__(self, op):
-        try:
-            return self._id == op._id
-        except:
-            return False
-    """
-
     def icon_to_dataurl(self):
         f = magic.Magic(mime=True, uncompress=True)
         mime = f.from_buffer(self.icon)
@@ -158,8 +149,9 @@ class User(Node, db.Model):
     password = Column(String(255))
     groups = relationship(
         "Group",
-        secondary=user_group_relation,
-        back_populates="users"
+        secondary=UserGroup,
+        back_populates="users",
+        cascade="all"
     )
 
     def to_dict(self, only_profile=False):
@@ -292,13 +284,15 @@ class Group(Node, db.Model):
     _project = None
     users = relationship(
         "User",
-        secondary=user_group_relation,
-        back_populates="groups"
+        secondary=UserGroup,
+        back_populates="groups",
+        cascade="all"
     )
     parent_id = Column(String, ForeignKey("mitama_group._id"))
-    children = relationship(
+    groups = relationship(
         "Group",
-        backref=backref("parent", remote_side=[_id])
+        backref=backref("parent", remote_side=[_id]),
+        cascade="all"
     )
 
     def to_dict(self, only_profile=False):
@@ -312,6 +306,18 @@ class Group(Node, db.Model):
     def load_noimage(self):
         return load_noimage_group()
 
+    @_classproperty
+    def relation(cls):
+        return Column(String, ForeignKey("mitama_group._id"), nullable=False)
+
+    @_classproperty
+    def relations(cls):
+        return relation("mitama_group._id", cascade="all, delete")
+
+    @_classproperty
+    def relation_or_null(cls):
+        return Column(String, ForeignKey("mitama_group._id"), nullable=True)
+
     @classmethod
     def tree(cls):
         return Group.query.filter(Group.parent == None).all()
@@ -320,7 +326,7 @@ class Group(Node, db.Model):
         if isinstance(node, User):
             self.users.append(node)
         elif isinstance(node, Group):
-            self.children.append(node)
+            self.groups.append(node)
         else:
             raise TypeError("Appending object must be Group or User instance")
         self.query.session.commit()
@@ -330,7 +336,7 @@ class Group(Node, db.Model):
             if isinstance(node, User):
                 self.users.append(node)
             elif isinstance(node, Group):
-                self.children.append(node)
+                self.groups.append(node)
             else:
                 raise TypeError("Appending object must be Group or User instance")
         self.query.session.commit()
@@ -338,14 +344,14 @@ class Group(Node, db.Model):
     def remove(self, node):
         if not isinstance(node, Group) and not isinstance(node, User):
             raise TypeError("Removing object must be Group or User instance")
-        self.children.remove(node)
+        self.groups.remove(node)
         self.query.session.commit()
 
     def remove_all(self, nodes):
         for node in nodes:
             if not isinstance(node, Group) and not isinstance(node, User):
                 raise TypeError("Appending object must be Group or User instance")
-        self.children.remove_all(nodes)
+        self.groups.remove_all(nodes)
         self.query.session.commit()
 
     def is_ancestor(self, node):
@@ -370,14 +376,13 @@ class Group(Node, db.Model):
     def is_descendant(self, node):
         if not isinstance(node, Group) and not isinstance(node, User):
             raise TypeError("Checking object must be Group or User instance")
-        #layer = self.children()
-        layer = self.children
+        layer = self.groups
         while len(layer) > 0:
             if node in layer:
                 return True
             layer_ = list()
             for node_ in layer:
-                layer_.extend(node_.children)
+                layer_.extend(node_.groups)
             layer = layer_
         return False
 
@@ -385,7 +390,7 @@ class Group(Node, db.Model):
         if isinstance(node, User):
             return node in self.users
         elif isinstance(node, Group):
-            return node in self.children
+            return node in self.groups
         else:
             raise TypeError("Checking object must be Group or User instance")
 
@@ -412,45 +417,59 @@ class Group(Node, db.Model):
                 group.mail(subject, body, type, to_all)
 
 
-class Role(db.Model):
-    __tablename__ = "mitama_role"
-    name = Column(String)
-    users = relationship(
-        "User",
-        secondary=role_user,
-        back_populates="roles"
-    )
-    groups = relationship(
-        "Group",
-        secondary=role_group,
-        back_populates="roles"
-    )
-
-
-
 role_user = Table(
     "mitama_role_user",
     db.metadata,
-    Column("role_id", ForeignKey("Role._id")),
-    Column("user_id", ForeignKey("User._id"))
+    Column("role_id", String, ForeignKey("mitama_role._id", ondelete="CASCADE")),
+    Column("user_id", String, ForeignKey("mitama_user._id", ondelete="CASCADE"))
 )
 
 role_group = Table(
     "mitama_role_group",
     db.metadata,
-    Column("role_id", ForeignKey("Role._id")),
-    Column("group_id", ForeignKey("Group._id"))
+    Column("role_id", String, ForeignKey("mitama_role._id", ondelete="CASCADE")),
+    Column("group_id", String, ForeignKey("mitama_group._id", ondelete="CASCADE"))
 )
 
-def permission(db_, permissions, init_func=None):
-    role_permission = Table(
-        "mitama_role_permission",
-        db_.metadata,
-        Column("role_id", ForeignKey("Role._id")),
-        Column("permission_id", ForeignKey("Permission._id")),
+class RoleRelation(db.Model):
+    role_id = Column(String, ForeignKey("mitama_inner_role._id", ondelete="CASCADE")),
+    relation_id = Column(String, ForeignKey("mitama_user_group._id", ondelete="CASCADE"))
+
+
+class Role(db.Model):
+    __tablename__ = "mitama_role"
+    name = Column(String, unique=True, nullable=False)
+    users = relationship(
+        "User",
+        secondary=role_user,
+        back_populates="roles",
+        cascade="all, delete"
     )
-    if init_func is not None:
-        event.listens(role_permission, 'after_create', init_func)
+    groups = relationship(
+        "Group",
+        secondary=role_group,
+        back_populates="roles",
+        cascade="all, delete"
+    )
+
+class InnerRole(db.Model):
+    __tablename__ = "mitama_inner_role"
+    name = Column(String, unique=True, nullable=False)
+    relation = relationship(
+        "RoleRelation",
+        secondary=RoleRelation,
+        back_populates="roles",
+        cascade="all, delete"
+    )
+
+def permission(db_, permissions):
+    role_permission = Table(
+        db_.Model.prefix + "_role_permission",
+        db_.metadata,
+        Column("role_id", String, ForeignKey("mitama_role._id", ondelete="CASCADE")),
+        Column("permission_id", String, ForeignKey(db.Model.prefix + "_permission._id", ondelete="CASCADE")),
+        extend_existing=True
+    )
 
     class Permission(db_.Model):
         name = Column(String)
@@ -458,7 +477,8 @@ def permission(db_, permissions, init_func=None):
         roles = relationship(
             "Role",
             secondary=role_permission,
-            back_populates="permissions"
+            back_populates="permissions",
+            cascade="all, delete"
         )
 
         @classmethod
@@ -502,7 +522,94 @@ def permission(db_, permissions, init_func=None):
             """
             return not cls.is_accepted(screen_name, node)
 
+    def after_create(target, conn, **kw):
+        for perm_name in permissions:
+            perm = Permission()
+            perm.name = perm_name
+            Permission.query.session.add(perm)
+        Permission.commit()
+
     return Permission
 
+
+def inner_permission(db_, permissions):
+    inner_role_permission = Table(
+        db_.Model.prefix + "_role_permission",
+        db_.metadata,
+        Column("role_id", String, ForeignKey("mitama_role._id", ondelete="CASCADE")),
+        Column("permission_id", String, ForeignKey(db.Model.prefix + "_permission._id", ondelete="CASCADE")),
+        extend_existing=True
+    )
+
+    class InnerPermission(db_.Model):
+        name = Column(String)
+        screen_name = Column(String)
+        roles = relationship(
+            "InnerRole",
+            secondary=inner_role_permission,
+            back_populates="permissions",
+            cascade="all, delete"
+        )
+
+        @classmethod
+        def accept(cls, screen_name, role):
+            """特定のRoleに許可します """
+            if cls.is_accepted(screen_name, role):
+                return
+            permission = cls.retrieve(screen_name == permission)
+            permission.roles.append(role)
+            permission.save()
+
+        @classmethod
+        def forbit(cls, screen_name, role):
+            """UserまたはGroupの許可を取りやめます """
+            if cls.is_forbidden(screen_name, role):
+                return
+            permission = cls.retrieve(screen_name == permission)
+            permission.roles.remove(role)
+            permission.save()
+
+        @classmethod
+        def is_accepted(cls, screen_name, node):
+            """UserまたはGroupが許可されているか確認します
+            """
+            perm = cls.retrieve(screen_name == screen_name)
+            for role in perm.roles:
+                if isinstance(node, User):
+                    if node in role.users:
+                        return True
+                    for group in role.groups:
+                        if group.is_in(node):
+                            return True
+                else:
+                    if node in role.groups:
+                        return True
+            return False
+
+        @classmethod
+        def is_forbidden(cls, screen_name, node):
+            """UserまたはGroupが許可されていないか確認します
+            """
+            return not cls.is_accepted(screen_name, node)
+
+    return InnerPermission
+
+Permission = permission(db, [
+    "admin",
+    "create_group",
+    "update_group",
+    "delete_group",
+    "create_user",
+    "update_user",
+    "delete_user",
+])
+
+InnerPermission = inner_permission(db, [
+    "admin",
+    "add_user",
+    "remove_user",
+    "add_group",
+    "remove_group",
+])
 
 db.create_all()

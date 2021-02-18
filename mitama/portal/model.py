@@ -23,44 +23,14 @@ class Invite(db.Model):
         mime = f.from_buffer(self.icon)
         return "data:" + mime + ";base64," + b64encode(self.icon).decode()
 
-
-class CreateUserPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    pass
-
-
-class UpdateUserPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    targetDownPropagate = True
-    target = Column(User.type, nullable=True)
-    pass
-
-
-class DeleteUserPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    pass
-
-
-class CreateGroupPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    pass
-
-
-class UpdateGroupPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    targetDownPropagate = True
-    target = Column(Group.type, nullable=True)
-    pass
-
-
-class DeleteGroupPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    pass
-
-
-class Admin(PermissionMixin, db.Model):
-    upPropagate = True
-    pass
-
+Permission = permission(db, [
+    "admin",
+    "create_group",
+    "update_group",
+    "delete_group",
+    "create_user",
+    "update_user",
+    "delete_user",
+])
 
 db.create_all()

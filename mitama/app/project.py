@@ -3,6 +3,7 @@ import importlib
 import subprocess
 import mitama
 import inspect
+import json
 from mitama.app.http import Request
 from mitama.app import App, AppRegistry
 from mitama.app.app import _session_middleware
@@ -22,9 +23,11 @@ class Project(App):
         Group._project = self
         self.port = config.port
         self.mail = config.mail
+        self.project_dir = config._project_dir
         self.apps = AppRegistry()
         self.apps.load_config(config)
         self.middlewares = [_session_middleware()]
+        self.config = config
 
     def __call__(self, env, start_response):
         request = Request(env)
@@ -92,7 +95,19 @@ class Project(App):
                 return request, handler
         return False
 
+    def install(self, package_name, path="/"):
+        app = self.apps.load_package(package_name, path, self._project_dir)
+        self.apps[path] = app
+        self.apps[path].install()
+        self.config[package_name] = {
+            "path": path
+        }
+        with open("mitama.json", "w") as f:
+            f.write(json.dumps(self.config.to_dict()))
 
     def uninstall(self, package_name):
         self.apps[package_name].uninstall()
         del self.apps[package_name]
+        del self.config[package_name]
+        with open("mitama.json", "w") as f:
+            f.write(json.dumps(self.config.to_dict()))

@@ -11,4 +11,4 @@ os.chdir(
     os.path.dirname(__file__)
 )
 
-app = Project()
+__project__ = Project()

@@ -17,15 +17,6 @@ from .controller import (
     AppsController,
 )
 from .middleware import InitializeMiddleware
-from .model import (
-    Admin,
-    CreateGroupPermission,
-    CreateUserPermission,
-    DeleteGroupPermission,
-    DeleteUserPermission,
-    UpdateGroupPermission,
-    UpdateUserPermission,
-)
 
 with open(Path(os.path.dirname(__file__)) / "static/icon.png", "rb") as f:
     icon = f.read()
@@ -39,15 +30,6 @@ class App(BaseApp):
     @property
     def view(self):
         view = super().view
-        view.globals.update(
-            user_create_permission=CreateUserPermission.is_accepted,
-            user_update_permission=UpdateUserPermission.is_accepted,
-            user_delete_permission=DeleteUserPermission.is_accepted,
-            group_create_permission=CreateGroupPermission.is_accepted,
-            group_update_permission=UpdateGroupPermission.is_accepted,
-            group_delete_permission=DeleteGroupPermission.is_accepted,
-            is_admin=Admin.is_accepted,
-        )
         return view
 
     @property
@@ -96,21 +78,5 @@ class App(BaseApp):
                 ),
             ]
         )
-
-    def delete_user(self, user):
-        CreateUserPermission.forbit(user)
-        UpdateUserPermission.forbit(user)
-        DeleteUserPermission.forbit(user)
-        CreateGroupPermission.forbit(user)
-        UpdateGroupPermission.forbit(user)
-        DeleteGroupPermission.forbit(user)
-
-    def delete_group(self, group):
-        CreateUserPermission.forbit(group)
-        UpdateUserPermission.forbit(group)
-        DeleteUserPermission.forbit(group)
-        CreateGroupPermission.forbit(group)
-        UpdateGroupPermission.forbit(group)
-        DeleteGroupPermission.forbit(group)
 
     pass

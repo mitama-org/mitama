@@ -35,3 +35,4 @@ class Builder(object):
         install_dir = os.path.dirname(inspect.getfile(self.__class__))
         self.data["install_dir"] = install_dir
         return self.app(**self.data)
+
