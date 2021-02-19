@@ -198,7 +198,7 @@ class UsersController(Controller):
         user = User.retrieve(screen_name=req.params["id"])
         roles = Role.list()
         if req.method == "POST":
-            form = req.post()
+            form = UserUpdateForm(req.post())
             try:
                 user.screen_name = form["screen_name"]
                 user.name = form["name"]
@@ -215,7 +215,7 @@ class UsersController(Controller):
                         "roles": roles
                     },
                 )
-            except ValidationException as err:
+            except ValidationError as err:
                 error = err.message
                 return Response.render(
                     template,

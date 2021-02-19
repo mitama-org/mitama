@@ -39,6 +39,7 @@ class _RequestPayload:
             return len(self._field_storage[key].value) > 0
 
     def __getitem__(self, key):
+        print(self._field_storage[key])
         if key not in self._field_storage:
             raise KeyError
         elif (self._field_storage[key].filename or "") != "":
