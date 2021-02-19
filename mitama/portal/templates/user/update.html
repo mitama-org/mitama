@@ -41,6 +41,17 @@
                 <dd>
                     <input type='text' name='name' placeholder='名前' value='{{ name }}'/>
                 </dd>
+                {% if permission("admin", request.user) %}
+                <dt>役割</dt>
+                <dd>
+                    {% for role in roles %}
+                    <label>
+                        <input type='checkbox' name='roles' value='{{ role.screen_name }}' {% if role in user.roles %}checked{% endif %}/>
+                        {{ role.name }}
+                    </label>
+                    {% endfor %}
+                </dd>
+                {% endif %}
             </dl>
             <button type='submit'>設定を変更</button>
             <!--

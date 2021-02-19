@@ -11,7 +11,7 @@
             <a href='{{ url('/apps') }}'>アプリ</a>
         </div>
         <div class='tab-content'>
-            {% if create_permission %}
+            {% if permission("create_user", request.user) %}
             <div class='tool-box'>
                 <a href='{{ url('/users/invite') }}'><button>ユーザーを招待</button></a>
             </div>

@@ -11,7 +11,8 @@ class Field:
         required=False,
         name=None,
         form_type="text",
-        placeholder=None
+        placeholder=None,
+        listed=False
     ):
         self.required = required
         self.label = label
@@ -21,6 +22,7 @@ class Field:
         self.form_type = form_type
         self.placeholder = placeholder
         self.name = name
+        self.listed = listed
 
     def instance(self):
         return FieldInstance(
@@ -31,29 +33,20 @@ class Field:
             required=self.required,
             name=self.name,
             form_type=self.form_type,
-            placeholder=self.placeholder
+            placeholder=self.placeholder,
+            listed=self.listed
         )
 
 class FileField(Field):
     def __init__(
         self,
-        label="",
-        initial=None,
-        validator=None,
-        required=False,
-        name=None,
-        placeholder=None,
         accept=None,
-        max_file_size=None
+        max_file_size=None,
+        **kwargs
     ):
+        kwargs["form_type"] = "file"
         super().__init__(
-            required=required,
-            label=label,
-            initial=initial,
-            validator=validator,
-            name=name,
-            placeholder=placeholder,
-            form_type="file"
+            **kwargs
         )
         self.accept = None
         self.max_file_size = None
@@ -80,7 +73,8 @@ class FieldInstance:
         required=False,
         name=None,
         form_type="text",
-        placeholder=None
+        placeholder=None,
+        listed=False
     ):
         self.required = required
         self.label = label
@@ -91,6 +85,7 @@ class FieldInstance:
         self.form_type = form_type
         self.placeholder = placeholder
         self.name = name
+        self.listed=listed
 
     def reset(self):
         self.data = self.initial
@@ -154,3 +149,4 @@ class FileFieldInstance(FieldInstance):
     @data.setter
     def data(self, value):
         self._data = value
+

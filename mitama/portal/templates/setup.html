@@ -13,36 +13,13 @@
     </p>
     <form method='post' action='' enctype='multipart/form-data' class='entrance'>
         <dl>
-            <dt>アイコン</dt>
+            <dt>メールアドレス</dt>
             <dd>
-                <div id='image-form'>
-                    <img src="{{ url("/static/noimage_user.svg") }}"/>
-                    <label class='button'>
-                        <input type='file' name='icon' accept='image/*' onchange='previewImage(this)' />
-                        画像を選択
-                    </label>
-                    <script>
-                        function previewImage(dom) {
-                            document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
-                        }
-                    </script>
-                </div>
-            </dd>
-            <dt>ログイン名</dt>
-            <dd>
-                <input type='text' name='screen_name' placeholder='ログイン名' value='{{ post.screen_name }}'/>
-            </dd>
-            <dt>名前</dt>
-            <dd>
-            <input type='text' name='name' placeholder='名前' value='{{ post.name }}'/>
-            </dd>
-            <dt>パスワード</dt>
-            <dd>
-                <input type='password' name='password' placeholder='パスワード' value='{{ post.password }}'/>
+                <input type="email" name="email" placeholder="メールアドレス" />
             </dd>
         </dl>
         <div class='submit'>
-            <button type="submit">はじめる</button>
+            <button type="submit">確認メールを送信</button>
         </div>
         <p class='error'>{{ error }}</p>
     </form>

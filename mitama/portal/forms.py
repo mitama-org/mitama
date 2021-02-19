@@ -44,13 +44,7 @@ class GroupUpdateForm(Form):
     name = Field(label="名前", required=True)
     screen_name = Field(label="ドメイン名", required=True)
     parent = Field(label="親グループ")
-    admin = Field(initial=False)
-    user_create = Field(initial=False)
-    user_update = Field(initial=False)
-    user_delete = Field(initial=False)
-    group_create = Field(initial=False)
-    group_update = Field(initial=False)
-    group_delete = Field(initial=False)
+    roles = Field(label="役割", listed=True)
 
 
 class AppUpdateForm(Form):

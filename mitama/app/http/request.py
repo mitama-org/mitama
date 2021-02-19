@@ -31,6 +31,8 @@ class _RequestPayload:
     def __contains__(self, key):
         if key not in self._field_storage:
             return False
+        elif isinstance(self._field_storage[key], list):
+            return True
         elif isinstance(self._field_storage[key].file, io.BytesIO):
             return (self._field_storage[key].filename or "") != ""
         else:

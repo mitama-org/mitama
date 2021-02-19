@@ -12,7 +12,7 @@
                 <div class="screen-name">{{group.screen_name}}</div>
             </div>
             <div class='action'>
-            {% if group_update_permission(request.user, group) %}
+            {% if permission("update_group", request.user) or inner_permission("admin", group, request.user) %}
                 <a href='/groups/{{group.screen_name}}/settings'><button>設定</button></a>
             {% endif %}
             </div>
@@ -36,7 +36,7 @@
         <div class="content">
             <h2 class="mini-title">メンバー</h2>
             <div class="user-list tight">
-                {% for user in group.children|user %}
+                {% for user in group.users %}
                     <a href="{{url("/users/"+user.screen_name)}}" class="item">
                         <img src='{{ dataurl(user.icon) }}' class='user-icon' />
                         <div class='detail'>

@@ -19,7 +19,10 @@ class Form:
     def __init__(self, data = None):
         for field in self.fields.values():
             if field.name in data:
-                field.data = data[field.name]
+                if field.listed:
+                    field.data = data.getlist(field.name)
+                else:
+                    field.data = data.get(field.name)
             field.validate()
 
     def __getitem__(self, key):

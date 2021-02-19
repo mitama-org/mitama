@@ -4,6 +4,7 @@ from pathlib import Path
 from mitama.app import App as BaseApp
 from mitama.app import Router
 from mitama.app.method import view, post
+from mitama.models import Permission, InnerPermission
 from mitama.utils.controllers import static_files
 from mitama.utils.middlewares import SessionMiddleware
 
@@ -30,6 +31,10 @@ class App(BaseApp):
     @property
     def view(self):
         view = super().view
+        view.globals.update(
+            permission=Permission.is_accepted,
+            inner_permission=InnerPermission.is_accepted,
+        )
         return view
 
     @property

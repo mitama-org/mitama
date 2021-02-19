@@ -27,5 +27,5 @@ class Command:
 
         project_name = os.getcwd().split('/')[-1]
         sys.path.append(str(config._project_dir))
-        app = importlib.import_module("__init__", package=".").app
-        run_app(app, app.port)
+        project = importlib.import_module("__init__", package=".").__project__
+        run_app(project, project.port)

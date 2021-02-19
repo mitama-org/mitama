@@ -4,7 +4,7 @@ import magic
 
 from mitama.db import BaseDatabase
 from mitama.db.types import *
-from mitama.models import Group, PermissionMixin, User
+from mitama.models import Group, User, permission
 
 
 db = BaseDatabase(prefix='portal')
@@ -22,15 +22,5 @@ class Invite(db.Model):
         f = magic.Magic(mime=True, uncompress=True)
         mime = f.from_buffer(self.icon)
         return "data:" + mime + ";base64," + b64encode(self.icon).decode()
-
-Permission = permission(db, [
-    "admin",
-    "create_group",
-    "update_group",
-    "delete_group",
-    "create_user",
-    "update_user",
-    "delete_user",
-])
 
 db.create_all()

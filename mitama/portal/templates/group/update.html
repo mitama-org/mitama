@@ -1,8 +1,7 @@
 {% extends 'base.html' %}
 {% block header %}
     {% include 'header.html' %}
-{% endblock %}
-{% block content %}
+{% endblock %} {% block content %}
 {% if error == None %}
 {% set post = request.post() %}
 {% else %}
@@ -36,82 +35,24 @@
                 <dd>
                     <input type='text' name='name' placeholder='名前' value='{{ name }}'/>
                 </dd>
-                {% if is_admin(request.user) %}
-                <dt>権限の設定</dt>
-                <dd class='permission'>
-                    <p>所属メンバーには以下の権限が付与されます</p>
+                {% if permission("admin", request.user) %}
+                <dt>役割</dt>
+                <dd>
+                    {% for role in roles %}
                     <label>
-                        <input
-                            type='checkbox'
-                            name='user_create'
-                            value='on'
-                            {{ 'checked' if user_create_permission(group) else ''}}
-                        />
-                        <div>ユーザーの招待</div>
+                        <input type='checkbox' name='roles' value='{{ role.screen_name }}' {% if role in group.roles %}checked{% endif %}/>
+                        {{ role.name }}
                     </label>
-                    <label>
-                        <input
-                            type='checkbox'
-                            name='user_update'
-                            value='on'
-                            {{ 'checked' if user_update_permission(group) else ''}}
-                        />
-                        <div>ユーザー情報の変更</div>
-                    </label>
-                    <label>
-                        <input
-                            type='checkbox'
-                            name='user_delete'
-                            value='on'
-                            {{ 'checked' if user_delete_permission(group) else ''}}
-                        />
-                        <div>ユーザーの追放</div>
-                    </label>
-                    <label>
-                        <input
-                            type='checkbox'
-                            name='group_create'
-                            value='on'
-                            {{ 'checked' if group_create_permission(group) else ''}}
-                        />
-                        <div>グループの作成</div>
-                    </label>
-                    <label>
-                        <input
-                            type='checkbox'
-                            name='group_update'
-                            value='on'
-                            {{ 'checked' if group_update_permission(group) else ''}}
-                        />
-                        <div>グループ情報の更新</div>
-                    </label>
-                    <label>
-                        <input
-                            type='checkbox'
-                            name='group_delete'
-                            value='on'
-                            {{ 'checked' if group_delete_permission(group) else ''}}
-                        />
-                        <div>グループの強制解散</div>
-                    </label>
-                    <label>
-                        <input
-                            type='checkbox'
-                            name='admin'
-                            value='on'
-                            {{ 'checked' if is_admin(group) else ''}}
-                        />
-                        <div>管理者権限（アプリ設定・権限設定の権限）</div>
-                    </label>
+                    {% endfor %}
                 </dd>
-            {% endif %}
+                {% endif %}
             </dl>
             <button type='submit'>設定を変更</button>
             {% if error %}
                 <p class='error'>{{ error }}</p>
             {% endif %}
             {% if message %}
-                <p class='message'>{{ message}}</p>
+                <p class='message'>{{ message }}</p>
             {% endif %}
         </form>
         <section class='inner'>
@@ -120,7 +61,7 @@
                 <button onclick='document.querySelector("#modal-switch").click()'>追加</button>
             </h3>
             <div class='member-control-list'>
-                {% set groups = group.children()|group %}
+                {% set groups = group.groups %}
                 {% if groups|length > 0 %}
                 <h4>グループ</h4>
                 {% for group_ in groups %}
@@ -136,7 +77,7 @@
                 </div>
                 {% endfor %}
                 {% endif %}
-                {% set users = group.children()|user %}
+                {% set users = group.users %}
                 {% if users|length > 0 %}
                 <h4>ユーザー</h4>
                 {% for user in users %}
@@ -148,10 +89,10 @@
                     </div>
                     <div class='actions'>
                         <a href='/groups/{{group.screen_name}}/remove/{{user.id}}'><button>はずす</button></a>
-                        {% if not group_update_permission(user, group) %}
-                        <a href='/groups/{{group.screen_name}}/accept/{{user.id}}/update'><button>変更を許可</button></a>
+                        {% if not inner_permission("admin", group, user) %}
+                        <a href='/groups/{{group.screen_name}}/accept/{{user.id}}/update'><button>グループ管理者にする</button></a>
                         {% else %}
-                        <a href='/groups/{{group.screen_name}}/forbit/{{user.id}}/update'><button>変更を拒否</button></a>
+                        <a href='/groups/{{group.screen_name}}/forbit/{{user.id}}/update'><button>一般メンバーにする</button></a>
                         {% endif %}
                     </div>
                 </div>

@@ -3,6 +3,8 @@ import importlib
 import subprocess
 import mitama
 import inspect
+import smtplib
+from email.mime.text import MIMEText
 import json
 from mitama.app.http import Request
 from mitama.app import App, AppRegistry
@@ -15,26 +17,26 @@ class Project(App):
     def __init__(self):
         config = get_from_project_dir()
 
-        if config.database.type == "mysql":
+        if config.database["type"] == "mysql":
             engine = create_engine(
                 "mysql://{}:{}@{}/{}?charset=utf8".format(
-                    config.database.user,
-                    config.database.password,
-                    config.database.host,
-                    config.database.db_name
+                    config.database["user"],
+                    config.database["password"],
+                    config.database["host"],
+                    config.database["db_name"]
                 )
             )
-        elif config.database.type == "postgresql":
+        elif config.database["type"] == "postgresql":
             engine = create_engine(
                 "postgresql://{}:{}@{}/{}?charset=utf8".format(
-                    config.database.user,
-                    config.database.password,
-                    config.database.host,
-                    config.database.db_name
+                    config.database["user"],
+                    config.database["password"],
+                    config.database["host"],
+                    config.database["db_name"]
                 )
             )
         else:
-            engine = create_engine("sqlite:///" + str(config.database.path))
+            engine = create_engine("sqlite:///" + str(config.database["path"]))
         DatabaseManager.set_engine(engine)
 
         from mitama.models import User, Group

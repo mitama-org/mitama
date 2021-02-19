@@ -4,11 +4,12 @@ from uuid import uuid4
 
 from mitama.app import AppRegistry, Controller
 from mitama.app.http import Response
-from mitama.models import AuthorizationError, Group, User
+from mitama.models import AuthorizationError, Group, User, Role, Permission
 from mitama.app.forms import ValidationError
 from mitama.noimage import load_noimage_group, load_noimage_user
 
 from .forms import (
+    SetupForm,
     LoginForm,
     RegisterForm,
     InviteForm,
@@ -47,22 +48,15 @@ class RegisterController(Controller):
     def signup(self, request):
         sess = request.session()
         template = self.view.get_template("signup.html")
-        invite = Invite.query.filter(Invite.token == request.query["token"][0]).first()
+        user = User.retrieve(_token=request.query["token"][0])
         if request.method == "POST":
             try:
                 form = RegisterForm(request.post())
-                user = User()
                 user.set_password(form["password"])
-                if invite.editable:
-                    user.screen_name = form["screen_name"]
-                    user.name = form["name"]
-                    user.icon = form["icon"] or invite.icon
-                else:
-                    user.screen_name = invite.screen_name
-                    user.name = invite.name
-                    user.icon = invite.icon
-                user.create()
-                invite.delete()
+                user.screen_name = form["screen_name"]
+                user.name = form["name"]
+                user.icon = form["icon"] or user.icon
+                user.update()
                 sess["jwt_token"] = User.get_jwt(user)
                 return Response.redirect(self.app.convert_url("/"))
             except ValidationError as err:
@@ -71,39 +65,68 @@ class RegisterController(Controller):
                     template,
                     {
                         "error": err.messsage,
-                        "name": form["name"] or invite.name,
-                        "screen_name": form["screen_name"] or invite.screen_name,
+                        "name": form["name"] or user.name,
+                        "screen_name": form["screen_name"] or user.screen_name,
                         "password": form["password"] or "",
                         "icon": icon,
-                        "editable": invite.editable,
                     },
                 )
         return Response.render(
             template,
             {
-                "icon": invite.icon,
-                "name": invite.name,
-                "screen_name": invite.screen_name,
-                "editable": invite.editable,
+                "icon": user.icon,
+                "name": user.name or "",
+                "screen_name": user.screen_name or "",
             },
         )
 
     def setup(self, request):
         sess = request.session()
         template = self.view.get_template("setup.html")
+        if len(User.list()) > 0:
+            return Response.redirect(self.app.convert_url("/login"))
         if request.method == "POST":
             try:
                 form = SetupForm(request.post())
-                invite = Invite()
-                invite.email = form["email"]
-                invite.create()
-                self.send_mail(
-                    invite.email,
+                user = User()
+                user.email = form["email"]
+                user._token = str(uuid4())
+                user.create()
+                user.mail(
                     "Mitamaへようこそ",
-                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.convert_fullurl("/signup?token=" + invite.token))
+                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.app.convert_fullurl(request, "/signup?token=" + user._token))
                 )
+
+                owner = Role()
+                owner.screen_name = "owner"
+                owner.name = "Owner"
+                owner.create()
+                manager = Role()
+                manager.screen_name = "manager"
+                manager.name = "Manager"
+                owner.create()
+                normal = Role()
+                normal.screen_name = "normal"
+                normal.name = "Normal"
+                owner.create()
+
+                Permission.accept("admin", owner)
+                Permission.accept("create_user", owner)
+                Permission.accept("update_user", owner)
+                Permission.accept("delete_user", owner)
+                Permission.accept("create_group", owner)
+                Permission.accept("update_group", owner)
+                Permission.accept("delete_group", owner)
+                Permission.accept("create_user", manager)
+                Permission.accept("update_user", manager)
+                Permission.accept("create_group", manager)
+                Permission.accept("update_group", manager)
+
+                user.roles.append(owner)
+                user.update()
+
                 template = self.view.get_template("confirm.html")
-                return Response.render(template, {"error": err.message})
+                return Response.render(template)
             except ValidationError as err:
                 return Response.render(template, {"error": err.message})
         return Response.render(template)
@@ -125,20 +148,17 @@ class UsersController(Controller):
         if req.method == "POST":
             form = InviteForm(req.post())
             try:
-                invite = Invite()
-                invite.name = form["name"]
-                invite.screen_name = form["screen_name"]
-                invite.icon = form["icon"]
-                invite.token = str(uuid4())
-                invite.editable = form["editable"]
-                invite.email = form["email"]
-                invite.create()
-                self.send_mail(
-                    invite.email,
+                user = User()
+                user.name = form["name"]
+                user.screen_name = form["screen_name"]
+                user.icon = form["icon"]
+                user.email = form["email"]
+                user._token = str(uuid4())
+                user.create()
+                user.mail(
                     "Mitamaに招待されています",
                     "下記リンクから、Mitamaに参加しましょう\n{}".format(self.convert_fullurl("/signup?token=" + invite.token))
                 )
-                invites = Invite.list()
                 return Response.render(
                     template, {"invites": invites, "icon": load_noimage_user()}
                 )
@@ -176,6 +196,7 @@ class UsersController(Controller):
     def update(self, req):
         template = self.view.get_template("user/update.html")
         user = User.retrieve(screen_name=req.params["id"])
+        roles = Role.list()
         if req.method == "POST":
             form = req.post()
             try:
@@ -191,10 +212,11 @@ class UsersController(Controller):
                         "screen_name": user.screen_name,
                         "name": user.name,
                         "icon": user.icon,
+                        "roles": roles
                     },
                 )
-            except Exception as err:
-                error = str(err)
+            except ValidationException as err:
+                error = err.message
                 return Response.render(
                     template,
                     {
@@ -203,6 +225,7 @@ class UsersController(Controller):
                         "screen_name": form["screen_name"] or user.screen_name,
                         "name": form["name"] or user.name,
                         "icon": form["icon"],
+                        "roles": roles
                     },
                 )
         return Response.render(
@@ -212,6 +235,7 @@ class UsersController(Controller):
                 "screen_name": user.screen_name,
                 "name": user.name,
                 "icon": user.icon,
+                "roles": roles
             },
         )
 
@@ -243,14 +267,13 @@ class GroupsController(Controller):
                 group.icon = form["icon"]
                 group.create()
                 if "parent" in form and form["parent"] != "":
-                    Group.retrieve(int(form["parent"])).append(group)
+                    Group.retrieve(form["parent"]).append(group)
                 group.append(req.user)
                 return Response.redirect(self.app.convert_url("/groups"))
-            except Exception as err:
-                error = str(err)
+            except ValidationError as err:
                 return Response.render(
                     template,
-                    {"groups": groups, "icon": load_noimage_group(), "error": error},
+                    {"groups": groups, "icon": load_noimage_group(), "error": err.message},
                 )
         return Response.render(
             template, {"groups": groups, "icon": load_noimage_group()}
@@ -268,6 +291,7 @@ class GroupsController(Controller):
 
     def update(self, req):
         template = self.view.get_template("group/update.html")
+        roles = Role.list()
         group = Group.retrieve(screen_name=req.params["id"])
         groups = list()
         for g in Group.list():
@@ -283,6 +307,8 @@ class GroupsController(Controller):
                 icon = form["icon"] or group.icon
                 group.screen_name = form["screen_name"]
                 group.name = form["name"]
+                for role in form["roles"]:
+                    group.roles.append(Role.retrieve(screen_name=role))
                 group.icon = icon
                 group.update()
                 return Response.render(
@@ -295,6 +321,7 @@ class GroupsController(Controller):
                         "all_groups": groups,
                         "all_users": users,
                         "icon": group.icon,
+                        "roles": roles
                     },
                 )
             except ValidationError as err:
@@ -309,6 +336,7 @@ class GroupsController(Controller):
                         "screen_name": form["screen_name"],
                         "name": form["name"],
                         "icon": group.icon,
+                        "roles": roles
                     },
                 )
         return Response.render(
@@ -320,6 +348,7 @@ class GroupsController(Controller):
                 "screen_name": group.screen_name,
                 "name": group.name,
                 "icon": group.icon,
+                "roles": roles
             },
         )
 
@@ -331,17 +360,16 @@ class GroupsController(Controller):
             if "user" in form:
                 for uid in form.getlist("user"):
                     try:
-                        nodes.append(User.retrieve(int(uid)))
+                        nodes.append(User.retrieve(uid))
                     except Exception as err:
-                        print(err)
                         pass
             if "group" in form:
                 for gid in form.getlist("group"):
                     try:
-                        nodes.append(Group.retrieve(int(gid)))
+                        nodes.append(Group.retrieve(gid))
                     except Exception as err:
-                        print(err)
                         pass
+            print(nodes)
             group.append_all(nodes)
         except Exception:
             pass
@@ -353,11 +381,7 @@ class GroupsController(Controller):
     def remove(self, req):
         try:
             group = Group.retrieve(screen_name=req.params["id"])
-            cid = int(req.params["cid"])
-            if cid % 2 == 0:
-                child = Group.retrieve(cid / 2)
-            else:
-                child = User.retrieve((cid + 1) / 2)
+            child = User.retrieve(request.params["cid"])
             group.remove(child)
         except Exception:
             pass

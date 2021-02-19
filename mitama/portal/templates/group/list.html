@@ -11,7 +11,7 @@
             <a href='{{ url('/apps') }}'>アプリ</a>
         </div>
         <div class='tab-content'>
-            {% if create_permission %}
+            {% if permission("create_group", request.user) %}
             <div class='tool-box'>
                 <a href='{{ url('/groups/create') }}'><button>チームを作成</button></a>
             </div>

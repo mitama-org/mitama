@@ -21,7 +21,7 @@ class Config:
         self.port = 8080
         self.mail = {
             "host": "localhost",
-            "port": 587,
+            "port": 25,
             "address": "mitama@example.com"
         }
         for k in dic:

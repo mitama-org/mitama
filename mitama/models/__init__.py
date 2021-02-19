@@ -56,6 +56,8 @@ class UserGroup(db.Model):
     _id = user_group.c._id
     group_id= user_group.c.group_id
     user_id = user_group.c.user_id
+    user = relationship("User")
+    group = relationship("Group")
 
 class Node(object):
     _icon = Column(LargeBinary)
@@ -112,16 +114,6 @@ class Node(object):
     def icon(self, value):
         self._icon = value
 
-    @classmethod
-    def retrieve(cls, id=None, screen_name=None):
-        if id != None:
-            node = cls.query.filter(cls._id == id).first()
-        elif screen_name != None:
-            node = cls.query.filter(cls._screen_name == screen_name).first()
-        else:
-            raise Exception("")
-        return node
-
     def icon_to_dataurl(self):
         f = magic.Magic(mime=True, uncompress=True)
         mime = f.from_buffer(self.icon)
@@ -139,6 +131,14 @@ class Node(object):
     def add_icon_proxy(cls, fn):
         cls._icon_proxy.append(fn)
 
+    @classmethod
+    def retrieve(cls, _id=None, screen_name=None, **kwargs):
+        if _id is not None:
+            return super().retrieve(_id = _id)
+        elif screen_name is not None:
+            return super().retrieve(_screen_name = screen_name)
+        else:
+            return super().retrieve(**kwargs)
 
 class User(Node, db.Model):
     """ユーザーのモデルクラスです
@@ -153,6 +153,7 @@ class User(Node, db.Model):
     __tablename__ = "mitama_user"
     _id = Column(String, default=UUID("user"), primary_key = True, nullable=False)
     _project = None
+    _token = Column(String)
     email = Column(String, nullable=False)
     password = Column(String(255))
     groups = relationship(
@@ -203,7 +204,7 @@ class User(Node, db.Model):
         :return: Userインスタンス
         """
         try:
-            user = cls.retrieve(screen_name=screen_name)
+            user = cls.retrieve(_screen_name=screen_name)
             if user is None:
                 raise AuthorizationError("user not found")
         except:
@@ -346,7 +347,7 @@ class Group(Node, db.Model):
     def append_all(self, nodes):
         for node in nodes:
             if isinstance(node, User):
-                self.users.append(UserGroup(group=self, user=node))
+                self.users.append(node)
             elif isinstance(node, Group):
                 self.groups.append(node)
             else:
@@ -452,7 +453,8 @@ role_group = Table(
 
 class Role(db.Model):
     __tablename__ = "mitama_role"
-    name = Column(String, unique=True, nullable=False)
+    screen_name = Column(String, unique=True, nullable=False)
+    name = Column(String)
     users = relationship(
         "User",
         secondary=role_user,
@@ -465,6 +467,7 @@ class Role(db.Model):
         backref="roles",
         cascade="all, delete"
     )
+
 
 role_relation = Table(
     "mitama_role_relation",
@@ -502,7 +505,7 @@ def permission(db_, permissions):
 
     class Permission(db_.Model):
         name = Column(String)
-        screen_name = Column(String)
+        screen_name = Column(String, unique = True)
         roles = relationship(
             "Role",
             secondary=role_permission,
@@ -515,24 +518,24 @@ def permission(db_, permissions):
             """特定のRoleに許可します """
             if cls.is_accepted(screen_name, role):
                 return
-            permission = cls.retrieve(screen_name == permission)
+            permission = cls.retrieve(screen_name=screen_name)
             permission.roles.append(role)
-            permission.save()
+            permission.update()
 
         @classmethod
         def forbit(cls, screen_name, role):
             """UserまたはGroupの許可を取りやめます """
             if cls.is_forbidden(screen_name, role):
                 return
-            permission = cls.retrieve(screen_name == permission)
+            permission = cls.retrieve(screen_name=screen_name)
             permission.roles.remove(role)
-            permission.save()
+            permission.update()
 
         @classmethod
         def is_accepted(cls, screen_name, node):
             """UserまたはGroupが許可されているか確認します
             """
-            perm = cls.retrieve(screen_name == screen_name)
+            perm = cls.retrieve(screen_name=screen_name)
             for role in perm.roles:
                 if isinstance(node, User):
                     if node in role.users:
@@ -552,11 +555,14 @@ def permission(db_, permissions):
             return not cls.is_accepted(screen_name, node)
 
     def after_create(target, conn, **kw):
-        for perm_name in permissions:
+        for perm_ in permissions:
             perm = Permission()
-            perm.name = perm_name
+            perm.name = perm_["name"]
+            perm.screen_name = perm_["screen_name"]
             Permission.query.session.add(perm)
-        Permission.commit()
+        Permission.query.session.commit()
+
+    event.listen(Permission.__table__, "after_create", after_create)
 
     return Permission
 
@@ -572,7 +578,7 @@ def inner_permission(db_, permissions):
 
     class InnerPermission(db_.Model):
         name = Column(String)
-        screen_name = Column(String)
+        screen_name = Column(String, unique = True)
         roles = relationship(
             "InnerRole",
             secondary=inner_role_permission,
@@ -587,7 +593,7 @@ def inner_permission(db_, permissions):
                 return
             permission = cls.retrieve(screen_name == permission)
             permission.roles.append(role)
-            permission.save()
+            permission.update()
 
         @classmethod
         def forbit(cls, screen_name, role):
@@ -596,49 +602,89 @@ def inner_permission(db_, permissions):
                 return
             permission = cls.retrieve(screen_name == permission)
             permission.roles.remove(role)
-            permission.save()
+            permission.update()
 
         @classmethod
-        def is_accepted(cls, screen_name, node):
+        def is_accepted(cls, screen_name, group, user):
             """UserまたはGroupが許可されているか確認します
             """
-            perm = cls.retrieve(screen_name == screen_name)
-            for role in perm.roles:
-                if isinstance(node, User):
-                    if node in role.users:
-                        return True
-                    for group in role.groups:
-                        if group.is_in(node):
-                            return True
-                else:
-                    if node in role.groups:
-                        return True
-            return False
+            rel = UserGroup.retrieve(user=user, group=group)
+            try:
+                perm = cls.retrieve(screen_name == screen_name, relation = rel)
+                return True
+            except Exception:
+                return False
 
         @classmethod
-        def is_forbidden(cls, screen_name, node):
+        def is_forbidden(cls, screen_name, group, node):
             """UserまたはGroupが許可されていないか確認します
             """
             return not cls.is_accepted(screen_name, node)
 
+    def after_create(target, conn, **kw):
+        for perm_ in permissions:
+            perm = InnerPermission()
+            perm.name = perm_["name"]
+            perm.screen_name = perm_["screen_name"]
+            InnerPermission.query.session.add(perm)
+        InnerPermission.query.session.commit()
+
+    event.listen(InnerPermission.__table__, "after_create", after_create)
+
     return InnerPermission
 
 Permission = permission(db, [
-    "admin",
-    "create_group",
-    "update_group",
-    "delete_group",
-    "create_user",
-    "update_user",
-    "delete_user",
+    {
+        "name": "権限管理",
+        "screen_name": "admin"
+    },
+    {
+        "name": "グループ作成",
+        "screen_name": "create_group",
+    },
+    {
+        "name": "グループ更新",
+        "screen_name": "update_group",
+    },
+    {
+        "name": "グループ削除",
+        "screen_name": "delete_group",
+    },
+    {
+        "name": "ユーザー作成",
+        "screen_name": "create_user",
+    },
+    {
+        "name": "ユーザー更新",
+        "screen_name": "update_user",
+    },
+    {
+        "name": "ユーザー削除",
+        "screen_name": "delete_user",
+    }
 ])
 
 InnerPermission = inner_permission(db, [
-    "admin",
-    "add_user",
-    "remove_user",
-    "add_group",
-    "remove_group",
+    {
+        "name": "グループ管理",
+        "screen_name": "admin"
+    },
+    {
+        "name": "ユーザー追加",
+        "screen_name": "add_user",
+    },
+    {
+        "name": "ユーザー削除",
+        "screen_name": "remove_user"
+    },
+    {
+        "name": "グループ追加",
+        "screen_name": "add_group"
+    },
+    {
+        "name": "グループ削除",
+        "screen_name": "remove_group"
+    }
 ])
 
 db.create_all()
