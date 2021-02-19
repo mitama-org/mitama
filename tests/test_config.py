@@ -15,7 +15,7 @@ class TestConfig(unittest.TestCase):
             conf._project_dir, Path(os.path.dirname(__file__)) / "test_apps"
         )
         self.assertEqual(
-            conf._sqlite_db_path,
+            conf.database["path"],
             Path(os.path.dirname(__file__)) / "test_apps/db.sqlite3",
         )
         self.assertEqual(conf.a, "alice")
@@ -25,7 +25,24 @@ class TestConfig(unittest.TestCase):
         conf = Config(
             Path(os.path.dirname(__file__)) / "test_apps", {"password_validation":{}, "a": "alice", "b": "bob"}
         )
-        self.assertEqual(conf.to_dict(), {"password_validation": {}, "a": "alice", "b": "bob"})
+        self.assertEqual(
+            conf.to_dict(),
+            {
+                "database": {
+                    "type": "sqlite",
+                    "path": Path(os.path.dirname(__file__)) / "test_apps/db.sqlite3"
+                },
+                "port": 8080,
+                "mail": {
+                    "host": "localhost",
+                    "port": 587,
+                    "address": "mitama@example.com"
+                },
+                "password_validation": {},
+                "a": "alice",
+                "b": "bob"
+            }
+        )
 
     def test_from_project_dir(self):
         p = Path(os.path.dirname(__file__)) / "test_apps"
