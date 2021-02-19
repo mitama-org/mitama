@@ -84,8 +84,10 @@ class AppRegistry(_Singleton):
         app = builder.build()
         return app
 
-    def load_config(self, config = get_from_project_dir()):
+    def load_config(self, config = None):
         """アプリの一覧をmitama.jsonから読み込み、配信します"""
+        if config is None:
+            config = get_from_project_dir()
         sys.path.append(str(config._project_dir))
         for app_name in config.apps:
             _app = config.apps[app_name]

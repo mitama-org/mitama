@@ -15,7 +15,26 @@ class Project(App):
     def __init__(self):
         config = get_from_project_dir()
 
-        engine = create_engine("sqlite:///" + str(config._sqlite_db_path))
+        if config.database.type == "mysql":
+            engine = create_engine(
+                "mysql://{}:{}@{}/{}?charset=utf8".format(
+                    config.database.user,
+                    config.database.password,
+                    config.database.host,
+                    config.database.db_name
+                )
+            )
+        elif config.database.type == "postgresql":
+            engine = create_engine(
+                "postgresql://{}:{}@{}/{}?charset=utf8".format(
+                    config.database.user,
+                    config.database.password,
+                    config.database.host,
+                    config.database.db_name
+                )
+            )
+        else:
+            engine = create_engine("sqlite:///" + str(config.database.path))
         DatabaseManager.set_engine(engine)
 
         from mitama.models import User, Group

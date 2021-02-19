@@ -12,9 +12,12 @@ def get_engine():
     from mitama.conf import get_from_project_dir
 
     config = get_from_project_dir()
-    return create_engine("sqlite:///" + str(config._sqlite_db_path))
-
-
-def get_test_engine():
-    return create_engine("sqlite://")
+    return create_engine(
+        "mysql://{}:{}@{}/{}?charset=utf8".format(
+            config.database.user,
+            config.database.password,
+            config.database.host,
+            config.database.db_name
+        )
+    )
 

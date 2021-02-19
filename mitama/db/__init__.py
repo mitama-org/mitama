@@ -22,7 +22,7 @@ from sqlalchemy.sql import func
 
 from mitama._extra import _Singleton
 
-from .driver.sqlite3 import get_app_engine, get_engine, get_test_engine
+from .driver.sqlite3 import get_test_engine
 from .model import Model
 
 

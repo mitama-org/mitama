@@ -22,7 +22,6 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy import event
 
-from mitama.app.hook import HookRegistry
 from mitama.db import BaseDatabase, func, ForeignKey, relationship, Table, backref
 from mitama.db.types import Column, Group, Integer, LargeBinary
 from mitama.db.types import Node as NodeType
@@ -36,7 +35,6 @@ class Database(BaseDatabase):
     pass
 
 db = Database(prefix='mitama')
-hook_registry = HookRegistry()
 
 secret = secrets.token_hex(32)
 
@@ -45,10 +43,19 @@ class AuthorizationError(Exception):
     pass
 
 
-class UserGroup(db.Model):
-    group_id = Column(String, ForeignKey("mitama_group._id", ondelete="CASCADE")),
-    user_id = Column(String, ForeignKey("mitama_user._id", ondelete="CASCADE")),
+user_group = Table(
+    "mitama_user_group",
+    db.metadata,
+    Column("_id", String, default=UUID(), primary_key=True),
+    Column("group_id", String, ForeignKey("mitama_group._id", ondelete="CASCADE"), primary_key=True),
+    Column("user_id", String, ForeignKey("mitama_user._id", ondelete="CASCADE"), primary_key=True),
+)
 
+class UserGroup(db.Model):
+    __table__ = user_group
+    _id = user_group.c._id
+    group_id= user_group.c.group_id
+    user_id = user_group.c.user_id
 
 class Node(object):
     _icon = Column(LargeBinary)
@@ -143,15 +150,14 @@ class User(Node, db.Model):
     :param icon: アイコン
     """
 
+    __tablename__ = "mitama_user"
     _id = Column(String, default=UUID("user"), primary_key = True, nullable=False)
     _project = None
     email = Column(String, nullable=False)
     password = Column(String(255))
     groups = relationship(
         "Group",
-        secondary=UserGroup,
-        back_populates="users",
-        cascade="all"
+        secondary=user_group,
     )
 
     def to_dict(self, only_profile=False):
@@ -165,17 +171,23 @@ class User(Node, db.Model):
 
     def delete(self):
         """ユーザーを削除します"""
+        from mitama.app.hook import HookRegistry
+        hook_registry = HookRegistry()
         hook_registry.delete_user(self)
         super().delete()
 
     def update(self):
         """ユーザー情報を更新します"""
         super().update()
+        from mitama.app.hook import HookRegistry
+        hook_registry = HookRegistry()
         hook_registry.update_user(self)
 
     def create(self):
         """ユーザーを作成します"""
         super().create()
+        from mitama.app.hook import HookRegistry
+        hook_registry = HookRegistry()
         hook_registry.create_user(self)
 
     def password_check(self, password):
@@ -208,7 +220,9 @@ class User(Node, db.Model):
         :param password: パスワードのプレーンテキスト
         :return: 検証済みパスワード
         """
-        config = get_from_project_dir()
+        if self._project is None:
+            return password
+        config = self._project.config
         MIN_PASSWORD_LEN = config.password_validation.get('MIN_PASSWORD_LEN', None)
         COMPLICATED_PASSWORD = config.password_validation.get('COMPLICATED_PASSWORD', False)
 
@@ -280,19 +294,17 @@ class Group(Node, db.Model):
     :param icon: アイコン
     """
 
+    __tablename__ = "mitama_group"
     _id = Column(String, default=UUID("group"), primary_key=True, nullable=False)
     _project = None
     users = relationship(
         "User",
-        secondary=UserGroup,
-        back_populates="groups",
-        cascade="all"
+        secondary=user_group,
     )
     parent_id = Column(String, ForeignKey("mitama_group._id"))
     groups = relationship(
         "Group",
         backref=backref("parent", remote_side=[_id]),
-        cascade="all"
     )
 
     def to_dict(self, only_profile=False):
@@ -334,7 +346,7 @@ class Group(Node, db.Model):
     def append_all(self, nodes):
         for node in nodes:
             if isinstance(node, User):
-                self.users.append(node)
+                self.users.append(UserGroup(group=self, user=node))
             elif isinstance(node, Group):
                 self.groups.append(node)
             else:
@@ -396,17 +408,23 @@ class Group(Node, db.Model):
 
     def delete(self):
         """グループを削除します"""
+        from mitama.app.hook import HookRegistry
+        hook_registry = HookRegistry()
         hook_registry.delete_group(self)
         super().delete()
 
     def update(self):
         """グループの情報を更新します"""
         super().update()
+        from mitama.app.hook import HookRegistry
+        hook_registry = HookRegistry()
         hook_registry.update_group(self)
 
     def create(self):
         """グループを作成します"""
         super().create()
+        from mitama.app.hook import HookRegistry
+        hook_registry = HookRegistry()
         hook_registry.create_group(self)
 
     def mail(self, subject, body, type="html", to_all=False):
@@ -431,10 +449,6 @@ role_group = Table(
     Column("group_id", String, ForeignKey("mitama_group._id", ondelete="CASCADE"))
 )
 
-class RoleRelation(db.Model):
-    role_id = Column(String, ForeignKey("mitama_inner_role._id", ondelete="CASCADE")),
-    relation_id = Column(String, ForeignKey("mitama_user_group._id", ondelete="CASCADE"))
-
 
 class Role(db.Model):
     __tablename__ = "mitama_role"
@@ -442,23 +456,38 @@ class Role(db.Model):
     users = relationship(
         "User",
         secondary=role_user,
-        back_populates="roles",
+        backref="roles",
         cascade="all, delete"
     )
     groups = relationship(
         "Group",
         secondary=role_group,
-        back_populates="roles",
+        backref="roles",
         cascade="all, delete"
     )
+
+role_relation = Table(
+    "mitama_role_relation",
+    db.metadata,
+    Column("_id", String, default=UUID(), primary_key=True),
+    Column("role_id", String, ForeignKey("mitama_inner_role._id", ondelete="CASCADE")),
+    Column("relation_id", String, ForeignKey("mitama_user_group._id", ondelete="CASCADE"))
+)
+
+class RoleRelation(db.Model):
+    __table__ = role_relation
+    _id = role_relation.c._id
+    role_id = role_relation.c.role_id
+    relation_id = role_relation.c.relation_id
+
 
 class InnerRole(db.Model):
     __tablename__ = "mitama_inner_role"
     name = Column(String, unique=True, nullable=False)
     relation = relationship(
-        "RoleRelation",
-        secondary=RoleRelation,
-        back_populates="roles",
+        "UserGroup",
+        secondary=role_relation,
+        backref="roles",
         cascade="all, delete"
     )
 
@@ -466,8 +495,8 @@ def permission(db_, permissions):
     role_permission = Table(
         db_.Model.prefix + "_role_permission",
         db_.metadata,
-        Column("role_id", String, ForeignKey("mitama_role._id", ondelete="CASCADE")),
-        Column("permission_id", String, ForeignKey(db.Model.prefix + "_permission._id", ondelete="CASCADE")),
+        Column("role_id", String, ForeignKey("mitama_role._id", ondelete="CASCADE"), primary_key=True),
+        Column("permission_id", String, ForeignKey(db.Model.prefix + "_permission._id", ondelete="CASCADE"), primary_key=True),
         extend_existing=True
     )
 
@@ -477,7 +506,7 @@ def permission(db_, permissions):
         roles = relationship(
             "Role",
             secondary=role_permission,
-            back_populates="permissions",
+            backref="permissions",
             cascade="all, delete"
         )
 
@@ -534,10 +563,10 @@ def permission(db_, permissions):
 
 def inner_permission(db_, permissions):
     inner_role_permission = Table(
-        db_.Model.prefix + "_role_permission",
+        db_.Model.prefix + "_inner_role_permission",
         db_.metadata,
-        Column("role_id", String, ForeignKey("mitama_role._id", ondelete="CASCADE")),
-        Column("permission_id", String, ForeignKey(db.Model.prefix + "_permission._id", ondelete="CASCADE")),
+        Column("role_id", String, ForeignKey("mitama_inner_role._id", ondelete="CASCADE")),
+        Column("permission_id", String, ForeignKey(db.Model.prefix + "_inner_permission._id", ondelete="CASCADE")),
         extend_existing=True
     )
 
@@ -547,7 +576,7 @@ def inner_permission(db_, permissions):
         roles = relationship(
             "InnerRole",
             secondary=inner_role_permission,
-            back_populates="permissions",
+            backref="permissions",
             cascade="all, delete"
         )
 

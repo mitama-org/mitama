@@ -13,7 +13,10 @@ from pathlib import Path
 class Config:
     def __init__(self, path, dic):
         self._project_dir = path
-        self._sqlite_db_path = Path(self._project_dir) / "db.sqlite3"
+        self.database = {
+            "type": "sqlite",
+            "path": Path(self._project_dir) / "db.sqlite3"
+        }
         self.password_validation = {}
         self.port = 8080
         self.mail = {

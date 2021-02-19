@@ -11,6 +11,7 @@ class TestUser(unittest.TestCase):
         user = User()
         user.name = "alice"
         user.screen_name = "alice"
+        user.email = "alice@example.com"
         user.set_password("alice_s_password_1234")
         user.create()
         self.assertTrue(User.password_auth("alice", "alice_s_password_1234"))
