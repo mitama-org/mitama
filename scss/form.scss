@@ -79,3 +79,10 @@ form {
         padding: 32px;
     }
 }
+#welcome_message_editor {
+    textarea {
+        width: 100%;
+        height: 200px;
+        margin: 16px 0;
+    }
+}

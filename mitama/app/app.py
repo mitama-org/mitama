@@ -4,7 +4,8 @@ from base64 import b64encode
 from pathlib import Path
 
 import magic
-from jinja2 import Environment, FileSystemLoader
+import markdown
+from jinja2 import Markup, Environment, FileSystemLoader
 from yarl import URL
 
 from mitama.noimage import load_noimage_app
@@ -43,6 +44,7 @@ class App:
             if "project_dir" in kwargs
             else Path(os.path.dirname(__file__))
         )
+        self.params = kwargs
         self.router._app = self
         hook_registry = HookRegistry()
         if hasattr(self, "create_user"):
@@ -112,7 +114,7 @@ class App:
     @property
     def view(self):
         self._view = Environment(
-            loader=FileSystemLoader(self.install_dir / self.template_dir)
+            loader=FileSystemLoader(self.install_dir / self.template_dir),
         )
 
         def filter_user(arg):
@@ -121,8 +123,12 @@ class App:
         def filter_group(arg):
             return [group for group in arg if group.__class__.__name__ == "Group"]
 
+        def markdown_(text):
+            return Markup(markdown.markdown(text))
+
         self._view.filters["user"] = filter_user
         self._view.filters["group"] = filter_group
+        self._view.filters["markdown"] = markdown_
         self._view.globals.update(
             url=self.convert_url, fullurl=self.convert_fullurl, dataurl=dataurl
         )

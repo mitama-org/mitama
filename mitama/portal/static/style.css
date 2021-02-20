@@ -318,6 +318,11 @@ header #menu-status:checked ~ menu {
     padding: 32px;
   }
 }
+#content #welcome_message_editor textarea {
+  width: 100%;
+  height: 200px;
+  margin: 16px 0;
+}
 #content .item .icon {
   border-radius: 50%;
 }
@@ -740,6 +745,9 @@ header #menu-status:checked ~ menu {
   #content .inner {
     padding-top: 32px;
     padding-bottom: 32px;
+  }
+  #content .inner .inner-header {
+    padding-left: 32px;
   }
   #content .tight {
     padding-left: 32px;

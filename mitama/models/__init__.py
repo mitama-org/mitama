@@ -140,6 +140,9 @@ class Node(object):
         else:
             return super().retrieve(**kwargs)
 
+    def __eq__(self, other):
+        return self._id == other._id
+
 class User(Node, db.Model):
     """ユーザーのモデルクラスです
 
@@ -357,14 +360,20 @@ class Group(Node, db.Model):
     def remove(self, node):
         if not isinstance(node, Group) and not isinstance(node, User):
             raise TypeError("Removing object must be Group or User instance")
-        self.groups.remove(node)
+        if isinstance(node, Group):
+            self.groups.remove(node)
+        else:
+            self.users.remove(node)
         self.query.session.commit()
 
     def remove_all(self, nodes):
         for node in nodes:
             if not isinstance(node, Group) and not isinstance(node, User):
                 raise TypeError("Appending object must be Group or User instance")
-        self.groups.remove_all(nodes)
+            if isinstance(node, Group):
+                self.groups.remove(node)
+            else:
+                self.users.remove(node)
         self.query.session.commit()
 
     def is_ancestor(self, node):
@@ -468,6 +477,20 @@ class Role(db.Model):
         cascade="all, delete"
     )
 
+    def append(self, node):
+        if isinstance(node, Group):
+            self.groups.append(node)
+        else:
+            self.users.append(node)
+        self.update()
+
+    def remove(self, node):
+        if isinstance(node, Group):
+            self.groups.remove(node)
+        else:
+            self.users.remove(node)
+        self.update()
+
 
 role_relation = Table(
     "mitama_role_relation",
@@ -483,16 +506,26 @@ class RoleRelation(db.Model):
     role_id = role_relation.c.role_id
     relation_id = role_relation.c.relation_id
 
-
 class InnerRole(db.Model):
     __tablename__ = "mitama_inner_role"
-    name = Column(String, unique=True, nullable=False)
-    relation = relationship(
+    screen_name = Column(String, unique=True, nullable=False)
+    name = Column(String)
+    relations = relationship(
         "UserGroup",
         secondary=role_relation,
         backref="roles",
         cascade="all, delete"
     )
+
+    def append(self, group, user):
+        relation = UserGroup.retrieve(group=group, user=user)
+        self.relations.append(relation)
+        self.update()
+
+    def remove(self, group, user):
+        relation = UserGroup.retrieve(group=group, user=user)
+        self.relations.remove(relation)
+        self.update()
 
 def permission(db_, permissions):
     role_permission = Table(
@@ -609,11 +642,8 @@ def inner_permission(db_, permissions):
             """UserまたはGroupが許可されているか確認します
             """
             rel = UserGroup.retrieve(user=user, group=group)
-            try:
-                perm = cls.retrieve(screen_name == screen_name, relation = rel)
-                return True
-            except Exception:
-                return False
+            role = InnerRole.retrieve(screen_name == screen_name)
+            return rel in role.relations
 
         @classmethod
         def is_forbidden(cls, screen_name, group, node):

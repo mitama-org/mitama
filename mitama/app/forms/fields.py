@@ -1,7 +1,10 @@
-from .errors import *
+from . import errors
 import re
 
 class Field:
+    ValidationError = errors.ValidationError
+    EmptyError = errors.EmptyError
+    FormatError = errors.FormatError
     def __init__(
         self,
         label="",
@@ -34,7 +37,10 @@ class Field:
             name=self.name,
             form_type=self.form_type,
             placeholder=self.placeholder,
-            listed=self.listed
+            listed=self.listed,
+            validation_error=self.ValidationError,
+            empty_error=self.EmptyError,
+            format_error=self.FormatError,
         )
 
 class FileField(Field):
@@ -60,7 +66,10 @@ class FileField(Field):
             name=self.name,
             placeholder=self.placeholder,
             accept=self.accept,
-            max_file_size=self.max_file_size
+            max_file_size=self.max_file_size,
+            validation_error=self.ValidationError,
+            empty_error=self.EmptyError,
+            format_error=self.FormatError,
         )
 
 class FieldInstance:
@@ -74,7 +83,10 @@ class FieldInstance:
         name=None,
         form_type="text",
         placeholder=None,
-        listed=False
+        listed=False,
+        validation_error=errors.ValidationError,
+        empty_error=errors.EmptyError,
+        format_error=errors.FormatError,
     ):
         self.required = required
         self.label = label
@@ -86,15 +98,18 @@ class FieldInstance:
         self.placeholder = placeholder
         self.name = name
         self.listed=listed
+        self.validation_error = validation_error
+        self.empty_error = empty_error
+        self.format_error = format_error
 
     def reset(self):
         self.data = self.initial
 
     def validate(self):
         if self.required and self.data is None:
-            raise EmptyError(self.label)
+            raise self.empty_error(self.label)
         if self.data is not None and self.regex and re.fullmatch(self.regex, self.data) is None:
-            raise FormatError(self.label, self.data)
+            raise self.format_error(self.label, self.data)
         if self.data is not None and self.validator: self.validator(self.data)
         return True
 
@@ -109,7 +124,10 @@ class FileFieldInstance(FieldInstance):
         name=None,
         accept=None,
         placeholder=None,
-        max_file_size=None
+        max_file_size=None,
+        validation_error=errors.ValidationError,
+        empty_error=errors.EmptyError,
+        format_error=errors.FormatError,
     ):
         super().__init__(
             required=required,
@@ -118,7 +136,10 @@ class FileFieldInstance(FieldInstance):
             validator=validator,
             name=name,
             placeholder=placeholder,
-            form_type="file"
+            form_type="file",
+            validation_error=validation_error,
+            empty_error=empty_error,
+            format_error=format_error,
         )
         self.accept = accept
         self.max_file_size = max_file_size
@@ -127,9 +148,9 @@ class FileFieldInstance(FieldInstance):
 
     def validate(self):
         if self.required and self.data is None:
-            raise EmptyError(self.label)
+            raise self.empty_error(self.label)
         if self.data is not None and self.regex and re.fullmatch(self.regex, self.data) is None:
-            raise FormatError(self.label, self.data)
+            raise self.format_error(self.label, self.data)
         if self.data is not None and self.validator: self.validator(self.data)
         return True
 

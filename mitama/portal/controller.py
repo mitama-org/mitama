@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from mitama.app import AppRegistry, Controller
 from mitama.app.http import Response
-from mitama.models import AuthorizationError, Group, User, Role, Permission
+from mitama.models import AuthorizationError, Group, User, Role, Permission, InnerRole
 from mitama.app.forms import ValidationError
 from mitama.noimage import load_noimage_group, load_noimage_user
 
@@ -17,6 +17,7 @@ from .forms import (
     GroupCreateForm,
     GroupUpdateForm,
     AppUpdateForm,
+    WelcomeMessageForm
 )
 
 class SessionController(Controller):
@@ -132,13 +133,40 @@ class RegisterController(Controller):
         return Response.render(template)
 
 
-# HomeControllerではユーザー定義のダッシュボード的なのを作れるようにしたいけど、時間的にパス
-"""
 class HomeController(Controller):
     def handle(self, request):
         template = self.view.get_template('home.html')
-        return Response.render(template)
-"""
+        welcome_message = self.app.params["welcome_message"] if "welcome_message" in self.app.params else """
+# Mitamaへようこそ
+
+このページに社内システムの使い方を記述しておきましょう！
+        """
+        return Response.render(template, {
+            "welcome_message": welcome_message
+        })
+    def edit(self, request):
+        template = self.view.get_template("edit.html")
+        welcome_message = self.app.params["welcome_message"] if "welcome_message" in self.app.params else """
+# Mitamaへようこそ
+
+このページに社内システムの使い方を記述しておきましょう！
+        """.strip()
+        if request.method == "POST":
+            try:
+                form = WelcomeMessageForm(request.post())
+                welcome_message_ = form["welcome_message"]
+                self.app.params["welcome_message"] = welcome_message_
+                error = "変更を保存しました"
+            except ValidationError as err:
+                error = err.message
+            welcome_message = self.app.params["welcome_message"]
+            return Response.render(template, {
+                "welcome_message": welcome_message,
+                "error": error
+            })
+        return Response.render(template, {
+            "welcome_message": welcome_message,
+        })
 
 
 class UsersController(Controller):
@@ -378,12 +406,26 @@ class GroupsController(Controller):
                 self.app.convert_url("/groups/" + group.screen_name + "/settings")
             )
 
-    def remove(self, req):
+    def remove_user(self, req):
         try:
             group = Group.retrieve(screen_name=req.params["id"])
-            child = User.retrieve(request.params["cid"])
+            child = User.retrieve(req.params["uid"])
             group.remove(child)
-        except Exception:
+        except Exception as err:
+            print(err)
+            pass
+        finally:
+            return Response.redirect(
+                self.app.convert_url("/groups/" + group.screen_name + "/settings")
+            )
+
+    def remove_group(self, req):
+        try:
+            group = Group.retrieve(screen_name=req.params["id"])
+            child = Group.retrieve(req.params["gid"])
+            group.remove(child)
+        except Exception as err:
+            print(err)
             pass
         finally:
             return Response.redirect(
@@ -392,14 +434,18 @@ class GroupsController(Controller):
 
     def accept(self, req):
         group = Group.retrieve(screen_name=req.params["id"])
-        user = User.retrieve(int(req.params["cid"]))
+        user = User.retrieve(req.params["uid"])
+        inner_role = InnerRole.retrieve(screen_name = "admin")
+        inner_role.append(group, user)
         return Response.redirect(
             self.app.convert_url("/groups/" + group.screen_name + "/settings")
         )
 
     def forbit(self, req):
         group = Group.retrieve(screen_name=req.params["id"])
-        user = User.retrieve(int(req.params["cid"]))
+        user = User.retrieve(req.params["uid"])
+        inner_role = InnerRole.retrieve(screen_name = "admin")
+        inner_role.remove(group, user)
         return Response.redirect(
             self.app.convert_url("/groups/" + group.screen_name + "/settings")
         )

@@ -1,10 +1,11 @@
-from mitama.app.forms import Form, FileField, Field
+from mitama.app.forms import Form, FileField, Field, empty_error, format_error
 from mitama.noimage import load_noimage_group, load_noimage_user
-
 
 class SetupForm(Form):
     email = Field(label="メールアドレス", required=True)
 
+class WelcomeMessageForm(Form):
+    welcome_message = Field(label="ウェルカムボード", required=True)
 
 class LoginForm(Form):
     screen_name = Field(label="ログイン名", required=True)

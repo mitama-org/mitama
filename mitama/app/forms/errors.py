@@ -1,13 +1,13 @@
 from jinja2 import Template
 
 class ValidationError(Exception):
-    template = Template("Something wrong with {{ label }}")
+    template = Template("{{ label }}が適切ではありません")
     def __init__(self, label="", data=""):
         self.label = label
         self.data = data
 
     @classmethod
-    def setTemplate(cls, template = "Something is wrong with {{ label }}"):
+    def setTemplate(cls, template = "{{ label }}が適切ではありません"):
         cls.template = Template(template)
 
     @property
@@ -18,11 +18,21 @@ class ValidationError(Exception):
         )
 
 class EmptyError(ValidationError):
-    template = Template("{{ label }} is required, but it is emtpy.")
+    template = Template("{{ label }}が入力されていません")
     def __init__(self, label=""):
         super().__init__(label, None)
 
 class FormatError(ValidationError):
-    template = Template("Invalid format for {{ label }}.")
+    template = Template("{{ label }}の形式が間違っています")
     def __init__(self, label="", value=""):
         super().__init__(label, value)
+
+def empty_error(template_string):
+    class EmtpyError_(EmptyError):
+        template = Template(template_string)
+    return EmtpyError_
+
+def format_error(template_string):
+    class FormatError_(FormatError):
+        template = Template(template_string)
+    return FormatError_

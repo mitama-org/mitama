@@ -28,6 +28,8 @@ pysaml2 = "^6.5.1"
 tzlocal = "^2.1"
 watchdog = "^2.0.1"
 python-magic = "^0.4.22"
+jinja-markdown = "^1.200630"
+Markdown = "^3.3.3"
 
 [tool.poetry.dev-dependencies]
 unittest = "^0.0"

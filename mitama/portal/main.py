@@ -9,6 +9,7 @@ from mitama.utils.controllers import static_files
 from mitama.utils.middlewares import SessionMiddleware
 
 from .controller import (
+    HomeController,
     UsersController,
     GroupsController,
     RegisterController,
@@ -47,7 +48,8 @@ class App(BaseApp):
                 view("/login", SessionController, "login"),
                 Router(
                     [
-                        view("/", GroupsController, "list"),
+                        view("/", HomeController),
+                        view("/edit", HomeController, "edit"),
                         view("/logout", SessionController, "logout"),
                         view("/users", UsersController, "list"),
                         view("/users/invite", UsersController, "create"),
@@ -59,14 +61,15 @@ class App(BaseApp):
                         view("/groups/create", GroupsController, "create"),
                         view("/groups/<id>", GroupsController, "retrieve"),
                         post("/groups/<id>/append", GroupsController, "append"),
-                        view("/groups/<id>/remove/<cid>", GroupsController, "remove"),
+                        view("/groups/<id>/groups/<gid>/remove", GroupsController, "remove_group"),
+                        view("/groups/<id>/users/<uid>/remove", GroupsController, "remove_user"),
                         view(
-                            "/groups/<id>/accept/<cid>/update",
+                            "/groups/<id>/users/<uid>/accept",
                             GroupsController,
                             "accept",
                         ),
                         view(
-                            "/groups/<id>/forbit/<cid>/update",
+                            "/groups/<id>/users/<uid>/forbit",
                             GroupsController,
                             "forbit",
                         ),

@@ -4,5 +4,19 @@
 {% endblock %}
 {% block content %}
 <div id='content'>
+    <div class='tab-container'>
+        <div class='tab-header'>
+            <a href='{{ url('/') }}' class='focus'>ホーム</a>
+            <a href='{{ url('/groups') }}'>グループ</a>
+            <a href='{{ url('/users') }}'>ユーザー</a>
+            <a href='{{ url('/apps') }}'>アプリ</a>
+        </div>
+        <div class='tab-content'>
+            {{ welcome_message | markdown }}
+            {% if permission("admin", request.user) %}
+            <div><a href="{{ url('/edit') }}">編集</a></div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}
