@@ -4,9 +4,14 @@ from base64 import b64encode
 from pathlib import Path
 
 import magic
+<<<<<<< HEAD
 import markdown
 from jinja2 import Markup, Environment, FileSystemLoader
+=======
+from jinja2 import Environment, ChoiceLoader, FileSystemLoader
+>>>>>>> feature/template
 from yarl import URL
+import uuid
 
 from mitama.noimage import load_noimage_app
 
@@ -113,8 +118,12 @@ class App:
 
     @property
     def view(self):
+        toolkit = Path(os.path.dirname(__file__)) / "templates"
         self._view = Environment(
-            loader=FileSystemLoader(self.install_dir / self.template_dir),
+            loader=ChoiceLoader([
+                FileSystemLoader(self.install_dir / self.template_dir),
+                FileSystemLoader(toolkit),
+            ])
         )
 
         def filter_user(arg):
@@ -131,6 +140,7 @@ class App:
         self._view.filters["markdown"] = markdown_
         self._view.globals.update(
             url=self.convert_url, fullurl=self.convert_fullurl, dataurl=dataurl
+            uuid=uuid.uuid4
         )
         return self._view
 

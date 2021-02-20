@@ -58,7 +58,19 @@ class AppRegistry(_Singleton):
 
     def __setitem__(self, path, app):
         self._map[path] = app
-        self._map = dict(sorted(self._map.items(), key = lambda x: -1 * (x[0].count('/'))))
+
+        def sorter(x):
+            x_ = x[0]
+            if x_[-1] != "/":
+                x_ += "/"
+            return -1 * len(x_.split('/'))
+
+        self._map = dict(
+            sorted(
+                self._map.items(),
+                key=sorter
+            )
+        )
 
     def __getitem__(self, path):
         return self._map[path]

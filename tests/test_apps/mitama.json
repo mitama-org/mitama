@@ -2,6 +2,9 @@
     "apps": {
         "mitama.portal": {
             "path": "/"
+        },
+        "hello": {
+            "path": "/hel"
         }
     }
 }
