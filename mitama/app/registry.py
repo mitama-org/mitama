@@ -57,6 +57,7 @@ class AppRegistry(_Singleton):
         return Items()
 
     def __setitem__(self, path, app):
+        app.project = self.project
         self._map[path] = app
 
         def sorter(x):

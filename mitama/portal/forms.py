@@ -31,6 +31,7 @@ class UserUpdateForm(Form):
     icon = FileField(label="プロフィール画像", initial=load_noimage_user())
     name = Field(label="名前", required=True)
     screen_name = Field(label="ログイン名")
+    roles = Field(label="役割", listed=True)
 
 
 class GroupCreateForm(Form):

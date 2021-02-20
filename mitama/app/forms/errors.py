@@ -24,8 +24,8 @@ class EmptyError(ValidationError):
 
 class FormatError(ValidationError):
     template = Template("{{ label }}の形式が間違っています")
-    def __init__(self, label="", value=""):
-        super().__init__(label, value)
+    def __init__(self, label="", data=""):
+        super().__init__(label, data)
 
 def empty_error(template_string):
     class EmtpyError_(EmptyError):

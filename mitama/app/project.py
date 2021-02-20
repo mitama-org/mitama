@@ -44,8 +44,10 @@ class Project(App):
         Group._project = self
         self.port = config.port
         self.mail = config.mail
+        self.password_validation = config.password_validation
         self.project_dir = config._project_dir
         self.apps = AppRegistry()
+        self.apps.project = self
         self.apps.load_config(config)
         self.middlewares = [_session_middleware()]
         self.config = config
@@ -76,14 +78,15 @@ class Project(App):
         smtp.quit()
 
     def match(self, request):
-        for path, app in self.apps.items():
-            if path[0] != "/":
-                path = "/" + path
-            if request.path.startswith(path):
+        for path_, app in self.apps.items():
+            if path_[0] != "/":
+                path_ = "/" + path_
+            if request.path.startswith(path_):
                 request.app = app
                 result = app
                 method = request.method
                 path = request.subpath if hasattr(request, "subpath") else request.path
+                request.subpath = path[len(path_):] if path_ != "/" else path
                 def get_response_handler(result, method):
                     i = 0
 

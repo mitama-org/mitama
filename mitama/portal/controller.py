@@ -34,7 +34,7 @@ class SessionController(Controller):
                 sess["jwt_token"] = User.get_jwt(result)
                 redirect_to = request.query.get("redirect_to", ["/"])[0]
                 return Response.redirect(redirect_to)
-            except ValidationError as err:
+            except (ValidationError, AuthorizationError) as err:
                 return Response.render(template, {"error": err.message}, status=401)
         return Response.render(template, status=401)
 
@@ -136,30 +136,39 @@ class RegisterController(Controller):
 class HomeController(Controller):
     def handle(self, request):
         template = self.view.get_template('home.html')
-        welcome_message = self.app.params["welcome_message"] if "welcome_message" in self.app.params else """
+        try:
+            with open(self.app.project_dir / "welcome_message.md", "r") as f:
+                welcome_message = f.read()
+        except Exception:
+            welcome_message = """
 # Mitamaへようこそ
 
 このページに社内システムの使い方を記述しておきましょう！
-        """
+            """
         return Response.render(template, {
             "welcome_message": welcome_message
         })
     def edit(self, request):
         template = self.view.get_template("edit.html")
-        welcome_message = self.app.params["welcome_message"] if "welcome_message" in self.app.params else """
+        try:
+            with open(self.app.project_dir / "welcome_message.md", "r") as f:
+                welcome_message = f.read()
+        except Exception:
+            welcome_message = """
 # Mitamaへようこそ
 
 このページに社内システムの使い方を記述しておきましょう！
-        """.strip()
+            """
         if request.method == "POST":
             try:
                 form = WelcomeMessageForm(request.post())
                 welcome_message_ = form["welcome_message"]
-                self.app.params["welcome_message"] = welcome_message_
+                with open(self.app.project_dir / "welcome_message.md", "w") as f:
+                    f.write(welcome_message_)
                 error = "変更を保存しました"
             except ValidationError as err:
                 error = err.message
-            welcome_message = self.app.params["welcome_message"]
+            welcome_message = welcome_message_
             return Response.render(template, {
                 "welcome_message": welcome_message,
                 "error": error
@@ -231,6 +240,8 @@ class UsersController(Controller):
                 user.screen_name = form["screen_name"]
                 user.name = form["name"]
                 user.icon = form["icon"] or user.icon
+                for role in form["roles"]:
+                    user.roles.append(Role.retrieve(screen_name=role))
                 user.update()
                 return Response.render(
                     template,

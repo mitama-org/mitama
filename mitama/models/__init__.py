@@ -40,6 +40,18 @@ secret = secrets.token_hex(32)
 
 
 class AuthorizationError(Exception):
+    INVALID_TOKEN = 0
+    WRONG_PASSWORD = 1
+    USER_NOT_FOUND= 2
+    def __init__(self, code):
+        self.code = code
+    @property
+    def message(self):
+        return [
+            "トークンが不正です",
+            "パスワードが間違っています",
+            "ユーザーが見つかりません"
+        ][self.code]
     pass
 
 
@@ -209,14 +221,14 @@ class User(Node, db.Model):
         try:
             user = cls.retrieve(_screen_name=screen_name)
             if user is None:
-                raise AuthorizationError("user not found")
+                raise AuthorizationError(AuthorizationError.USER_NOT_FOUND)
         except:
-            raise AuthorizationError("user not found")
+            raise AuthorizationError(AuthorizationError.USER_NOT_FOUND)
         password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
         if bcrypt.checkpw(password, user.password):
             return user
         else:
-            raise AuthorizationError("Wrong password")
+            raise AuthorizationError(AuthorizationError.WRONG_PASSWORD)
 
     def valid_password(self, password):
         """パスワードが安全か検証します
@@ -268,7 +280,7 @@ class User(Node, db.Model):
         try:
             result = jwt.decode(token, secret, algorithms="HS256")
         except jwt.exceptions.InvalidTokenError as err:
-            raise AuthorizationError("Invalid token.")
+            raise AuthorizationError(AuthorizationError.INVALID_TOKEN)
         return cls.retrieve(result["id"])
 
     def is_ancestor(self, node):
