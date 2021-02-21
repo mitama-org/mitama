@@ -1,20 +1,18 @@
-{% set entrance = True %}
-{% extends 'base.html' %}
-{% block header %}
-    {% include "entrance-header.html" %}
-{% endblock %}
+{% extends 'login_base.html' %}
 {% block content %}
-<div id='content'>
-    <form method='post' action='' class='entrance'>
-        <div class='main'>
-            <h1>ログイン</h1>
-            <input type='text' name='screen_name' placeholder='ログイン名' value='{{ screen_name }}'/>
-            <input type='password' name='password' placeholder='パスワード' value='{{ password }}'/>
+<form method='post' action='' class='entrance'>
+    <div class='main mb-4'>
+        <h1 class='mb-4'>ログイン</h1>
+        <div class='mb-2'>
+            <input type='text' name='screen_name' placeholder='ログイン名' value='{{ screen_name }}' class='form-control'/>
         </div>
-        <div class='submit'>
-            <button type="submit">ログイン</button>
+        <div>
+            <input type='password' name='password' placeholder='パスワード' value='{{ password }}' class='form-control'/>
         </div>
-        <p class='error'>{{ error }}</p>
-    </form>
-</div>
+    </div>
+    <div class='d-grid'>
+        <button type="submit" class='btn btn-primary'>ログイン</button>
+    </div>
+    <p class='error'>{{ error }}</p>
+</form>
 {% endblock %}

@@ -4,44 +4,48 @@
 {% endblock %}
 {% block content %}
 {% set post = request.post() %}
-<div id='content'>
-    <h2 class='mini-title dark'>チームを作成</h2>
+<div id='content' class='container mb-3'>
+    <div class='mt-3 mb-3'>
+        <a href='{{ url('/groups') }}' class='btn btn-outline-secondary'>
+            <i class='bi-arrow-left'></i>
+            戻る
+        </a>
+    </div>
+    <h2 class='mt-4 mb-3'>チームを作成</h2>
     <form method='POST' action='' enctype='multipart/form-data'>
-        <dl>
-            <dt>アイコン</dt>
-            <dd>
-                <div id='image-form'>
-                    <img class="icon" src="{{ dataurl(icon) }}"/>
-                    <label class='button'>
-                        <input type='file' name='icon' accept='image/*' onchange="previewImage(this)" />
-                        画像を選択
-                    </label>
-                    <script>
-                        function previewImage(dom) {
-                            document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
-                        }
-                    </script>
-                </div>
-            </dd>
-            <dt>ドメイン名</dt>
-            <dd>
-                <input type='text' name='screen_name' placeholder='ドメイン名' value='{{ post.screen_name }}'/>
-            </dd>
-            <dt>名前</dt>
-            <dd>
-                <input type='text' name='name' placeholder='名前' value='{{ post.name }}'/>
-            </dd>
-            <dt>所属グループ</dt>
-            <dd>
-                <select name='parent'>
-                    <option></option>
-                    {% for group in groups %}
-                        <option value='{{group.id}}'>{{ group.name }}</option>
-                    {% endfor %}
-                </select>
-            </dd>
-        </dl>
-        <button type='submit'>チームを作成</button>
+        <div class='mb-3'>
+            <label class='form-label'>アイコン</label>
+            <div id='image-form'>
+                <img class="group-icon icon" src="{{ dataurl(icon) }}" style='width: 80px; height: 80px'/>
+                <label class='btn btn-primary' style='margin-left: 24px'>
+                    <input type='file' name='icon' accept='image/*' onchange="previewImage(this)" style='display: none'/>
+                    画像を選択
+                </label>
+                <script>
+                    function previewImage(dom) {
+                        document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
+                    }
+                </script>
+            </div>
+        </div>
+        <div class='mb-3'>
+            <label class='form-label'>ドメイン名</label>
+            <input class='form-control' type='text' name='screen_name' placeholder='ドメイン名' value='{{ post.screen_name }}'/>
+        </div>
+        <div class='mb-3'>
+            <label class='form-label'>名前</label>
+            <input class='form-control' type='text' name='name' placeholder='名前' value='{{ post.name }}'/>
+        </div>
+        <div class='mb-3'>
+            <label class='form-label'>所属グループ</label>
+            <select class='form-select' name='parent'>
+                <option></option>
+                {% for group in groups %}
+                    <option value='{{group.id}}'>{{ group.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type='submit' class='btn btn-primary'>チームを作成</button>
         <p class='error'>{{ error }}</p>
     </form>
 </div>

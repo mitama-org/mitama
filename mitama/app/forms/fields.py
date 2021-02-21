@@ -43,6 +43,31 @@ class Field:
             format_error=self.FormatError,
         )
 
+class DictField(Field):
+    def __init__(
+        self,
+        **kwargs
+    ):
+        super().__init__(
+            **kwargs
+        )
+
+    def instance(self):
+        return DictFieldInstance(
+            label=self.label,
+            initial=self.initial,
+            regex=self.regex,
+            validator=self.validator,
+            required=self.required,
+            name=self.name,
+            form_type=self.form_type,
+            placeholder=self.placeholder,
+            listed=self.listed,
+            validation_error=self.ValidationError,
+            empty_error=self.EmptyError,
+            format_error=self.FormatError,
+        )
+
 class FileField(Field):
     def __init__(
         self,
@@ -73,6 +98,47 @@ class FileField(Field):
         )
 
 class FieldInstance:
+    def __init__(
+        self,
+        label="",
+        initial=None,
+        regex=None,
+        validator=None,
+        required=False,
+        name=None,
+        form_type="text",
+        placeholder=None,
+        listed=False,
+        validation_error=errors.ValidationError,
+        empty_error=errors.EmptyError,
+        format_error=errors.FormatError,
+    ):
+        self.required = required
+        self.label = label
+        self.initial = initial
+        self.regex = regex
+        self.validator = validator
+        self.data = initial
+        self.form_type = form_type
+        self.placeholder = placeholder
+        self.name = name
+        self.listed=listed
+        self.validation_error = validation_error
+        self.empty_error = empty_error
+        self.format_error = format_error
+
+    def reset(self):
+        self.data = self.initial
+
+    def validate(self):
+        if self.required and self.data is None:
+            raise self.empty_error(self.label)
+        if self.data is not None and self.regex and re.fullmatch(self.regex, self.data) is None:
+            raise self.format_error(self.label, self.data)
+        if self.data is not None and self.validator: self.validator(self.data)
+        return True
+
+class DictFieldInstance:
     def __init__(
         self,
         label="",

@@ -49,7 +49,7 @@ class App(BaseApp):
                 Router(
                     [
                         view("/", HomeController),
-                        view("/edit", HomeController, "edit"),
+                        view("/settings", HomeController, "settings"),
                         view("/logout", SessionController, "logout"),
                         view("/users", UsersController, "list"),
                         view("/users/invite", UsersController, "create"),

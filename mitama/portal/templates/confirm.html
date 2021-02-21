@@ -1,15 +1,7 @@
-{% set entrance = True %}
-{% extends "base.html" %}
-{% block header %}
-    {% include "entrance-header.html" %}
-{% endblock %}
+{% extends 'login_base.html' %}
 {% block content %}
-<div id='content'>
-    <form method='post' action='' class='entrance'>
-        <div class='main'>
-            <h1>確認メールを送信しました</h1>
-            <p>メール内のURLから登録を続けてください</p>
-        </div>
-    </form>
+<div class='main mb-4'>
+    <h1 class='mb-4'>確認メールを送信しました</h1>
+    <p>メール内のURLから登録を続けてください</p>
 </div>
 {% endblock %}

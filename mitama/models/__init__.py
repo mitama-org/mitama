@@ -539,6 +539,10 @@ class InnerRole(db.Model):
         self.relations.remove(relation)
         self.update()
 
+    def exists(self, group, user):
+        relation = UserGroup.retrieve(group=group, user=user)
+        return relation in self.relations
+
 def permission(db_, permissions):
     role_permission = Table(
         db_.Model.prefix + "_role_permission",
@@ -561,8 +565,6 @@ def permission(db_, permissions):
         @classmethod
         def accept(cls, screen_name, role):
             """特定のRoleに許可します """
-            if cls.is_accepted(screen_name, role):
-                return
             permission = cls.retrieve(screen_name=screen_name)
             permission.roles.append(role)
             permission.update()
@@ -570,8 +572,6 @@ def permission(db_, permissions):
         @classmethod
         def forbit(cls, screen_name, role):
             """UserまたはGroupの許可を取りやめます """
-            if cls.is_forbidden(screen_name, role):
-                return
             permission = cls.retrieve(screen_name=screen_name)
             permission.roles.remove(role)
             permission.update()
@@ -634,18 +634,14 @@ def inner_permission(db_, permissions):
         @classmethod
         def accept(cls, screen_name, role):
             """特定のRoleに許可します """
-            if cls.is_accepted(screen_name, role):
-                return
-            permission = cls.retrieve(screen_name == permission)
+            permission = cls.retrieve(screen_name = screen_name)
             permission.roles.append(role)
             permission.update()
 
         @classmethod
         def forbit(cls, screen_name, role):
             """UserまたはGroupの許可を取りやめます """
-            if cls.is_forbidden(screen_name, role):
-                return
-            permission = cls.retrieve(screen_name == permission)
+            permission = cls.retrieve(screen_name = screen_name)
             permission.roles.remove(role)
             permission.update()
 
@@ -654,8 +650,11 @@ def inner_permission(db_, permissions):
             """UserまたはGroupが許可されているか確認します
             """
             rel = UserGroup.retrieve(user=user, group=group)
-            role = InnerRole.retrieve(screen_name == screen_name)
-            return rel in role.relations
+            permission = cls.retrieve(screen_name = screen_name)
+            for role in permission.roles:
+                if rel in role.relations:
+                    return True
+            return False
 
         @classmethod
         def is_forbidden(cls, screen_name, group, node):

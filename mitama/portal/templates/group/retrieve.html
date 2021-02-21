@@ -3,49 +3,34 @@
     {% include 'header.html' %}
 {% endblock %}
 {% block content %}
-<div id='content'>
-    <div class="inner">
-        <div class="profile-container">
-            <img src="{{ dataurl(group.icon) }}" class="icon"/>
-            <div class="detail">
-                <h2 class="name">{{group.name}}</h2>
-                <div class="screen-name">{{group.screen_name}}</div>
-            </div>
-            <div class='action'>
-            {% if permission("update_group", request.user) or inner_permission("admin", group, request.user) %}
-                <a href='/groups/{{group.screen_name}}/settings'><button>設定</button></a>
-            {% endif %}
-            </div>
-            <div class='group-list'>
-                <div class="children">
-                {% for g in group.children|group %}
-                    <div class='item'>
-                        <div class='branch'></div>
-                        <a href="{{ url("/groups/"+g.screen_name) }}" class="profile">
-                            <img src='{{ dataurl(g.icon) }}' class='icon' />
-                            <div class='detail'>
-                                <div class='name'>{{ g.name }}</div>
-                                <div class='screen-name'>{{ g.screen_name }}</div>
-                            </div>
-                        </a>
-                    </div>
-                {% endfor %}
-                </div>
+<div id='content' class='container'>
+    <div class="row pb-4 pt-5">
+        <div class='col d-flex justify-content-center'>
+            <img src="{{ dataurl(group.icon) }}" class="group-icon icon" style='width: 80px; height: 80px'/>
+        </div>
+        <div class="col-8">
+            <h2 class="name">{{group.name}}</h2>
+            <div class="screen-name">{{group.screen_name}}</div>
+        </div>
+        <div class='col d-flex justify-content-end'>
+        {% if permission("update_group", request.user) or inner_permission("admin", group, request.user) %}
+            <a href='/groups/{{group.screen_name}}/settings'><button class='btn btn-primary'>設定</button></a>
+        {% endif %}
+        </div>
+        <div class='group-list'>
+            <div class="children">
+            {% for g in group.groups %}
+                {{ lists.groupItem(g, link=url('/groups/'+g.screen_name)) }}
+            {% endfor %}
             </div>
         </div>
-        <div class="content">
-            <h2 class="mini-title">メンバー</h2>
-            <div class="user-list tight">
-                {% for user in group.users %}
-                    <a href="{{url("/users/"+user.screen_name)}}" class="item">
-                        <img src='{{ dataurl(user.icon) }}' class='user-icon' />
-                        <div class='detail'>
-                            <div class='name'>{{ user.name }}</div>
-                            <div class='screen-name'>{{ user.screen_name }}</div>
-                        </div>
-                    </a>
-                {% endfor %}
-            </div>
+    </div>
+    <div class="content">
+        <h3 class="mini-title">メンバー</h3>
+        <div class="user-list">
+            {% for user in group.users %}
+                {{ lists.userItem(user, link=url('/users/'+user.screen_name)) }}
+            {% endfor %}
         </div>
     </div>
 </div>

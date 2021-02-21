@@ -48,6 +48,15 @@ class _RequestPayload:
         else:
             raise KeyError
 
+    def keys(self):
+        return self._field_storage.keys()
+
+    def values(self):
+        return self._field_storage.values()
+
+    def items(self):
+        return self._field_storage.items()
+
     def get(self, key, default=None):
         if key in self:
             return self[key]

@@ -3,20 +3,23 @@
     {% include 'header.html' %}
 {% endblock %}
 {% block content %}
-<div id='content'>
-    <div class='tab-container'>
-        <div class='tab-header'>
-            <a href='{{ url('/') }}' class='focus'>ホーム</a>
-            <a href='{{ url('/groups') }}'>グループ</a>
-            <a href='{{ url('/users') }}'>ユーザー</a>
-            <a href='{{ url('/apps') }}'>アプリ</a>
-        </div>
-        <div class='tab-content'>
-            {{ welcome_message | markdown }}
-            {% if permission("admin", request.user) %}
-            <div><a href="{{ url('/edit') }}">編集</a></div>
-            {% endif %}
-        </div>
+<div id='content' class='container'>
+    <ul class='nav nav-tabs mt-2'>
+        <li class='nav-item'>
+            <a class='nav-link active' href='{{ url('/') }}'>ホーム</a>
+        </li>
+        <li class='nav-item'>
+            <a class='nav-link' href='{{ url('/groups') }}'>グループ</a>
+        </li>
+        <li class='nav-item'>
+            <a class='nav-link' href='{{ url('/users') }}'>ユーザー</a>
+        </li>
+        <li class='nav-item'>
+            <a class='nav-link' href='{{ url('/apps') }}'>アプリ</a>
+        </li>
+    </ul>
+    <div class='container pt-3 pb-3'>
+        {{ welcome_message | markdown }}
     </div>
 </div>
 {% endblock %}

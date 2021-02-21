@@ -4,7 +4,16 @@ from uuid import uuid4
 
 from mitama.app import AppRegistry, Controller
 from mitama.app.http import Response
-from mitama.models import AuthorizationError, Group, User, Role, Permission, InnerRole
+from mitama.models import (
+    AuthorizationError,
+    Group,
+    User,
+    Role,
+    InnerRole,
+    Permission,
+    InnerPermission,
+    UserGroup,
+)
 from mitama.app.forms import ValidationError
 from mitama.noimage import load_noimage_group, load_noimage_user
 
@@ -17,7 +26,7 @@ from .forms import (
     GroupCreateForm,
     GroupUpdateForm,
     AppUpdateForm,
-    WelcomeMessageForm
+    SettingsForm
 )
 
 class SessionController(Controller):
@@ -105,11 +114,23 @@ class RegisterController(Controller):
                 manager = Role()
                 manager.screen_name = "manager"
                 manager.name = "Manager"
-                owner.create()
+                manager.create()
                 normal = Role()
                 normal.screen_name = "normal"
                 normal.name = "Normal"
-                owner.create()
+                normal.create()
+                inner_owner = InnerRole()
+                inner_owner.screen_name = "owner"
+                inner_owner.name = "Owner"
+                inner_owner.create()
+                inner_manager = InnerRole()
+                inner_manager.screen_name = "manager"
+                inner_manager.name = "Manager"
+                inner_manager.create()
+                inner_normal = InnerRole()
+                inner_normal.screen_name = "normal"
+                inner_normal.name = "Normal"
+                inner_normal.create()
 
                 Permission.accept("admin", owner)
                 Permission.accept("create_user", owner)
@@ -122,6 +143,16 @@ class RegisterController(Controller):
                 Permission.accept("update_user", manager)
                 Permission.accept("create_group", manager)
                 Permission.accept("update_group", manager)
+
+                InnerPermission.accept("admin", inner_owner)
+                InnerPermission.accept("add_user", inner_owner)
+                InnerPermission.accept("remove_user", inner_owner)
+                InnerPermission.accept("add_group", inner_owner)
+                InnerPermission.accept("remove_group", inner_owner)
+                InnerPermission.accept("add_user", inner_manager)
+                InnerPermission.accept("remove_user", inner_owner)
+                InnerPermission.accept("add_group", inner_manager)
+                InnerPermission.accept("remove_group", inner_owner)
 
                 user.roles.append(owner)
                 user.update()
@@ -148,8 +179,8 @@ class HomeController(Controller):
         return Response.render(template, {
             "welcome_message": welcome_message
         })
-    def edit(self, request):
-        template = self.view.get_template("edit.html")
+    def settings(self, request):
+        template = self.view.get_template("settings.html")
         try:
             with open(self.app.project_dir / "welcome_message.md", "r") as f:
                 welcome_message = f.read()
@@ -161,8 +192,26 @@ class HomeController(Controller):
             """
         if request.method == "POST":
             try:
-                form = WelcomeMessageForm(request.post())
+                form = SettingsForm(request.post())
                 welcome_message_ = form["welcome_message"]
+                if form["role_screen_name"] is not None:
+                    role = Role()
+                    role.screen_name = form['role_screen_name']
+                    role.name = form['role_name'] if form['role_name'] is not None else form['role_screen_name']
+                    role.create()
+                for role_screen_name, role_permissions in form['role'].items():
+                    role = Role.retrieve(screen_name = role_screen_name)
+                    role.permissions = [Permission.retrieve(screen_name=permission) for permission in role_permissions]
+                    role.update()
+                if form["inner_role_screen_name"] is not None:
+                    inner_role = InnerRole()
+                    inner_role.screen_name = form['inner_role_screen_name']
+                    inner_role.name = form['inner_role_name'] if form['inner_role_name'] is not None else form['inner_role_screen_name']
+                    inner_role.create()
+                for inner_role_screen_name, inner_role_permissions in form['inner_role'].items():
+                    inner_role = InnerRole.retrieve(screen_name = inner_role_screen_name)
+                    inner_role.permissions = [InnerPermission.retrieve(screen_name=permission) for permission in inner_role_permissions]
+                    inner_role.update()
                 with open(self.app.project_dir / "welcome_message.md", "w") as f:
                     f.write(welcome_message_)
                 error = "変更を保存しました"
@@ -171,17 +220,25 @@ class HomeController(Controller):
             welcome_message = welcome_message_
             return Response.render(template, {
                 "welcome_message": welcome_message,
+                'roles': Role.list(),
+                'permissions': Permission.list(),
+                'inner_roles': InnerRole.list(),
+                'inner_permissions': InnerPermission.list(),
                 "error": error
             })
         return Response.render(template, {
             "welcome_message": welcome_message,
+            'roles': Role.list(),
+            'permissions': Permission.list(),
+            'inner_roles': InnerRole.list(),
+            'inner_permissions': InnerPermission.list(),
         })
 
 
 class UsersController(Controller):
     def create(self, req):
         template = self.view.get_template("user/create.html")
-        invites = Invite.list()
+        invites = User.query.filter(User.password==None).all()
         if req.method == "POST":
             form = InviteForm(req.post())
             try:
@@ -305,7 +362,7 @@ class GroupsController(Controller):
                 group.screen_name = form["screen_name"]
                 group.icon = form["icon"]
                 group.create()
-                if "parent" in form and form["parent"] != "":
+                if form["parent"] != None:
                     Group.retrieve(form["parent"]).append(group)
                 group.append(req.user)
                 return Response.redirect(self.app.convert_url("/groups"))
@@ -331,6 +388,7 @@ class GroupsController(Controller):
     def update(self, req):
         template = self.view.get_template("group/update.html")
         roles = Role.list()
+        inner_roles = InnerRole.list()
         group = Group.retrieve(screen_name=req.params["id"])
         groups = list()
         for g in Group.list():
@@ -349,6 +407,12 @@ class GroupsController(Controller):
                 for role in form["roles"]:
                     group.roles.append(Role.retrieve(screen_name=role))
                 group.icon = icon
+                group.users = [User.retrieve(user) for user in form['users']]
+                if form['new_user'] is not None:
+                    group.users.append(User.retrieve(form['new_user']))
+                for user, roles in form['inner_roles'].items():
+                    rel = UserGroup.retrieve(group = group, user = User.retrieve(user))
+                    rel.roles = [InnerRole.retrieve(screen_name = role) for role in roles]
                 group.update()
                 return Response.render(
                     template,
@@ -360,7 +424,8 @@ class GroupsController(Controller):
                         "all_groups": groups,
                         "all_users": users,
                         "icon": group.icon,
-                        "roles": roles
+                        "roles": Role.list(),
+                        "inner_roles": inner_roles
                     },
                 )
             except ValidationError as err:
@@ -375,7 +440,8 @@ class GroupsController(Controller):
                         "screen_name": form["screen_name"],
                         "name": form["name"],
                         "icon": group.icon,
-                        "roles": roles
+                        "roles": Role.list(),
+                        "inner_roles": inner_roles
                     },
                 )
         return Response.render(
@@ -387,7 +453,8 @@ class GroupsController(Controller):
                 "screen_name": group.screen_name,
                 "name": group.name,
                 "icon": group.icon,
-                "roles": roles
+                "roles": roles,
+                "inner_roles": inner_roles
             },
         )
 
@@ -408,7 +475,6 @@ class GroupsController(Controller):
                         nodes.append(Group.retrieve(gid))
                     except Exception as err:
                         pass
-            print(nodes)
             group.append_all(nodes)
         except Exception:
             pass

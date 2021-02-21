@@ -1,106 +1,15 @@
-header {
-  height: 56px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  background: var(--header-background);
-  position: sticky;
-  top: 0;
-  color: var(--header-text);
-}
-header #logo {
-  height: 40px;
-  display: block;
-}
-header #logo_container {
-  padding: 8px 16px;
-}
-header #user-menu #menu-status {
-  display: none;
-}
-header #user-menu label {
-  padding: 8px 16px;
-  display: grid;
-  grid-gap: 8px;
-  grid-template-columns: 32px 1fr;
-  align-items: center;
-  height: 40px;
-  font-weight: bold;
-  background: #0001;
-  width: 160px;
-}
-header #user-menu .user-icon {
-  width: 32px;
-  height: 32px;
-}
-header menu {
-  display: flex;
-  opacity: 0;
-  flex-direction: column;
-  justify-content: flex-end;
-  position: absolute;
-  top: 40px;
-  pointer-events: none;
-  width: 200px;
-  right: 0;
-  display: block;
-  margin: 0;
-  padding: 16px;
-  transition: all 0.2s;
-  background: var(--main-background);
-  box-shadow: 0 0 10px #0004;
-}
-header menu > div {
-  border-bottom: 1px solid var(--main-decoration);
-  padding-bottom: 8px;
-  margin-bottom: 8px;
-}
-header menu div:last-child {
-  border: none;
-  padding-bottom: 0;
-  margin-bottom: 0;
-}
-header menu a {
-  display: grid;
-  grid-template-columns: 32px 1fr;
-  grid-gap: 8px;
-  width: 100%;
-  height: 40px;
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
-  padding: 0 4px;
-  font-weight: bold;
-  color: var(--main-text);
-  transition: all 0.2s;
-}
-header menu a svg {
-  width: 32px;
-  height: 32px;
-  fill: var(--main-text);
-  transition: all 0.2s;
-}
-header menu a:hover {
-  color: var(--main-color);
-}
-header menu a:hover svg {
-  fill: var(--main-color);
-}
-header #menu-status:checked ~ menu {
-  opacity: 1;
-  pointer-events: all;
-  top: 64px;
+.user-icon {
+  object-fit: cover;
+  border-radius: 50%;
 }
 
-.user-icon {
-  border-radius: 50%;
+.group-icon {
+  object-fit: cover;
+  border-radius: 8%;
 }
 
 .icon {
   object-fit: cover;
-}
-
-.item .icon {
-  border-radius: 50%;
 }
 
 .no-item {
@@ -110,51 +19,6 @@ header #menu-status:checked ~ menu {
   justify-content: center;
   align-items: center;
   padding: 24px 0;
-}
-
-.member-append-list .item-container {
-  display: grid;
-  grid-template-columns: 24px 1fr;
-}
-.member-append-list .item-container input[type=checkbox] {
-  margin: 30px 6px;
-  width: 12px;
-  height: 12px;
-}
-.member-append-list .item {
-  display: grid;
-  grid-template-columns: 56px 1fr;
-  grid-gap: 16px;
-  text-decoration: none;
-  color: var(--main-text);
-  padding: 8px;
-}
-.member-append-list .item .user-icon, .member-append-list .item .icon {
-  display: block;
-  width: 56px;
-  height: 56px;
-  box-sizing: border-box;
-  border: 2px solid #0001;
-}
-.member-append-list .item .user-icon {
-  border-radius: 28px;
-}
-.member-append-list .item .icon {
-  border-radius: 4px;
-}
-.member-append-list .item .detail {
-  display: flex;
-  justify-content: space-around;
-  flex-direction: column;
-  padding: 8px 0;
-}
-.member-append-list .item .detail .name {
-  font-size: 1rem;
-  font-weight: bold;
-}
-.member-append-list .item .detail .screen-name {
-  font-size: 0.85rem;
-  color: var(--main-text-lighter);
 }
 
 .group-list .group-item {
@@ -183,9 +47,7 @@ header #menu-status:checked ~ menu {
 }
 .group-list .group-item .profile .detail {
   display: flex;
-  justify-content: space-around;
   flex-direction: column;
-  padding: 8px 0;
 }
 .group-list .group-item .profile .detail .name {
   font-size: 1rem;
@@ -273,9 +135,7 @@ header #menu-status:checked ~ menu {
 .invite-list .user-item .detail,
 .invite-list .invite-item .detail {
   display: flex;
-  justify-content: space-around;
   flex-direction: column;
-  padding: 8px 0;
 }
 .user-list .user-item .detail .name,
 .user-list .invite-item .detail .name,
@@ -341,9 +201,7 @@ header #menu-status:checked ~ menu {
 }
 .member-control-list .member-control-item .detail {
   display: flex;
-  justify-content: space-around;
   flex-direction: column;
-  padding: 8px 0;
 }
 .member-control-list .member-control-item .detail .name {
   font-size: 1rem;
@@ -388,9 +246,7 @@ header #menu-status:checked ~ menu {
 }
 .group-list .group-item .profile .detail {
   display: flex;
-  justify-content: space-around;
   flex-direction: column;
-  padding: 8px 0;
 }
 .group-list .group-item .profile .detail .name {
   font-size: 1rem;
@@ -413,8 +269,8 @@ header #menu-status:checked ~ menu {
   display: block;
   position: absolute;
   box-sizing: border-box;
-  border-left: 2px solid var(--main-color);
-  border-bottom: 2px solid var(--main-color);
+  border-left: 2px solid #0002;
+  border-bottom: 2px solid #0002;
   width: 8px;
   height: 40px;
   left: 16px;
@@ -426,7 +282,7 @@ header #menu-status:checked ~ menu {
   display: block;
   position: absolute;
   box-sizing: border-box;
-  border-left: 2px solid var(--main-color);
+  border-left: 2px solid #0002;
   width: 8px;
   height: 38px;
   left: 16px;
@@ -456,7 +312,6 @@ header #menu-status:checked ~ menu {
 .app-list .app-item .detail {
   display: flex;
   flex-direction: column;
-  padding: 8px 0;
 }
 .app-list .app-item .detail .name {
   font-size: 1rem;
@@ -464,7 +319,10 @@ header #menu-status:checked ~ menu {
 }
 .app-list .app-item .detail .screen-name {
   font-size: 0.85rem;
-  color: var(--main-text-lighter);
+}
+.app-list .app-item .detail .description {
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
 }
 
-/*# sourceMappingURL=style.css.map */
+/*# sourceMappingURL=mitama-style.css.map */

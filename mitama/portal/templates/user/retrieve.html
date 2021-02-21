@@ -3,36 +3,27 @@
     {% include 'header.html' %}
 {% endblock %}
 {% block content %}
-<div id='content'>
-    <div class="inner">
-        <div class="profile-container">
-            <img src="{{ dataurl(user.icon) }}" class="user-icon"/>
-            <div class="detail">
-                <h2 class="name">{{user.name}}</h2>
-                <div class="screen-name">{{user.screen_name}}</div>
-            </div>
-            <div class='action'>
-            {% if permission("update_user", request.user) or request.user == user %}
-                <a href='/users/{{user.screen_name}}/settings'><button>設定</button></a>
-            {% endif %}
-            </div>
+<div id='content' class='container'>
+    <div class="row pb-4 pt-5">
+        <div class='col d-flex justify-content-center'>
+            <img src="{{ dataurl(user.icon) }}" class="user-icon" style='width: 80px; height: 80px'/>
         </div>
-        <div class="content">
-            <h2 class="mini-title">所属</h2>
-            <div class='group-list tight'>
-            {% for g in user.groups %}
-                <div class='item'>
-                    <div class='branch'></div>
-                    <a href="{{ url("/groups/"+g.screen_name) }}" class="profile">
-                        <img src='{{ dataurl(g.icon) }}' class='icon' />
-                        <div class='detail'>
-                            <div class='name'>{{ g.name }}</div>
-                            <div class='screen-name'>{{ g.screen_name }}</div>
-                        </div>
-                    </a>
-                </div>
-            {% endfor %}
-            </div>
+        <div class='col-8'>
+            <h2 class="name">{{user.name}}</h2>
+            <div class="screen-name">{{user.screen_name}}</div>
+        </div>
+        <div class='col d-flex justify-content-end'>
+        {% if permission("update_user", request.user) or request.user == user %}
+            <a href='/users/{{user.screen_name}}/settings'><button class='btn btn-primary'>設定</button></a>
+        {% endif %}
+        </div>
+    </div>
+    <div class="content">
+        <h3>所属</h3>
+        <div class='group-list'>
+        {% for g in user.groups %}
+            {{ lists.groupItem(g, link=url('/groups/'+g.screen_name)) }}
+        {% endfor %}
         </div>
     </div>
 </div>

@@ -3,33 +3,32 @@
     {% include 'header.html' %}
 {% endblock %}
 {% block content %}
-<div id='content'>
-    <div class='tab-container'>
-        <div class='tab-header'>
-            <a href='{{ url('/') }}'>ホーム</a>
-            <a href='{{ url('/groups') }}'>グループ</a>
-            <a href='{{ url('/users') }}'>ユーザー</a>
-            <a href='{{ url('/apps') }}' class='focus'>アプリ</a>
+<div id='content' class='container'>
+    <ul class='nav nav-tabs mt-2'>
+        <li class='nav-item'>
+            <a class='nav-link' href='{{ url('/') }}'>ホーム</a>
+        </li>
+        <li class='nav-item'>
+            <a class='nav-link' href='{{ url('/groups') }}'>グループ</a>
+        </li>
+        <li class='nav-item'>
+            <a class='nav-link' href='{{ url('/users') }}'>ユーザー</a>
+        </li>
+        <li class='nav-item'>
+            <a class='nav-link active' href='{{ url('/apps') }}'>アプリ</a>
+        </li>
+    </ul>
+    <div class='container'>
+        {% if permission('admin', request.user) %}
+        <div class='mb-3 mt-3'>
+            <a href='{{ url('/apps/settings') }}'><button class='btn btn-primary'>アプリ設定</button></a>
         </div>
-        <div class='tab-content'>
-            {% if is_admin %}
-            <div class='tool-box'>
-                <a href='{{ url('/apps/settings') }}'><button>アプリ設定</button></a>
-            </div>
-            {% endif %}
-            <div class="inner">
-                <div class='app-list'>
-                {% for app in apps %}
-                    <a href="{{ url(app.path) }}" class="item">
-                        <img src='{{ dataurl(app.icon) }}' class='icon' />
-                        <div class='detail'>
-                            <div class='name'>{{ app.name }}</div>
-                            <div class='screen-name'>{{ app.screen_name }}</div>
-                            <p class='description'>{{ app.description }}</p>
-                        </div>
-                    </a>
-                {% endfor %}
-                </div>
+        {% endif %}
+        <div class="inner">
+            <div class='app-list'>
+            {% for app in apps %}
+                {{ lists.appItem(app, link=url(app.path)) }}
+            {% endfor %}
             </div>
         </div>
     </div>
