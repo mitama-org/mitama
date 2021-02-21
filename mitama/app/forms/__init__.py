@@ -22,7 +22,9 @@ class Form:
                 field.data = {}
                 for k in data.keys():
                     if '.' in k:
-                        name, key = k.split('.')
+                        k_ = k.split('.')
+                        name = k_[0]
+                        key = '.'.join(k_[1:])
                         if field.listed:
                             field.data[key] = data.getlist(k)
                         else:

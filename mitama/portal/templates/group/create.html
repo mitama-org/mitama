@@ -47,6 +47,7 @@
         </div>
         <button type='submit' class='btn btn-primary'>チームを作成</button>
         <p class='error'>{{ error }}</p>
+        {{ forms.csrf(request) }}
     </form>
 </div>
 {% endblock %}

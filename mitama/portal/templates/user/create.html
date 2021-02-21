@@ -46,6 +46,7 @@
         {% if error %}
         <p class='error'>{{ error }}</p>
         {% endif %}
+        {{ forms.csrf(request) }}
     </form>
 </div>
 {% endblock %}

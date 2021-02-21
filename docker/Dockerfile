@@ -7,6 +7,7 @@ RUN usermod -u 1000 nginx
 WORKDIR /code
 
 ADD entrypoint.sh /code/entrypoint.sh
+ADD rewrite_json.py /code/rewrite_json.py
 ADD uwsgi.ini /code/uwsgi.ini
 ADD ../mitama/ /code
 
@@ -26,5 +27,6 @@ RUN chmod -R 777 /pid
 USER 1000
 WORKDIR /project
 
+ENV DATABASE_TYPE='sqlite3' DATABASE_HOST='localhost' DATABASE_NAME='mitama' DATABASE_USER='root' DATABASE_PASSWORD='password'
 EXPOSE 80
 CMD ["/code/entrypoint.sh"]

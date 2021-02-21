@@ -17,6 +17,9 @@ class ValidationError(Exception):
             data = self.data
         )
 
+    def __str__(self):
+        return self.message
+
 class EmptyError(ValidationError):
     template = Template("{{ label }}が入力されていません")
     def __init__(self, label=""):

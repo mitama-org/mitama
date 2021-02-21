@@ -66,7 +66,8 @@ class Response(ResponseBase):
         headers = list()
         for kv in self.headers.items():
             headers.append(kv)
-        cookies = self._cookies.output(attrs=[], header="")
+        cookies = self._cookies.output(header="")
+        print(cookies)
         if len(cookies) > 0:
             headers.extend([("Set-Cookie", cookie) for cookie in cookies.split("\r\n")])
         headers.append(("Content-Type", self.content_type))

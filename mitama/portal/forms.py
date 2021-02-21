@@ -59,4 +59,4 @@ class GroupUpdateForm(Form):
 
 
 class AppUpdateForm(Form):
-    prefix = Field(label="配信先", required=True)
+    prefix = DictField(label="配信先", required=True)

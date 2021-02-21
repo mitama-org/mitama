@@ -1,21 +1,37 @@
 {% macro userItem(user, id=None, link=None) -%}
-<a {% if link != None %}href="{{link}}"{% endif %} class="user-item" id='{{id}}'>
+{% if link != None %}
+<a href="{{link}}" class="user-item" id='{{id}}'>
+{% else %}
+<div href="{{link}}" class="user-item" id='{{id}}'>
+{% endif %}
     <img src='{{ dataurl(user.icon) }}' class='icon' />
     <div class='detail'>
         <div class='name'>{{ user.name }}</div>
         <div class='screen-name'>{{ user.screen_name }}</div>
     </div>
+{% if link != None %}
 </a>
+{% else %}
+</div>
+{% endif %}
 {%- endmacro %}
 {% macro userItemEx(user, id=None, link=None) -%}
-<a {% if link != None %}href="{{link}}"{% endif %} class="user-item" id='{{id}}'>
+{% if link != None %}
+<a href="{{link}}" class="user-item" id='{{id}}'>
+{% else %}
+<div href="{{link}}" class="user-item" id='{{id}}'>
+{% endif %}
     <img src='{{ dataurl(user.icon) }}' class='icon' />
     <div class='detail'>
         <div class='name'>{{ user.name }}</div>
         <div class='screen-name'>{{ user.screen_name }}</div>
         {{ caller() }}
     </div>
+{% if link != None %}
 </a>
+{% else %}
+</div>
+{% endif %}
 {%- endmacro %}
 {% macro groupItem(group, id=None, link=None, tree=False) -%}
 <div class="group-item" id='{{id}}'>
@@ -53,17 +69,29 @@
 </div>
 {%- endmacro %}
 {% macro appItem(app, id=None, link=None) -%}
-<a {% if link != None %}href="{{link}}"{% endif %} class="app-item" id='{{id}}'>
+{% if link != None %}
+<a href="{{link}}" class="app-item" id='{{id}}'>
+{% else %}
+<div href="{{link}}" class="app-item" id='{{id}}'>
+{% endif %}
     <img src='{{ dataurl(app.icon) }}' class='icon' />
     <div class='detail'>
         <div class='name'>{{ app.name }}</div>
         <div class='screen-name'>{{ app.screen_name }}</div>
         <p class='description'>{{ app.description }}</p>
     </div>
+{% if link != None %}
 </a>
+{% else %}
+</div>
+{% endif %}
 {%- endmacro %}
-{% macro appItemEx(app, id=None) -%}
-<a {% if link != None %}href="{{link}}"{% endif %} class="app-item" id='{{id}}'>
+{% macro appItemEx(app, id=None, link=None) -%}
+{% if link != None %}
+<a href="{{link}}" class="app-item" id='{{id}}'>
+{% else %}
+<div href="{{link}}" class="app-item" id='{{id}}'>
+{% endif %}
     <img src='{{ dataurl(app.icon) }}' class='icon' />
     <div class='detail'>
         <div class='name'>{{ app.name }}</div>
@@ -71,5 +99,9 @@
         <p class='description'>{{ app.description }}</p>
         {{ caller() }}
     </div>
+{% if link != None %}
 </a>
+{% else %}
+</div>
+{% endif %}
 {%- endmacro %}

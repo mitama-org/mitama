@@ -31,6 +31,7 @@
             <input class='form-control' type='password' name='password' placeholder='パスワード' value='{{ password }}'/>
         </div>
     </div>
+    {{ forms.csrf(request) }}
     <div class='d-grid'>
         <button type="submit" class='btn btn-primary'>Mitamaに参加する</button>
     </div>

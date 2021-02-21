@@ -78,7 +78,8 @@ class Project(App):
         smtp.quit()
 
     def match(self, request):
-        for path_, app in self.apps.items():
+        for app_name, app in self.apps.items():
+            path_ = app.path
             if path_[0] != "/":
                 path_ = "/" + path_
             if request.path.startswith(path_):

@@ -1,12 +1,11 @@
 {#
 {% import 'footers.macro.html' as footers %}
 {% import 'headers.macro.html' as headers %}
-{% import 'lists.macro.html' as lists %}
-{% import 'forms.macro.html' as forms %}
 {% import 'navs.macro.html' as navs %}
 {% import 'snippets.macro.html' as snippets %}
 #}
 {% import 'lists.macro.html' as lists %}
+{% import 'forms.macro.html' as forms %}
 
 <!DOCTYPE html>
 <html>

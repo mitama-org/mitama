@@ -36,7 +36,7 @@
     </label>
 {%- endmacro %}
 
-{% macro radio(name, value='', label='', id=uuid() checked=False) -%}
+{% macro radio(name, value='', label='', id=uuid(), checked=False) -%}
     <input
         type="radio"
         value="{{ value|e }}"
@@ -126,3 +126,8 @@
     {% endfor %}
     </datalist>
 {%- endmacro %}
+
+{% macro csrf(request) %}
+    {% set sess = request.session() %}
+    <input type='hidden' name='mitama_csrf_token' value='{{sess.mitama_csrf_token}}' />
+{% endmacro %}

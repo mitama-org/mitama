@@ -65,6 +65,7 @@
         {% if message %}
             <p class='message'>{{ message}}</p>
         {% endif %}
+        {{ forms.csrf(request) }}
     </form>
 </div>
 {% endblock %}

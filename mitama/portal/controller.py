@@ -544,22 +544,17 @@ class GroupsController(Controller):
 
 class AppsController(Controller):
     def update(self, req):
-        if Admin.is_forbidden(req.user):
+        if Permission.is_forbidden('admin', req.user):
             return self.app.error(req, 403)
         template = self.view.get_template("apps/update.html")
         apps = AppRegistry()
         if req.method == "POST":
-            apps.reset()
             form = AppUpdateForm(req.post())
             try:
                 prefix = form["prefix"]
-                data = dict()
-                data["apps"] = dict()
                 for package, path in prefix.items():
-                    data["apps"][package] = {"path": path}
-                with open(self.app.project_root_dir / "mitama.json", "w") as f:
-                    f.write(json.dumps(data))
-                apps.load_config()
+                    apps[package].path = path
+                apps.save_config()
                 return Response.render(
                     template,
                     {
