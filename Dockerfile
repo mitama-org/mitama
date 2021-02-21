@@ -1,17 +1,17 @@
-FROM alpine:3.7
+FROM alpine:3.13
 
-RUN apk add --no-cache nginx python3 sqlite mariadb-client postgresql
+RUN apk add --no-cache shadow nginx sqlite mariadb-client postgresql gcc libffi-dev build-base rust cargo libressl-dev python3 python3-dev py3-pip
 RUN mkdir /code
-RUN adduser -S nginx && adduser -S -g nginx nginx
 RUN usermod -u 1000 nginx
 WORKDIR /code
 
-ADD entrypoint.sh /code/entrypoint.sh
-ADD rewrite_json.py /code/rewrite_json.py
-ADD uwsgi.ini /code/uwsgi.ini
-ADD ../mitama/ /code
+ADD docker/entrypoint.sh /code/entrypoint.sh
+ADD docker/rewrite_json.py /code/rewrite_json.py
+ADD docker/uwsgi.ini /code/uwsgi.ini
+ADD mitama/ /code/mitama
+ADD pyproject.toml /code/pyproject.toml
 
-RUN pip install --upgrade pip poetry --no-cache-dir
+RUN pip3 install --upgrade pip poetry --no-cache-dir
 RUN poetry install --no-dev
 
 RUN mkdir /project
