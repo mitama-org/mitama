@@ -58,9 +58,9 @@ class AuthorizationError(Exception):
 user_group = Table(
     "mitama_user_group",
     db.metadata,
-    Column("_id", String, default=UUID(), primary_key=True),
-    Column("group_id", String, ForeignKey("mitama_group._id", ondelete="CASCADE"), primary_key=True),
-    Column("user_id", String, ForeignKey("mitama_user._id", ondelete="CASCADE"), primary_key=True),
+    Column("_id", String(64), default=UUID(), primary_key=True),
+    Column("group_id", String(64), ForeignKey("mitama_group._id", ondelete="CASCADE")),
+    Column("user_id", String(64), ForeignKey("mitama_user._id", ondelete="CASCADE")),
 )
 
 class UserGroup(db.Model):
@@ -166,10 +166,10 @@ class User(Node, db.Model):
     """
 
     __tablename__ = "mitama_user"
-    _id = Column(String, default=UUID("user"), primary_key = True, nullable=False)
+    _id = Column(String(64), default=UUID("user"), primary_key = True, nullable=False)
     _project = None
-    _token = Column(String)
-    email = Column(String, nullable=False)
+    _token = Column(String(64))
+    email = Column(String(64), nullable=False)
     password = Column(String(255))
     groups = relationship(
         "Group",
@@ -311,13 +311,13 @@ class Group(Node, db.Model):
     """
 
     __tablename__ = "mitama_group"
-    _id = Column(String, default=UUID("group"), primary_key=True, nullable=False)
+    _id = Column(String(64), default=UUID("group"), primary_key=True, nullable=False)
     _project = None
     users = relationship(
         "User",
         secondary=user_group,
     )
-    parent_id = Column(String, ForeignKey("mitama_group._id"))
+    parent_id = Column(String(64), ForeignKey("mitama_group._id"))
     groups = relationship(
         "Group",
         backref=backref("parent", remote_side=[_id]),
@@ -460,22 +460,22 @@ class Group(Node, db.Model):
 role_user = Table(
     "mitama_role_user",
     db.metadata,
-    Column("role_id", String, ForeignKey("mitama_role._id", ondelete="CASCADE")),
-    Column("user_id", String, ForeignKey("mitama_user._id", ondelete="CASCADE"))
+    Column("role_id", String(64), ForeignKey("mitama_role._id", ondelete="CASCADE")),
+    Column("user_id", String(64), ForeignKey("mitama_user._id", ondelete="CASCADE"))
 )
 
 role_group = Table(
     "mitama_role_group",
     db.metadata,
-    Column("role_id", String, ForeignKey("mitama_role._id", ondelete="CASCADE")),
-    Column("group_id", String, ForeignKey("mitama_group._id", ondelete="CASCADE"))
+    Column("role_id", String(64), ForeignKey("mitama_role._id", ondelete="CASCADE")),
+    Column("group_id", String(64), ForeignKey("mitama_group._id", ondelete="CASCADE"))
 )
 
 
 class Role(db.Model):
     __tablename__ = "mitama_role"
-    screen_name = Column(String, unique=True, nullable=False)
-    name = Column(String)
+    screen_name = Column(String(64), unique=True, nullable=False)
+    name = Column(String(64))
     users = relationship(
         "User",
         secondary=role_user,
@@ -507,9 +507,9 @@ class Role(db.Model):
 role_relation = Table(
     "mitama_role_relation",
     db.metadata,
-    Column("_id", String, default=UUID(), primary_key=True),
-    Column("role_id", String, ForeignKey("mitama_inner_role._id", ondelete="CASCADE")),
-    Column("relation_id", String, ForeignKey("mitama_user_group._id", ondelete="CASCADE"))
+    Column("_id", String(64), default=UUID(), primary_key=True),
+    Column("role_id", String(64), ForeignKey("mitama_inner_role._id", ondelete="CASCADE")),
+    Column("relation_id", String(64), ForeignKey("mitama_user_group._id", ondelete="CASCADE"))
 )
 
 class RoleRelation(db.Model):
@@ -520,8 +520,8 @@ class RoleRelation(db.Model):
 
 class InnerRole(db.Model):
     __tablename__ = "mitama_inner_role"
-    screen_name = Column(String, unique=True, nullable=False)
-    name = Column(String)
+    screen_name = Column(String(64), unique=True, nullable=False)
+    name = Column(String(64))
     relations = relationship(
         "UserGroup",
         secondary=role_relation,
@@ -547,14 +547,14 @@ def permission(db_, permissions):
     role_permission = Table(
         db_.Model.prefix + "_role_permission",
         db_.metadata,
-        Column("role_id", String, ForeignKey("mitama_role._id", ondelete="CASCADE"), primary_key=True),
-        Column("permission_id", String, ForeignKey(db.Model.prefix + "_permission._id", ondelete="CASCADE"), primary_key=True),
+        Column("role_id", String(64), ForeignKey("mitama_role._id", ondelete="CASCADE"), primary_key=True),
+        Column("permission_id", String(64), ForeignKey(db.Model.prefix + "_permission._id", ondelete="CASCADE"), primary_key=True),
         extend_existing=True
     )
 
     class Permission(db_.Model):
-        name = Column(String)
-        screen_name = Column(String, unique = True)
+        name = Column(String(64))
+        screen_name = Column(String(64), unique = True)
         roles = relationship(
             "Role",
             secondary=role_permission,
@@ -616,14 +616,14 @@ def inner_permission(db_, permissions):
     inner_role_permission = Table(
         db_.Model.prefix + "_inner_role_permission",
         db_.metadata,
-        Column("role_id", String, ForeignKey("mitama_inner_role._id", ondelete="CASCADE")),
-        Column("permission_id", String, ForeignKey(db.Model.prefix + "_inner_permission._id", ondelete="CASCADE")),
+        Column("role_id", String(64), ForeignKey("mitama_inner_role._id", ondelete="CASCADE")),
+        Column("permission_id", String(64), ForeignKey(db.Model.prefix + "_inner_permission._id", ondelete="CASCADE")),
         extend_existing=True
     )
 
     class InnerPermission(db_.Model):
-        name = Column(String)
-        screen_name = Column(String, unique = True)
+        name = Column(String(64))
+        screen_name = Column(String(64), unique = True)
         roles = relationship(
             "InnerRole",
             secondary=inner_role_permission,

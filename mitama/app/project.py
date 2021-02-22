@@ -19,21 +19,24 @@ class Project(App):
 
         if config.database["type"] == "mysql":
             engine = create_engine(
-                "mysql://{}:{}@{}/{}?charset=utf8".format(
+                "mysql://{}:{}@{}/{}".format(
                     config.database["user"],
                     config.database["password"],
                     config.database["host"],
-                    config.database["db_name"]
-                )
+                    config.database["name"]
+                ),
+                encoding="utf8"
             )
         elif config.database["type"] == "postgresql":
             engine = create_engine(
-                "postgresql://{}:{}@{}/{}?charset=utf8".format(
+                "postgresql://{}:{}@{}/{}".format(
                     config.database["user"],
                     config.database["password"],
                     config.database["host"],
-                    config.database["db_name"]
-                )
+                    config.database["name"]
+                ),
+                encoding="utf8",
+                echo=True
             )
         else:
             engine = create_engine("sqlite:///" + str(config.database["path"]))
