@@ -4,8 +4,10 @@ from base64 import b64encode
 from pathlib import Path
 
 import magic
-from jinja2 import Environment, FileSystemLoader
+import markdown
+from jinja2 import Markup, Environment, ChoiceLoader, FileSystemLoader
 from yarl import URL
+import uuid
 
 from mitama.noimage import load_noimage_app
 
@@ -28,21 +30,14 @@ class App:
     def icon(self):
         return load_noimage_app()
 
-    def __init__(self, **kwargs):
-        self.screen_name = kwargs["name"]
-        self.path = kwargs["path"]
-        self.package = kwargs["package"]
-        self.project_dir = (
-            Path(kwargs["project_dir"]) if "project_dir" in kwargs else None
-        )
-        self.project_root_dir = (
-            Path(kwargs["project_root_dir"]) if "project_dir" in kwargs else None
-        )
-        self.install_dir = (
-            Path(kwargs["install_dir"])
-            if "project_dir" in kwargs
-            else Path(os.path.dirname(__file__))
-        )
+    def __init__(self, name, path, package, project_dir=None, project_root_dir=None, install_dir=os.path.dirname(__file__), **kwargs):
+        self.screen_name = name
+        self.path = path
+        self.package = package
+        self.project_dir = Path(project_dir)
+        self.project_root_dir = Path(project_root_dir)
+        self.install_dir = Path(install_dir)
+        self.params = kwargs
         self.router._app = self
         hook_registry = HookRegistry()
         if hasattr(self, "create_user"):
@@ -111,8 +106,12 @@ class App:
 
     @property
     def view(self):
+        toolkit = Path(os.path.dirname(__file__)) / "templates"
         self._view = Environment(
-            loader=FileSystemLoader(self.install_dir / self.template_dir)
+            loader=ChoiceLoader([
+                FileSystemLoader(self.install_dir / self.template_dir),
+                FileSystemLoader(toolkit),
+            ])
         )
 
         def filter_user(arg):
@@ -121,16 +120,23 @@ class App:
         def filter_group(arg):
             return [group for group in arg if group.__class__.__name__ == "Group"]
 
+        def markdown_(text):
+            return Markup(markdown.markdown(text))
+
         self._view.filters["user"] = filter_user
         self._view.filters["group"] = filter_group
+        self._view.filters["markdown"] = markdown_
         self._view.globals.update(
-            url=self.convert_url, fullurl=self.convert_fullurl, dataurl=dataurl
+            url=self.convert_url,
+            fullurl=self.convert_fullurl,
+            dataurl=dataurl,
+            uuid=uuid.uuid4
         )
         return self._view
 
     def error(self, request, code):
         template = self.view.get_template(str(code) + ".html")
-        return Response.render(template)
+        return Response.render(template, status=code)
 
     def match(self, request):
         result = self.router.match(request)
@@ -144,6 +150,9 @@ class App:
                 return handle(request)
 
             return request, _handle, method
+
+    def save_params(self):
+        self.params
 
     def uninstall(self):
         db = DatabaseManager()

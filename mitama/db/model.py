@@ -28,7 +28,7 @@ def UUID(prefix = None):
 
 class Model:
     prefix = None
-    _id = Column(String, default=UUID(), primary_key=True, nullable=False)
+    _id = Column(String(64), default=UUID(), primary_key=True, nullable=False)
 
     @classmethod
     def attribute_names(cls):

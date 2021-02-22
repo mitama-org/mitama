@@ -20,9 +20,11 @@ class TestGroup(unittest.TestCase):
         user1 = User()
         user1.name = "bob"
         user1.screen_name = "bob"
+        user1.email = "bob@example.com"
         user2 = User()
         user2.name = "charlie"
         user2.screen_name = "charlie"
+        user2.email = "bob@example.com"
         group.create()
         user1.create()
         user2.create()

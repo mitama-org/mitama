@@ -47,4 +47,4 @@ class TestHttp(unittest.TestCase):
             )
 
         output = res.start(None, start_response)
-        self.assertEqual(output, [*b"Hello, world!"])
+        self.assertEqual(output, [b"Hello, world!"])

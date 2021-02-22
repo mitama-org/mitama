@@ -1,0 +1,107 @@
+{% macro userItem(user, id=None, link=None) -%}
+{% if link != None %}
+<a href="{{link}}" class="user-item" id='{{id}}'>
+{% else %}
+<div href="{{link}}" class="user-item" id='{{id}}'>
+{% endif %}
+    <img src='{{ dataurl(user.icon) }}' class='icon' />
+    <div class='detail'>
+        <div class='name'>{{ user.name }}</div>
+        <div class='screen-name'>{{ user.screen_name }}</div>
+    </div>
+{% if link != None %}
+</a>
+{% else %}
+</div>
+{% endif %}
+{%- endmacro %}
+{% macro userItemEx(user, id=None, link=None) -%}
+{% if link != None %}
+<a href="{{link}}" class="user-item" id='{{id}}'>
+{% else %}
+<div href="{{link}}" class="user-item" id='{{id}}'>
+{% endif %}
+    <img src='{{ dataurl(user.icon) }}' class='icon' />
+    <div class='detail'>
+        <div class='name'>{{ user.name }}</div>
+        <div class='screen-name'>{{ user.screen_name }}</div>
+        {{ caller() }}
+    </div>
+{% if link != None %}
+</a>
+{% else %}
+</div>
+{% endif %}
+{%- endmacro %}
+{% macro groupItem(group, id=None, link=None, tree=False) -%}
+<div class="group-item" id='{{id}}'>
+    <div class='branch'></div>
+    <a {% if link != None %}href="{{link}}"{% endif %} class='profile'>
+        <img src='{{ dataurl(group.icon) }}' class='icon' />
+        <div class='detail'>
+            <div class='name'>{{ group.name }}</div>
+            <div class='screen-name'>{{ group.screen_name }}</div>
+        </div>
+    </a>
+    {% if tree and group.groups.length != 0 %}
+    <div class='children'>
+        {{ tree(group.groups) }}
+    </div>
+    {% endif %}
+</div>
+{%- endmacro %}
+{% macro groupItemEx(group, id=None, link=None, tree=False) -%}
+<div class="group-item" id='{{id}}'>
+    <div class='branch'></div>
+    <a {% if link != None %}href="{{link}}"{% endif %} class='profile'>
+        <img src='{{ dataurl(group.icon) }}' class='icon' />
+        <div class='detail'>
+            <div class='name'>{{ group.name }}</div>
+            <div class='screen-name'>{{ group.screen_name }}</div>
+            {{ caller() }}
+        </div>
+    </a>
+    {% if tree and group.groups.length != 0 %}
+    <div class='children'>
+        {{ tree(group.groups) }}
+    </div>
+    {% endif %}
+</div>
+{%- endmacro %}
+{% macro appItem(app, id=None, link=None) -%}
+{% if link != None %}
+<a href="{{link}}" class="app-item" id='{{id}}'>
+{% else %}
+<div href="{{link}}" class="app-item" id='{{id}}'>
+{% endif %}
+    <img src='{{ dataurl(app.icon) }}' class='icon' />
+    <div class='detail'>
+        <div class='name'>{{ app.name }}</div>
+        <div class='screen-name'>{{ app.screen_name }}</div>
+        <p class='description'>{{ app.description }}</p>
+    </div>
+{% if link != None %}
+</a>
+{% else %}
+</div>
+{% endif %}
+{%- endmacro %}
+{% macro appItemEx(app, id=None, link=None) -%}
+{% if link != None %}
+<a href="{{link}}" class="app-item" id='{{id}}'>
+{% else %}
+<div href="{{link}}" class="app-item" id='{{id}}'>
+{% endif %}
+    <img src='{{ dataurl(app.icon) }}' class='icon' />
+    <div class='detail'>
+        <div class='name'>{{ app.name }}</div>
+        <div class='screen-name'>{{ app.screen_name }}</div>
+        <p class='description'>{{ app.description }}</p>
+        {{ caller() }}
+    </div>
+{% if link != None %}
+</a>
+{% else %}
+</div>
+{% endif %}
+{%- endmacro %}

@@ -1,5 +1,6 @@
 import urllib
 import base64
+from secrets import token_hex
 
 from mitama.app import Middleware
 from mitama.app.http import Response
@@ -46,4 +47,19 @@ class BasicMiddleware(Middleware):
             return Response(status=401, reason="Authorization Required", headers = {
                 "WWW-Authenticate": "Basic realm=\"mitama authorization\""
             })
+        return handler(request)
+
+class CsrfMiddleware(Middleware):
+    def process(self, request, handler):
+        sess = request.session()
+        if request.method == "POST":
+            session_token = sess["mitama_csrf_token"]
+            posts = request.post()
+            if "mitama_csrf_token" not in posts:
+                return Response(status=400, reason="Bad Request")
+            post_token = posts["mitama_csrf_token"]
+            if session_token != post_token:
+                return Response(status=400, reason="Bad Request")
+        else:
+            sess["mitama_csrf_token"] = token_hex(16)
         return handler(request)

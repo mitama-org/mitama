@@ -18,11 +18,3 @@ def get_engine():
 def get_test_engine():
     return create_engine("sqlite://")
 
-
-def get_app_engine(appname):
-    from mitama.conf import get_from_project_dir
-
-    config = get_from_project_dir()
-    return create_engine(
-        "sqlite:///" + str(config._project_dir / (appname + "/db.sqlite3"))
-    )

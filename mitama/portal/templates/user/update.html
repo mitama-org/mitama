@@ -8,53 +8,64 @@
 {% else %}
 {% set post = {} %}
 {% endif %}
-<div id='content'>
+<div id='content' class='container'>
     {% if request.user.id == user.id %}
-        <h2 class='mini-title dark'>設定</h2>
+        <h2 class='mt-4 mb-3'>プロフィール変更</h2>
     {% else %}
-        <h2 class='mini-title dark'>{{ user.name }}の設定</h2>
+        <h2 class='mt-4 mb-3'>{{user.name}}のプロフィール変更</h2>
     {% endif %}
-    <div class="inner">
-        <form method='POST' action='' enctype='multipart/form-data' class="tight">
-            <dl>
-                <dt>アイコン</dt>
-                <dd>
-                    <div id='image-form'>
-                        <img src="{{ dataurl(icon) }}" class="icon"/>
-                        <input type='file' name='icon' accept='image/*' />
-                        <label class='button'>
-                            <input type='file' accept='image/*' onchange="previewImage(this)" />
-                            画像を選択
-                        </label>
-                        <script>
-                            function previewImage(dom) {
-                                document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
-                            }
-                        </script>
-                    </div>
-                </dd>
-                <dt>ログイン名</dt>
-                <dd>
-                    <input type='text' name='screen_name' placeholder='ログイン名' value='{{ screen_name }}'/>
-                </dd>
-                <dt>名前</dt>
-                <dd>
-                    <input type='text' name='name' placeholder='名前' value='{{ name }}'/>
-                </dd>
-            </dl>
-            <button type='submit'>設定を変更</button>
-            <!--
-            <a href='{{ url('/users/'+user.id|string+'/delete') }}'>
-                <button type='button'>ユーザーを削除</button>
-            </a>
-            -->
-            {% if error %}
-                <p class='error'>{{ error }}</p>
-            {% endif %}
-            {% if message %}
-                <p class='message'>{{ message}}</p>
-            {% endif %}
-        </form>
-    </div>
+    <form method='POST' action='' enctype='multipart/form-data' class="tight">
+        <div class='mb-3'>
+            <label class='form-label'>アイコン</label>
+            <div id='image-form'>
+                <img src="{{ dataurl(icon) }}" class="user-icon" style='width: 80px; height: 80px'/>
+                <label class='btn btn-primary' style='margin-left: 24px'>
+                    <input type='file' name='icon' accept='image/*' onchange="previewImage(this)" style='display: none' />
+                    画像を選択
+                </label>
+                <script>
+                    function previewImage(dom) {
+                        document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
+                    }
+                </script>
+            </div>
+        </div>
+        <div class='mb-3'>
+            <label class='form-label' for='screen-name-form'>ログイン名</label>
+            <input class='form-control' id='screen-name-form' type='text' name='screen_name' placeholder='ログイン名' value='{{ screen_name }}'/>
+        </div>
+        <div class='mb-3'>
+            <label class='form-label' for='name-form'>名前</label>
+            <input class='form-control' id='name-form' type='text' name='name' placeholder='名前' value='{{ name }}'/>
+        </div>
+        {% if permission("admin", request.user) %}
+        <div>
+            <label class='form-label'>役割</label>
+            {% for role in roles %}
+            <div class='form-check'>
+                <input class='form-check-input' id='{{role.screen_name}}-roles-input' type='checkbox' name='roles' value='{{ role.screen_name }}' {% if role in user.roles %}checked{% endif %}/>
+                <label class='form-check-label' for='{{role.screen_name}}-roles-input'>
+                    {{ role.name }}
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class='mt-4 mb-4'>
+            <button type='submit' class='btn btn-primary'>設定を変更</button>
+        </div>
+        <!--
+        <a href='{{ url('/users/'+user.id|string+'/delete') }}'>
+            <button type='button'>ユーザーを削除</button>
+        </a>
+        -->
+        {% if error %}
+            <p class='error'>{{ error }}</p>
+        {% endif %}
+        {% if message %}
+            <p class='message'>{{ message}}</p>
+        {% endif %}
+        {{ forms.csrf(request) }}
+    </form>
 </div>
 {% endblock %}

@@ -4,7 +4,7 @@ import magic
 
 from mitama.db import BaseDatabase
 from mitama.db.types import *
-from mitama.models import Group, PermissionMixin, User
+from mitama.models import Group, User, permission
 
 
 db = BaseDatabase(prefix='portal')
@@ -13,6 +13,7 @@ db = BaseDatabase(prefix='portal')
 class Invite(db.Model):
     icon = Column(LargeBinary)
     screen_name = Column(String)
+    email = Column(String)
     name = Column(String)
     token = Column(String, unique=True)
     editable = Column(Boolean)
@@ -21,45 +22,5 @@ class Invite(db.Model):
         f = magic.Magic(mime=True, uncompress=True)
         mime = f.from_buffer(self.icon)
         return "data:" + mime + ";base64," + b64encode(self.icon).decode()
-
-
-class CreateUserPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    pass
-
-
-class UpdateUserPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    targetDownPropagate = True
-    target = Column(User.type, nullable=True)
-    pass
-
-
-class DeleteUserPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    pass
-
-
-class CreateGroupPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    pass
-
-
-class UpdateGroupPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    targetDownPropagate = True
-    target = Column(Group.type, nullable=True)
-    pass
-
-
-class DeleteGroupPermission(PermissionMixin, db.Model):
-    upPropagate = True
-    pass
-
-
-class Admin(PermissionMixin, db.Model):
-    upPropagate = True
-    pass
-
 
 db.create_all()

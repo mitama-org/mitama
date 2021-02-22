@@ -1,6 +1,4 @@
-.item .icon {
-    border-radius: 50%;
-}
+
 .no-item{
     color: var(--main-text-lighter);
     font-size: 0.8rem;
@@ -9,55 +7,9 @@
     align-items: center;
     padding: 24px 0;
 }
-.member-append-list{
-    .item-container{
-        display: grid;
-        grid-template-columns: 24px 1fr;
-        input[type='checkbox'] {
-            margin: 30px 6px;
-            width: 12px;
-            height: 12px;
-        }
-    }
-    .item {
-        display: grid;
-        grid-template-columns: 56px 1fr;
-        grid-gap: 16px;
-        text-decoration: none;
-        color: var(--main-text);
-        padding: 8px;
-        .user-icon, .icon{
-            display: block;
-            width: 56px;
-            height: 56px;
-            box-sizing: border-box;
-            border: 2px solid #0001;
-        }
-        .user-icon {
-            border-radius: 28px;
-        }
-        .icon {
-            border-radius: 4px;
-        }
-        .detail {
-            display: flex;
-            justify-content: space-around;
-            flex-direction: column;
-            padding: 8px 0;
-            .name{
-                font-size: 1rem;
-                font-weight: bold;
-            }
-            .screen-name{ 
-                font-size: 0.85rem;
-                color: var(--main-text-lighter);
-            }
-        }
-    }
-}
 
 .group-list {
-    .item{
+    .group-item{
         display: grid;
         grid-template-columns: auto 1fr;
         .branch {
@@ -81,9 +33,7 @@
             }
             .detail {
                 display: flex;
-                justify-content: space-around;
                 flex-direction: column;
-                padding: 8px 0;
                 .name{
                     font-size: 1rem;
                     font-weight: bold;
@@ -133,7 +83,8 @@
         margin: 16px 0 8px;
         font-size: 0.75rem;
     }
-    .item {
+    .user-item,
+    .invite-item {
         display: grid;
         grid-template-columns: 56px 1fr;
         grid-gap: 16px;
@@ -155,9 +106,7 @@
         }
         .detail {
             display: flex;
-            justify-content: space-around;
             flex-direction: column;
-            padding: 8px 0;
             .name{
                 font-size: 1rem;
                 font-weight: bold;
@@ -188,7 +137,7 @@
         margin: 16px 0 8px;
         font-size: 0.75rem;
     }
-    .item {
+    .member-control-item {
         display: grid;
         grid-template-columns: 56px 1fr auto;
         grid-gap: 16px;
@@ -210,9 +159,7 @@
         }
         .detail {
             display: flex;
-            justify-content: space-around;
             flex-direction: column;
-            padding: 8px 0;
             .name{
                 font-size: 1rem;
                 font-weight: bold;
@@ -233,7 +180,7 @@
     }
 }
 .group-list {
-    .item{
+    .group-item{
         display: grid;
         grid-template-columns: auto 1fr;
         .branch {
@@ -257,9 +204,7 @@
             }
             .detail {
                 display: flex;
-                justify-content: space-around;
                 flex-direction: column;
-                padding: 8px 0;
                 .name{
                     font-size: 1rem;
                     font-weight: bold;
@@ -282,8 +227,8 @@
                 display: block;
                 position: absolute;
                 box-sizing: border-box;
-                border-left: 2px solid var(--main-color);
-                border-bottom: 2px solid var(--main-color);
+                border-left: 2px solid #0002;
+                border-bottom: 2px solid #0002;
                 width: 8px;
                 height: 40px;
                 left: 16px;
@@ -297,7 +242,7 @@
                 display: block;
                 position: absolute;
                 box-sizing: border-box;
-                border-left: 2px solid var(--main-color);
+                border-left: 2px solid #0002;
                 width: 8px;
                 height: 38px;
                 left: 16px;
@@ -310,7 +255,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     justify-content: start;
-    .item {
+    .app-item {
         display: grid;
         text-decoration: none;
         color: var(--main-text);
@@ -327,14 +272,16 @@
         .detail {
             display: flex;
             flex-direction: column;
-            padding: 8px 0;
             .name{
                 font-size: 1rem;
                 font-weight: bold;
             }
             .screen-name{ 
                 font-size: 0.85rem;
-                color: var(--main-text-lighter);
+            }
+            .description {
+                font-size: 0.9rem;
+                margin: 0.5rem 0;
             }
         }
     }

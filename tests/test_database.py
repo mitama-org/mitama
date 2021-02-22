@@ -1,11 +1,14 @@
 import unittest
 
-from mitama.db import Database
+from mitama.db import DatabaseManager, BaseDatabase
 from mitama.db.types import Column, Integer, String
 
-Database.test()
-db = Database(prefix="test")
+DatabaseManager.test()
 
+class Database(BaseDatabase):
+    pass
+
+db = Database(prefix="test")
 
 class ModelA(db.Model):
     name = Column(String)

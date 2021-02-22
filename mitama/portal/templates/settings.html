@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+<div id='content' class='container'>
+    <div class="mb-3 mt-3">
+        <a href="/"><button class='btn btn-outline-secondary'><i class='bi-arrow-left'></i>戻る</button></a>
+    </div>
+    <h2>設定</h2>
+    <form method="POST">
+        <div class='mb-5 mt-4'>
+            <h4 class='mt-3 mb-3'>ウェルカムボード</h4>
+            <textarea name="welcome_message" class='form-control' rows='20'>{{welcome_message}}</textarea>
+            <div class='mb-3 mt-3'>
+                <button class='btn btn-primary'>設定を更新</button>
+            </div>
+        </div>
+        <div class='mt-4 mb-5'>
+            <h4 class='mt-3 mb-3'>権限割り当て</h4>
+            <table class='table'>
+                <thead>
+                <tr>
+                    <th scope='col'>#</th>
+                    {% for role in roles %}
+                    <th scope='col'>{{ role.name }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for permission in permissions %}
+                <tr>
+                    <th>{{ permission.name }}</th>
+                    {% for role in roles %}
+                    <td>
+                        <input
+                            type='checkbox'
+                            name='role.{{role.screen_name}}'
+                            value='{{permission.screen_name}}'
+                            {% if role in permission.roles %}
+                            checked
+                            {% endif %}
+                        />
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class='mb-3 mt-3'>
+                <button class='btn btn-primary'>設定を更新</button>
+                <button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#addrole'>役割を追加</button>
+            </div>
+        </div>
+        <div class='mt-4 mb-5'>
+            <h4 class='mt-3 mb-3'>グループ内権限割り当て</h4>
+            <table class='table'>
+                <thead>
+                <tr>
+                    <th scope='col'>#</th>
+                    {% for role in inner_roles %}
+                    <th scope='col'>{{ role.name }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for permission in inner_permissions %}
+                <tr>
+                    <th>{{ permission.name }}</th>
+                    {% for role in inner_roles %}
+                    <td>
+                        <input
+                            type='checkbox'
+                            name='inner_role.{{role.screen_name}}'
+                            value='{{permission.screen_name}}'
+                            {% if role in permission.roles %}
+                            checked
+                            {% endif %}
+                        />
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class='mb-3 mt-3'>
+                <button class='btn btn-primary'>設定を更新</button>
+                <button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#addinnerrole'>役割を追加</button>
+            </div>
+        </div>
+        <div class='modal fade' id='addrole' tabindex='-1'>
+            <div class='modal-dialog'>
+                <div class='modal-content'>
+                    <div class='modal-header'>
+                        <h5 class='modal-title'>役割を追加</h5>
+                    </div>
+                    <div class='modal-body'>
+                        <div class='mb-3'>
+                            <label class='form-label'>役割ID<span style='font-size:0.75rem'>(半角英数、ハイフン、アンダーバー)</span></label>
+                            <input class='form-control' type='text' name='role_screen_name' pattern='^[0-9a-zA-Z_-]+$'/>
+                        </div>
+                        <div class='mb-3'>
+                            <label class='form-label'>役割名</label>
+                            <input class='form-control' type='text' name='role_name'/>
+                        </div>
+                    </div>
+                    <div class='modal-footer'>
+                        <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>キャンセル</button>
+                        <button class='btn btn-primary'>追加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class='modal fade' id='addinnerrole' tabindex='-1'>
+            <div class='modal-dialog'>
+                <div class='modal-content'>
+                    <div class='modal-header'>
+                        <h5 class='modal-title'>グループ内役割を追加</h5>
+                    </div>
+                    <div class='modal-body'>
+                        <div class='mb-3'>
+                            <label class='form-label'>グループ内役割ID<span style='font-size:0.75rem'>(半角英数、ハイフン、アンダーバー)</span></label>
+                            <input class='form-control' type='text' name='inner_role_screen_name' pattern='^[0-9a-zA-Z_-]+$'/>
+                        </div>
+                        <div class='mb-3'>
+                            <label class='form-label'>グループ内役割名</label>
+                            <input class='form-control' type='text' name='inner_role_name'/>
+                        </div>
+                    </div>
+                    <div class='modal-footer'>
+                        <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>キャンセル</button>
+                        <button class='btn btn-primary'>追加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class='modal fade' id='updaterole' tabindex='-1'>
+            <div class='modal-dialog'>
+                <div class='modal-content'>
+                    <div class='modal-header'>
+                        <h5 class='modal-title'>役割を編集</h5>
+                    </div>
+                    <div class='modal-body'>
+                        <div class='mb-3'>
+                            <label class='form-label'>役割ID<span style='font-size:0.75rem'>(半角英数、ハイフン、アンダーバー)</span></label>
+                            <input class='form-control' type='text' name='role_screen_name' pattern='^[0-9a-zA-Z_-]+$'/>
+                        </div>
+                        <div class='mb-3'>
+                            <label class='form-label'>役割名</label>
+                            <input class='form-control' type='text' name='role_name'/>
+                        </div>
+                    </div>
+                    <div class='modal-footer'>
+                        <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>キャンセル</button>
+                        <button class='btn btn-primary'>追加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class='modal fade' id='updateinnerrole' tabindex='-1'>
+            <div class='modal-dialog'>
+                <div class='modal-content'>
+                    <div class='modal-header'>
+                        <h5 class='modal-title'>グループ内役割を編集</h5>
+                    </div>
+                    <div class='modal-body'>
+                        <div class='mb-3'>
+                            <label class='form-label'>グループ内役割ID<span style='font-size:0.75rem'>(半角英数、ハイフン、アンダーバー)</span></label>
+                            <input class='form-control' type='text' name='inner_role_update_screen_name' pattern='^[0-9a-zA-Z_-]+$'/>
+                        </div>
+                        <div class='mb-3'>
+                            <label class='form-label'>グループ内役割名</label>
+                            <input class='form-control' type='text' name='inner_role_update_name'/>
+                        </div>
+                    </div>
+                    <div class='modal-footer'>
+                        <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>キャンセル</button>
+                        <button class='btn btn-primary'>追加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ forms.csrf(request) }}
+    </form>
+</div>
+{% endblock %}

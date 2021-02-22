@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "mitama"
+version = "4.0.0"
+description = ""
+authors = ["boke0 <speken00.tt@gmail.com>"]
+license = "MIT"
+
+include = [
+    "mitama/portal/templates/*.html",
+    "mitama/portal/templates/**/*.html",
+    "mitama/portal/static/*",
+    "mitama/http/templates/*.html",
+    "mitama/http/static/*",
+    "mitama/app/static/*",
+    "mitama/skeleton/*",
+    "mitama/skeleton/**/*"
+]
+
+[tool.poetry.scripts]
+mitama = 'mitama.commands:exec'
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Jinja2 = "^2.11.3"
+SQLAlchemy = "^1.3.23"
+cryptography = "^3.4.6"
+PyJWT = "^2.0.1"
+bcrypt = "^3.2.0"
+yarl = "^1.6.3"
+pysaml2 = "^6.5.1"
+tzlocal = "^2.1"
+watchdog = "^2.0.1"
+python-magic = "^0.4.22"
+jinja-markdown = "^1.200630"
+Markdown = "^3.3.3"
+mysqlclient = "^2.0.3"
+psycopg2 = "^2.8.6"
+
+[tool.poetry.dev-dependencies]
+unittest = "^0.0"
+flake8 = "^3.8.4"
+isort = "^5.7.0"
+black = "^20.8b1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

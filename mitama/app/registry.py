@@ -1,6 +1,8 @@
 import importlib
 import os
 import sys
+from pathlib import Path
+import json
 
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers import Observer
@@ -56,15 +58,28 @@ class AppRegistry(_Singleton):
                     yield (key, app)
         return Items()
 
-    def __setitem__(self, path, app):
-        self._map[path] = app
-        self._map = dict(sorted(self._map.items(), key = lambda x: -1 * (x[0].count('/'))))
+    def __setitem__(self, app_name, app):
+        app.project = self.project
+        self._map[app_name] = app
 
-    def __getitem__(self, path):
-        return self._map[path]
+        def sorter(x):
+            x_ = x[1].path
+            if x_[-1] != "/":
+                x_ += "/"
+            return -1 * len(x_.split('/'))
 
-    def __delitem__(self, path):
-        del self._map[path]
+        self._map = dict(
+            sorted(
+                self._map.items(),
+                key=sorter
+            )
+        )
+
+    def __getitem__(self, app_name):
+        return self._map[app_name]
+
+    def __delitem__(self, app_name):
+        del self._map[app_name]
 
     def reset(self):
         """アプリの一覧をリセットします"""
@@ -84,8 +99,10 @@ class AppRegistry(_Singleton):
         app = builder.build()
         return app
 
-    def load_config(self, config = get_from_project_dir()):
+    def load_config(self, config = None):
         """アプリの一覧をmitama.jsonから読み込み、配信します"""
+        if config is None:
+            config = get_from_project_dir()
         sys.path.append(str(config._project_dir))
         for app_name in config.apps:
             _app = config.apps[app_name]
@@ -93,8 +110,19 @@ class AppRegistry(_Singleton):
             if not app_dir.is_dir():
                 os.mkdir(app_dir)
             app = self.load_package(app_name, _app["path"], config._project_dir)
-            self[_app["path"]] = app
+            self[app_name] = app
 
+    def save_config(self):
+        path = Path(os.getcwd())
+        with open(path / "mitama.json", "r") as f:
+            data = f.read()
+        config_json = json.loads(data)
+        for app_name, app in self.items():
+            config_json["apps"][app_name] = {
+                "path": app.path
+            }
+        with open(path / "mitama.json", "w") as f:
+            f.write(json.dumps(config_json, indent=4))
 '''
     def router(self):
         """アプリの情報に基づいてルーティングエンジンを生成します"""

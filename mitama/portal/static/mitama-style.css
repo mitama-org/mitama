@@ -1,0 +1,328 @@
+.user-icon {
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.group-icon {
+  object-fit: cover;
+  border-radius: 8%;
+}
+
+.icon {
+  object-fit: cover;
+}
+
+.no-item {
+  color: var(--main-text-lighter);
+  font-size: 0.8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 0;
+}
+
+.group-list .group-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+.group-list .group-item .branch {
+  grid-column: 1/2;
+  width: 0px;
+}
+.group-list .group-item .profile {
+  display: grid;
+  text-decoration: none;
+  color: var(--main-text);
+  grid-column: 2/3;
+  grid-template-columns: 56px 1fr;
+  grid-gap: 16px;
+  padding: 8px;
+}
+.group-list .group-item .profile .icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  border: 2px solid #0001;
+  box-sizing: border-box;
+}
+.group-list .group-item .profile .detail {
+  display: flex;
+  flex-direction: column;
+}
+.group-list .group-item .profile .detail .name {
+  font-size: 1rem;
+  font-weight: bold;
+}
+.group-list .group-item .profile .detail .screen-name {
+  font-size: 0.85rem;
+  color: var(--main-text-lighter);
+}
+.group-list .children {
+  grid-column: 2/3;
+  position: relative;
+}
+.group-list .children::before {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 2px;
+  height: calc(100% - 45px);
+  left: 16px;
+  background: var(--main-color);
+}
+.group-list .children .branch {
+  width: 24px;
+  display: block;
+  position: relative;
+}
+.group-list .children .branch::before {
+  content: "";
+  display: block;
+  position: absolute;
+  box-sizing: border-box;
+  border-left: 2px solid var(--main-color);
+  border-bottom: 2px solid var(--main-color);
+  width: 8px;
+  height: 40px;
+  left: 16px;
+  top: -8px;
+  border-bottom-left-radius: 4px;
+}
+
+.user-list h4,
+.invite-list h4 {
+  margin: 16px 0 8px;
+  font-size: 0.75rem;
+}
+.user-list .user-item,
+.user-list .invite-item,
+.invite-list .user-item,
+.invite-list .invite-item {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  grid-gap: 16px;
+  text-decoration: none;
+  color: var(--main-text);
+  padding: 8px;
+}
+.user-list .user-item .user-icon, .user-list .user-item .icon,
+.user-list .invite-item .user-icon,
+.user-list .invite-item .icon,
+.invite-list .user-item .user-icon,
+.invite-list .user-item .icon,
+.invite-list .invite-item .user-icon,
+.invite-list .invite-item .icon {
+  display: block;
+  width: 56px;
+  height: 56px;
+  box-sizing: border-box;
+  border: 2px solid #0001;
+}
+.user-list .user-item .user-icon,
+.user-list .invite-item .user-icon,
+.invite-list .user-item .user-icon,
+.invite-list .invite-item .user-icon {
+  border-radius: 28px;
+}
+.user-list .user-item .icon,
+.user-list .invite-item .icon,
+.invite-list .user-item .icon,
+.invite-list .invite-item .icon {
+  border-radius: 4px;
+}
+.user-list .user-item .detail,
+.user-list .invite-item .detail,
+.invite-list .user-item .detail,
+.invite-list .invite-item .detail {
+  display: flex;
+  flex-direction: column;
+}
+.user-list .user-item .detail .name,
+.user-list .invite-item .detail .name,
+.invite-list .user-item .detail .name,
+.invite-list .invite-item .detail .name {
+  font-size: 1rem;
+  font-weight: bold;
+}
+.user-list .user-item .detail .screen-name,
+.user-list .invite-item .detail .screen-name,
+.invite-list .user-item .detail .screen-name,
+.invite-list .invite-item .detail .screen-name {
+  font-size: 0.85rem;
+  color: var(--main-text-lighter);
+}
+.user-list .user-item .detail .buttons,
+.user-list .invite-item .detail .buttons,
+.invite-list .user-item .detail .buttons,
+.invite-list .invite-item .detail .buttons {
+  text-align: right;
+  font-size: 0.8rem;
+}
+.user-list .user-item .detail .buttons a,
+.user-list .invite-item .detail .buttons a,
+.invite-list .user-item .detail .buttons a,
+.invite-list .invite-item .detail .buttons a {
+  display: inline-block;
+}
+.user-list .user-item .detail .buttons input,
+.user-list .invite-item .detail .buttons input,
+.invite-list .user-item .detail .buttons input,
+.invite-list .invite-item .detail .buttons input {
+  display: block;
+  position: absolute;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.member-control-list h4 {
+  margin: 16px 0 8px;
+  font-size: 0.75rem;
+}
+.member-control-list .member-control-item {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  grid-gap: 16px;
+  text-decoration: none;
+  color: var(--main-text);
+  padding: 8px;
+}
+.member-control-list .member-control-item .user-icon, .member-control-list .member-control-item .icon {
+  display: block;
+  width: 56px;
+  height: 56px;
+  box-sizing: border-box;
+  border: 2px solid #0001;
+}
+.member-control-list .member-control-item .user-icon {
+  border-radius: 28px;
+}
+.member-control-list .member-control-item .icon {
+  border-radius: 4px;
+}
+.member-control-list .member-control-item .detail {
+  display: flex;
+  flex-direction: column;
+}
+.member-control-list .member-control-item .detail .name {
+  font-size: 1rem;
+  font-weight: bold;
+}
+.member-control-list .member-control-item .detail .screen-name {
+  font-size: 0.85rem;
+  color: var(--main-text-lighter);
+}
+.member-control-list .member-control-item .actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.member-control-list .member-control-item .actions a {
+  margin-left: 4px;
+}
+
+.group-list .group-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+.group-list .group-item .branch {
+  grid-column: 1/2;
+  width: 0px;
+}
+.group-list .group-item .profile {
+  display: grid;
+  text-decoration: none;
+  color: var(--main-text);
+  grid-column: 2/3;
+  grid-template-columns: 56px 1fr;
+  grid-gap: 16px;
+  padding: 8px;
+}
+.group-list .group-item .profile .icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  border: 2px solid #0001;
+  box-sizing: border-box;
+}
+.group-list .group-item .profile .detail {
+  display: flex;
+  flex-direction: column;
+}
+.group-list .group-item .profile .detail .name {
+  font-size: 1rem;
+  font-weight: bold;
+}
+.group-list .group-item .profile .detail .screen-name {
+  font-size: 0.85rem;
+  color: var(--main-text-lighter);
+}
+.group-list .children {
+  grid-column: 2/3;
+}
+.group-list .children .branch {
+  width: 24px;
+  display: block;
+  position: relative;
+}
+.group-list .children .branch::before {
+  content: "";
+  display: block;
+  position: absolute;
+  box-sizing: border-box;
+  border-left: 2px solid #0002;
+  border-bottom: 2px solid #0002;
+  width: 8px;
+  height: 40px;
+  left: 16px;
+  top: -8px;
+  border-bottom-left-radius: 4px;
+}
+.group-list .children .item + .item > .branch::after {
+  content: "";
+  display: block;
+  position: absolute;
+  box-sizing: border-box;
+  border-left: 2px solid #0002;
+  width: 8px;
+  height: 38px;
+  left: 16px;
+  top: -38px;
+}
+
+.app-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  justify-content: start;
+}
+.app-list .app-item {
+  display: grid;
+  text-decoration: none;
+  color: var(--main-text);
+  grid-template-columns: 56px 1fr;
+  grid-gap: 16px;
+  padding: 8px;
+}
+.app-list .app-item .icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  border: 2px solid #0001;
+  box-sizing: border-box;
+}
+.app-list .app-item .detail {
+  display: flex;
+  flex-direction: column;
+}
+.app-list .app-item .detail .name {
+  font-size: 1rem;
+  font-weight: bold;
+}
+.app-list .app-item .detail .screen-name {
+  font-size: 0.85rem;
+}
+.app-list .app-item .detail .description {
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+/*# sourceMappingURL=mitama-style.css.map */

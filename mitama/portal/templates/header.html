@@ -1,34 +1,40 @@
-<header id='header'>
-    <div id='logo_container'>
-        <a href='{{ url('/') }}'>
-            <img src='{{ url('/static/white-logo.svg') }}' alt='Mitama' id='logo'/>
+<nav class='navbar navbar-expand-lg navbar-light bg-secondary'>
+    <div class='container-fluid'>
+        <a href='{{ url('/') }}' class='navbar-brand'>
+            <img src='{{ url('/static/white-logo.svg') }}' height='40px' width='auto' alt='Mitama' id='logo'/>
         </a>
-    </div>
-    <div id='user-menu'>
-        <input type='checkbox' id='menu-status'>
-        <label for='menu-status'>
-            <img src="{{ dataurl(request.user.icon) }}" class='user-icon'/>
-            {{ request.user.name }}
-        </label>
-        <menu>
-            <div>
-                <a href='{{ url('/users/' + request.user.screen_name) }}'>
-                    <img src="{{ dataurl(request.user.icon) }}" class='user-icon'/>
-                    <div>マイページ</div>
-                </a>
-                {% if user_update_permission(request.user, request.user) %}
-                <a href='{{ url('/users/' + request.user.screen_name + "/settings") }}'>
-                    <svg><use xlink:href="{{ url("/static/spritesheet.svg") }}#settings"></use></svg>
-                    <div>設定</div>
-                </a>
+        <button class='navbar-toggler' data-bs-toggle='collapse' data-bs-target='#navList' aria-controls='navList'>
+            <span class='navbar-toggler-icon'></span>
+        </button>
+        <div class='collapse navbar-collapse' id='navList'>
+            <ul class='navbar-nav ms-auto mb-2 mb-lg-0'>
+                <li class='nav-item'>
+                    <a class='nav-link text-white' href='{{ url('/users/' + request.user.screen_name) }}'>
+                        <i class='bi-person'></i>
+                        マイページ
+                    </a>
+                </li>
+                <li class='nav-item'>
+                    <a class='nav-link text-white' href='{{ url('/users/' + request.user.screen_name + "/settings") }}'>
+                        <i class='bi-person-circle'></i>
+                        プロフィール変更
+                    </a>
+                </li>
+                {% if permission("admin", request.user) %}
+                <li class='nav-item'>
+                    <a class='nav-link text-white' href='{{ url('/settings') }}'>
+                        <i class='bi-gear'></i>
+                        設定
+                    </a>
+                </li>
                 {% endif %}
-            </div>
-            <div>
-                <a href='/logout'>
-                    <svg><use xlink:href="{{ url("/static/spritesheet.svg") }}#logout"></use></svg>
-                    <div>ログアウト</div>
-                </a>
-            </div>
-        </menu>
+                <li class='nav-item'>
+                    <a class='nav-link text-white' href='/logout'>
+                        <i class='bi-box-arrow-left'></i>
+                        ログアウト
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
-</header>
+</nav>

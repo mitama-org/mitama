@@ -1,0 +1,15 @@
+{% macro tabs() -%}
+    {% set uuid = uuid() %}
+    <div class="tab-container">
+        {% caller(uuid) %}
+    <div>
+{%- endmacro %}
+
+{% macro tabitem(tab_uuid, title) -%}
+    {% set uuid = uuid() %}
+    <input type="radio" name="__tab-title-{{tab_uuid}}" id="__tab-title-{{tab_uuid}}-{{uuid}}" />
+    <label class="tab-title" for="__tab-title-{{tab_uuid}}-{{uuid}}">{{title}}</label>
+    <div class="tab-item-container">
+        {{caller()}}
+    </div>
+{%- endmacro %}

@@ -1,47 +1,40 @@
-{% set entrance = True %}
-{% extends 'base.html' %}
-{% block header %}
-    {% include "entrance-header.html" %}
-{% endblock %}
+{% extends 'login_base.html' %}
 {% block content %}
-<div id='content'>
-    <h1>Mitamaに参加する</h1>
-    <form method='POST' action='' enctype="multipart/form-data" class='entrance'>
-        <dl>
-            <dt>アイコン</dt>
-            <dd>
-                <div id='image-form'>
-                    <img src="{{ dataurl(icon) if icon|length > 0 else url("/static/noimage_user.svg") }}"/>
-                    {% if editable %}
-                    <label class='button'>
-                        <input type='file' name='icon' accept='image/*' onchange='previewImage(this)'/>
-                        画像を選択
-                    </label>
-                    {% endif %}
-                    <script>
-                        function previewImage(dom) {
-                            document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
-                        }
-                    </script>
-                </div>
-            </dd>
-            <dt>ログイン名</dt>
-            <dd>
-            <input type='text' name='screen_name' placeholder='ログイン名' value='{{ screen_name }}' {{ '' if editable else 'readonly' }}/>
-            </dd>
-            <dt>名前</dt>
-            <dd>
-                <input type='text' name='name' placeholder='名前' value='{{ name }}' {{ '' if editable else 'readonly' }}/>
-            </dd>
-            <dt>パスワード</dt>
-            <dd>
-                <input type='password' name='password' placeholder='パスワード' value='{{ password }}'/>
-            </dd>
-        </dl>
-        <div class='submit'>
-            <button type="submit">Mitamaに参加する</button>
+<form method='POST' action='' enctype="multipart/form-data" class='entrance'>
+    <div class='main mb-4'>
+        <h1 class='mb-4'>Mitamaに参加する</h1>
+        <div class='mb-3'>
+            <label class='form-label'>アイコン</label>
+            <div id='image-form'>
+                <img src="{{ dataurl(icon) if icon|length > 0 else url("/static/noimage_user.svg") }}" style='width: 80px; height: 80px; margin-right: 24px' class='user-icon'/>
+                <label class='btn btn-primary'>
+                    <input type='file' name='icon' accept='image/*' onchange='previewImage(this)' style='display: none'/>
+                    画像を選択
+                </label>
+                <script>
+                    function previewImage(dom) {
+                        document.querySelector("#image-form img").src=URL.createObjectURL(dom.files[0])
+                    }
+                </script>
+            </div>
         </div>
-        <p class='error'>{{ error }}</p>
-    </form>
-</div>
+        <div class='mb-3'>
+            <label class='form-label'>ログイン名</label>
+            <input class='form-control' type='text' name='screen_name' placeholder='ログイン名' value='{{ screen_name }}' />
+        </div>
+        <div class='mb-3'>
+            <label class='form-label'>名前</label>
+            <input class='form-control' type='text' name='name' placeholder='名前' value='{{ name }}' />
+        </div>
+        <div class='mb-3'>
+            <label class='form-label'>パスワード</label>
+            <input class='form-control' type='password' name='password' placeholder='パスワード' value='{{ password }}'/>
+        </div>
+    </div>
+    {{ forms.csrf(request) }}
+    <div class='d-grid'>
+        <button type="submit" class='btn btn-primary'>Mitamaに参加する</button>
+    </div>
+    <p class='error'>{{ error }}</p>
+</form>
 {% endblock %}
