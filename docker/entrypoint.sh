@@ -1,5 +1,5 @@
 #!/bin/sh
 
 nginx start
-python /code/rewrite_json.py
+python /code/setup_config.py
 uwsgi --ini /code/uwsgi.ini
