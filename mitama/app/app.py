@@ -166,7 +166,7 @@ class App:
 def _session_middleware():
     import base64
 
-    from cryptography import fernet
+    from Crypto.Random import get_random_bytes
 
     from mitama.app import Middleware
     from mitama.app.http.session import EncryptedCookieStorage
@@ -177,7 +177,7 @@ def _session_middleware():
         with open(".tmp/MITAMA_SESSION_KEY", "r") as f:
             session_key = f.read()
     else:
-        key = fernet.Fernet.generate_key()
+        key = get_random_bytes(16)
         session_key = base64.urlsafe_b64encode(key).decode("utf-8")
         if not os.path.exists(".tmp"):
             os.mkdir(".tmp")

@@ -1,8 +1,11 @@
 import json
 import time
+import base64
 from collections.abc import MutableMapping
 
-from cryptography import fernet
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+from Crypto.Util import Padding
 
 
 class Session(MutableMapping):
@@ -108,7 +111,7 @@ class EncryptedCookieStorage:
             secret_key = secret_key.encode("utf-8")
         elif isinstance(secret_key, (bytes, bytearray)):
             pass
-        self._fernet = fernet.Fernet(secret_key)
+        self.secret_key = secret_key
 
     @property
     def cookie_name(self):
@@ -135,22 +138,40 @@ class EncryptedCookieStorage:
             return Session(None, data=None, new=True, max_age=self.max_age)
         else:
             try:
+                data = base64.urlsafe_b64decode(cookie.encode("utf-8"))
+                iv = data[:16]
+                cipher = AES.new(self.secret_key, AES.MODE_CBC, iv)
+                decrypted = cipher.decrypt(
+                    data[16:]
+                )
+                without_padding = Padding.unpad(
+                    decrypted,
+                    16,
+                    "pkcs7"
+                )
                 data = self._decoder(
-                    self._fernet.decrypt(
-                        cookie.encode("utf-8"), ttl=self._max_age
-                    ).decode("utf-8")
+                    without_padding.decode("utf-8")
                 )
                 return Session(None, data=data, new=False, max_age=self.max_age)
-            except (TypeError, fernet.InvalidToken):
+            except (TypeError, ValueError) as err:
+                print(err)
                 return Session(None, data=None, new=True, max_age=self.max_age)
 
     def save_session(self, request, response, session):
         if session.empty:
             return self.save_cookie(response, "", max_age=session.max_age)
+        iv = get_random_bytes(16)
         cookie_data = self._encoder(self._get_session_data(session)).encode("utf-8")
+        cipher = AES.new(self.secret_key, AES.MODE_CBC, iv)
+        with_padding = Padding.pad(
+            cookie_data,
+            16,
+            "pkcs7"
+        )
+        encrypted = base64.urlsafe_b64encode(iv + cipher.encrypt(with_padding)).decode("utf-8")
         self.save_cookie(
             response,
-            self._fernet.encrypt(cookie_data).decode("utf-8"),
+            encrypted,
             max_age=session.max_age,
         )
 
