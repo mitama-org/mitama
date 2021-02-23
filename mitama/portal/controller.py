@@ -94,7 +94,7 @@ class RegisterController(Controller):
                 user.update()
                 sess["jwt_token"] = User.get_jwt(user)
                 return Response.redirect(self.app.convert_url("/"))
-            except ValidationError as err:
+            except (ValidationError, ValueError) as err:
                 icon = form["icon"]
                 return Response.render(
                     template,

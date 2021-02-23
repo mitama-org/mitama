@@ -245,8 +245,10 @@ class User(Node, db.Model):
         if self._project is None:
             return password
         config = self._project.config
-        MIN_PASSWORD_LEN = config.password_validation.get('MIN_PASSWORD_LEN', None)
-        COMPLICATED_PASSWORD = config.password_validation.get('COMPLICATED_PASSWORD', False)
+        if config.password_validation is None:
+            return password
+        MIN_PASSWORD_LEN = config.password_validation.get('min_password_len', None)
+        COMPLICATED_PASSWORD = config.password_validation.get('complicated_password', False)
 
         if MIN_PASSWORD_LEN and len(password) < MIN_PASSWORD_LEN:
             raise ValueError('パスワードは{}文字以上である必要があります'.format(MIN_PASSWORD_LEN))

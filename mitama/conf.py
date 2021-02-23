@@ -17,7 +17,7 @@ class Config:
             "type": "sqlite",
             "path": Path(self._project_dir) / "db.sqlite3"
         }
-        self.password_validation = {}
+        self.password_validation = None
         self.port = 8080
         self.mail = {
             "host": "localhost",
