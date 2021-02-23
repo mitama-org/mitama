@@ -20,7 +20,7 @@ include = [
 mitama = 'mitama.commands:exec'
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.6"
 Jinja2 = "^2.11.3"
 SQLAlchemy = "^1.3.23"
 cryptography = "^3.4.6"
@@ -35,6 +35,7 @@ jinja-markdown = "^1.200630"
 Markdown = "^3.3.3"
 mysqlclient = "^2.0.3"
 psycopg2 = "^2.8.6"
+Pillow = "^8.1.0"
 
 [tool.poetry.dev-dependencies]
 unittest = "^0.0"

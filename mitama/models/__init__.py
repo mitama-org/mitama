@@ -208,7 +208,10 @@ class User(Node, db.Model):
 
     def password_check(self, password):
         password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
-        return bcrypt.checkpw(password, self.password)
+        password_ = self.password
+        if isinstance(password_, str):
+            password_ = password_.encode()
+        return bcrypt.checkpw(password, password_)
 
     @classmethod
     def password_auth(cls, screen_name, password):
@@ -225,7 +228,10 @@ class User(Node, db.Model):
         except:
             raise AuthorizationError(AuthorizationError.USER_NOT_FOUND)
         password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
-        if bcrypt.checkpw(password, user.password):
+        password_ = user.password
+        if isinstance(password_, str):
+            password_ = password_.encode()
+        if bcrypt.checkpw(password, password_):
             return user
         else:
             raise AuthorizationError(AuthorizationError.WRONG_PASSWORD)

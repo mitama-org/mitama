@@ -6,12 +6,5 @@
         "hello": {
             "path": "/hels"
         }
-    },
-    "database": {
-        "name": "postgres",
-        "user": "postgres",
-        "password": "postgres",
-        "type": "postgresql",
-        "host": "127.0.0.1"
     }
 }

@@ -1,5 +1,6 @@
 import json
 import traceback
+import io
 from uuid import uuid4
 
 from mitama.app import AppRegistry, Controller
@@ -29,6 +30,30 @@ from .forms import (
     SettingsForm
 )
 
+from PIL import Image
+
+def resize_icon(icon):
+    if icon is None:
+        return None
+    img = Image.open(io.BytesIO(icon))
+    width, height = img.size
+    if width > height:
+        scale = 200 / height
+    else:
+        scale = 200 / width
+    width *= scale
+    height *= scale
+    print(width, height)
+    resize = img.resize((int(width), int(height)), resample=Image.NEAREST)
+    if width > height:
+        cropped = resize.crop((int((width-height)/2), 0, width - int((width-height)/2), height))
+    else:
+        cropped = resize.crop((0, int((height-width)/2), width, height - int((height-width)/2)))
+    print(cropped.size, width, height, int((width-height)/2))
+    export = io.BytesIO()
+    cropped.save(export, format="PNG")
+    return export.getvalue()
+
 class SessionController(Controller):
     def login(self, request):
         template = self.view.get_template("login.html")
@@ -44,7 +69,7 @@ class SessionController(Controller):
                 redirect_to = request.query.get("redirect_to", ["/"])[0]
                 return Response.redirect(redirect_to)
             except (ValidationError, AuthorizationError) as err:
-                return Response.render(template, {"error": err.message}, status=401)
+                return Response.render(template, {"error": str(err)}, status=401)
         return Response.render(template, status=401)
 
     def logout(self, request):
@@ -65,7 +90,7 @@ class RegisterController(Controller):
                 user.set_password(form["password"])
                 user.screen_name = form["screen_name"]
                 user.name = form["name"]
-                user.icon = form["icon"] or user.icon
+                user.icon = reize_icon(form["icon"]) if form["icon"] is not None else user.icon
                 user.update()
                 sess["jwt_token"] = User.get_jwt(user)
                 return Response.redirect(self.app.convert_url("/"))
@@ -160,7 +185,7 @@ class RegisterController(Controller):
                 template = self.view.get_template("confirm.html")
                 return Response.render(template)
             except ValidationError as err:
-                return Response.render(template, {"error": err.message})
+                return Response.render(template, {"error": str(err)})
         return Response.render(template)
 
 
@@ -216,7 +241,7 @@ class HomeController(Controller):
                     f.write(welcome_message_)
                 error = "変更を保存しました"
             except ValidationError as err:
-                error = err.message
+                error = str(err)
             welcome_message = welcome_message_
             return Response.render(template, {
                 "welcome_message": welcome_message,
@@ -243,10 +268,10 @@ class UsersController(Controller):
             form = InviteForm(req.post())
             try:
                 user = User()
+                user.email = form["email"]
                 user.name = form["name"]
                 user.screen_name = form["screen_name"]
-                user.icon = form["icon"]
-                user.email = form["email"]
+                user.icon = resize_icon(form["icon"])
                 user._token = str(uuid4())
                 user.create()
                 user.mail(
@@ -264,7 +289,7 @@ class UsersController(Controller):
                         "invites": invites,
                         "name": form["name"],
                         "screen_name": form["screen_name"],
-                        "icon": form["icon"],
+                        "icon": resize_icon(form["icon"]),
                         "error": error,
                     },
                 )
@@ -296,7 +321,7 @@ class UsersController(Controller):
             try:
                 user.screen_name = form["screen_name"]
                 user.name = form["name"]
-                user.icon = form["icon"] or user.icon
+                user.icon = resize_icon(form["icon"]) if form["icon"] is not None else user.icon
                 for role in form["roles"]:
                     user.roles.append(Role.retrieve(screen_name=role))
                 user.update()
@@ -311,8 +336,8 @@ class UsersController(Controller):
                         "roles": roles
                     },
                 )
-            except ValidationError as err:
-                error = err.message
+            except Exception as err:
+                error = str(err)
                 return Response.render(
                     template,
                     {
@@ -320,7 +345,7 @@ class UsersController(Controller):
                         "user": user,
                         "screen_name": form["screen_name"] or user.screen_name,
                         "name": form["name"] or user.name,
-                        "icon": form["icon"],
+                        "icon": resize_icon(form["icon"]),
                         "roles": roles
                     },
                 )
@@ -360,7 +385,7 @@ class GroupsController(Controller):
                 group = Group()
                 group.name = form["name"]
                 group.screen_name = form["screen_name"]
-                group.icon = form["icon"]
+                group.icon = resize_icon(form["icon"])
                 group.create()
                 if form["parent"] != None:
                     Group.retrieve(form["parent"]).append(group)
@@ -369,7 +394,7 @@ class GroupsController(Controller):
             except ValidationError as err:
                 return Response.render(
                     template,
-                    {"groups": groups, "icon": load_noimage_group(), "error": err.message},
+                    {"groups": groups, "icon": load_noimage_group(), "error": str(err)},
                 )
         return Response.render(
             template, {"groups": groups, "icon": load_noimage_group()}
@@ -401,7 +426,7 @@ class GroupsController(Controller):
         if req.method == "POST":
             form = GroupUpdateForm(req.post())
             try:
-                icon = form["icon"] or group.icon
+                icon = resize_icon(form["icon"]) if form["icon"] is not None else group.icon
                 group.screen_name = form["screen_name"]
                 group.name = form["name"]
                 for role in form["roles"]:
@@ -429,7 +454,7 @@ class GroupsController(Controller):
                     },
                 )
             except ValidationError as err:
-                error = err.message
+                error = str(err)
                 return Response.render(
                     template,
                     {

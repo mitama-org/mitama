@@ -20,6 +20,10 @@
     <h2 class='mt-4 mb-3'>ユーザーを招待</h2>
     <form method='post' action='' enctype='multipart/form-data' class="inner tight">
         <div class='mb-3'>
+            <label class='form-label'>メールアドレス</label>
+            <input class='form-control' type='email' name='email' placeholder='メールアドレス' value='{{ post.email }}'/>
+        </div>
+        <div class='mb-3'>
             <label class='form-label'>アイコン</label>
             <div id='image-form'>
                 <img src="{{ dataurl(icon) }}" class='user-icon icon' style='width: 80px; height: 80px'/>

@@ -5,7 +5,7 @@ from mitama.app import App as BaseApp
 from mitama.app import Router
 from mitama.app.method import view, post
 from mitama.models import Permission, InnerPermission
-from mitama.utils.controllers import static_files
+from mitama.utils.controllers import static_files, mitama_favicon
 from mitama.utils.middlewares import SessionMiddleware, CsrfMiddleware
 
 from .controller import (
@@ -43,6 +43,7 @@ class App(BaseApp):
         return Router(
             [
                 view("/static/<path:path>", static_files()),
+                view("/favicon.ico", mitama_favicon()),
                 Router(
                     [
                         view("/setup", RegisterController, "setup"),
