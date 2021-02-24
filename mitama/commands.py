@@ -18,7 +18,7 @@ from pathlib import Path
 
 
 def init_project_dir(path):
-    files = glob.glob(os.path.dirname(__file__) + "/../skeleton/project/*")
+    files = glob.glob(os.path.dirname(__file__) + "/skeleton/project/*")
     for file in files:
         if os.path.isdir(file):
             continue

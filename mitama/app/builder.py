@@ -28,9 +28,6 @@ class Builder(object):
     def set_project_dir(self, path):
         self.data["project_dir"] = path
 
-    def set_project_root_dir(self, path):
-        self.data["project_root_dir"] = path
-
     @property
     def path(self):
         return self.data.get("path")

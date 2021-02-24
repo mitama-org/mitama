@@ -1,9 +1,12 @@
+import os
 import sys
 import importlib
 import subprocess
 import mitama
 import inspect
 import smtplib
+import argparse
+from pathlib import Path, PosixPath
 from email.mime.text import MIMEText
 import json
 from mitama.app.http import Request
@@ -12,6 +15,7 @@ from mitama.app.app import _session_middleware
 from mitama.db import create_engine, DatabaseManager
 from mitama.conf import get_from_project_dir
 
+from . import commands
 
 class Project(App):
     def __init__(
@@ -30,33 +34,9 @@ class Project(App):
         },
         **kwargs
     ):
+        if not isinstance(project_dir, PosixPath):
+            project_dir = Path(project_dir)
         self.project_dir = project_dir
-        if database["type"] == "sqlite" and database["path"] is None:
-            database["path"] = project_dir / "db.sqlite3"
-        if database["type"] == "mysql":
-            engine = create_engine(
-                "mysql://{}:{}@{}/{}".format(
-                    database["user"],
-                    database["password"],
-                    database["host"],
-                    database["name"]
-                ),
-                encoding="utf8"
-            )
-        elif database["type"] == "postgresql":
-            engine = create_engine(
-                "postgresql://{}:{}@{}/{}".format(
-                    database["user"],
-                    database["password"],
-                    database["host"],
-                    database["name"]
-                ),
-                encoding="utf8",
-                echo=True
-            )
-        else:
-            engine = create_engine("sqlite:///" + str(database["path"]))
-        DatabaseManager.set_engine(engine)
 
         from mitama.models import User, Group
         User._project = self
@@ -69,13 +49,12 @@ class Project(App):
         for builder in app_builders:
             if builder.screen_name is None:
                 builder.set_screen_name(builder.package)
-            builder.set_project_root_dir(self.project_root_dir)
             builder.set_project_dir(self.project_dir / builder.screen_name)
             app = builder.build()
             self.apps[app.screen_name] = app
         self.config = kwargs
 
-        self.router = self.apps.router
+        self.router = self.apps.router()
 
     def send_mail(self, to, subject, body, type="html"):
         mail = self.mail
@@ -112,11 +91,11 @@ class Project(App):
     def arg_parser(self):
         if not hasattr(self, "_arg_parser"):
             self._arg_parser = argparse.ArgumentParser(description="")
-            subparser = self._arg_parser.add_subparser()
+            subparser = self._arg_parser.add_subparsers()
 
             cmd_run = subparser.add_parser("run", help="Start serving project")
-            cmd_run.add_argument("-p", "--port", help="serving port")
-            cmd_run.set_default(handler=commands.run)
+            cmd_run.add_argument("-p", "--port", help="serving port", type=int, default=8080)
+            cmd_run.set_defaults(handler=commands.run)
             #cmd_cleandb = subparser.add_parser("cleandb", help="Clean up unused App's database")
             #cmd_cleandb.add_argument("prefix", help="")
         return self._arg_parser
@@ -124,7 +103,7 @@ class Project(App):
     def command(self):
         args = self.arg_parser.parse_args()
         if hasattr(args, 'handler'):
-            args.handler(project, args)
+            args.handler(self, args)
         else:
             self.arg_parser.print_help()
 
@@ -132,10 +111,10 @@ class Project(App):
 def include(package, screen_name=None, project_dir=None, project_root_dir=None, path=None):
     if str(project_dir) not in sys.path:
         sys.path.append(str(project_dir))
-    if app_name not in sys.modules:
-        init = importlib.__import__(app_name, fromlist=["AppBuilder"])
+    if package not in sys.modules:
+        init = importlib.__import__(package, fromlist=["AppBuilder"])
     else:
-        init = importlib.reload(app_name)
+        init = importlib.reload(package)
     builder = init.AppBuilder()
     if screen_name is None:
         screen_name = package

@@ -9,6 +9,8 @@ from watchdog.observers import Observer
 
 from mitama._extra import _Singleton
 from mitama.conf import get_from_project_dir
+from mitama.app.http import Request, Response
+from mitama.app.app import _session_middleware
 
 from .method import group
 from .router import Router
@@ -89,4 +91,51 @@ class AppRegistry(_Singleton):
                 router.add_route(group(app.path, app))
             self._router = router
         return self._router
+
+
+
+def _session_middleware():
+    import base64
+
+    from Crypto.Random import get_random_bytes
+
+    from mitama.app import Middleware
+    from mitama.app.http.session import EncryptedCookieStorage
+
+    if "MITAMA_SESSION_KEY" in os.environ:
+        session_key = os.environ["MITAMA_SESSION_KEY"]
+    elif os.path.exists(".tmp/MITAMA_SESSION_KEY"):
+        with open(".tmp/MITAMA_SESSION_KEY", "r") as f:
+            session_key = f.read()
+    else:
+        key = get_random_bytes(16)
+        session_key = base64.urlsafe_b64encode(key).decode("utf-8")
+        if not os.path.exists(".tmp"):
+            os.mkdir(".tmp")
+        with open(".tmp/MITAMA_SESSION_KEY", "w") as f:
+            f.write(session_key)
+
+    class SessionMiddleware(Middleware):
+        fernet_key = session_key
+
+        def __init__(self):
+            secret_key = base64.urlsafe_b64decode(self.fernet_key.encode("utf-8"))
+            cookie_storage = EncryptedCookieStorage(secret_key)
+            self.storage = cookie_storage
+
+        def process(self, request, handler):
+            request["mitama_session_storage"] = self.storage
+            raise_response = False
+            response = handler(request)
+            if not isinstance(response, Response):
+                return response
+            session = request.get("mitama_session")
+            if session is not None:
+                if session._changed:
+                    self.storage.save_session(request, response, session)
+            if raise_response:
+                raise response
+            return response
+
+    return SessionMiddleware
 

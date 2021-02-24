@@ -30,12 +30,11 @@ class App:
     def icon(self):
         return load_noimage_app()
 
-    def __init__(self, name, path, package, project_dir=None, project_root_dir=None, install_dir=os.path.dirname(__file__), **kwargs):
-        self.screen_name = name
+    def __init__(self, screen_name, path, package, project_dir=None, install_dir=os.path.dirname(__file__), **kwargs):
+        self.screen_name = screen_name
         self.path = path
         self.package = package
         self.project_dir = Path(project_dir)
-        self.project_root_dir = Path(project_root_dir)
         self.install_dir = Path(install_dir)
         self.params = kwargs
         self.router._app = self
