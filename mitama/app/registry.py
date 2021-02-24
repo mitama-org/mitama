@@ -9,6 +9,8 @@ from watchdog.observers import Observer
 
 from mitama._extra import _Singleton
 from mitama.conf import get_from_project_dir
+from mitama.app.http import Request, Response
+from mitama.app.app import _session_middleware
 
 from .method import group
 from .router import Router
@@ -29,34 +31,9 @@ class AppRegistry(_Singleton):
     def __init__(self):
         super().__init__()
 
-    def start_watch(self):
-        observer = Observer()
-
-        class Handler(PatternMatchingEventHandler):
-            def on_event(self_):
-                self.load_config()
-
-            def on_created(self, event):
-                self.on_event()
-
-            def on_updated(self, event):
-                self.on_event()
-
-            def on_deleted(self, event):
-                self.on_event()
-
-        observer.schedule(Handler(), self.project_dir)
-
     def __iter__(self):
         for app in self._map.values():
             yield app
-
-    def items(self):
-        class Items:
-            def __iter__(self_):
-                for key, app in self._map.items():
-                    yield (key, app)
-        return Items()
 
     def __setitem__(self, app_name, app):
         app.project = self.project
@@ -85,59 +62,80 @@ class AppRegistry(_Singleton):
         """アプリの一覧をリセットします"""
         self._map = dict()
 
-    def load_package(self, app_name, path, project_dir):
+    def load_package(self, package, screen_name=None, path="/"):
+        project_dir = self.project.project_dir
+        if str(project_dir) not in sys.path:
+            sys.path.append(str(project_dir))
         if app_name not in sys.modules:
             init = importlib.__import__(app_name, fromlist=["AppBuilder"])
         else:
             init = importlib.reload(app_name)
         builder = init.AppBuilder()
-        builder.set_package(app_name)
-        builder.set_project_dir(project_dir / app_name)
+        if screen_name is None:
+            screen_name = package
+        builder.set_package(package)
+        builder.set_screen_name(screen_name)
         builder.set_project_root_dir(project_dir)
+        builder.set_project_dir(project_dir / screen_name)
         builder.set_path(path)
-        builder.set_name(app_name)
         app = builder.build()
         return app
 
-    def load_config(self, config = None):
-        """アプリの一覧をmitama.jsonから読み込み、配信します"""
-        if config is None:
-            config = get_from_project_dir()
-        sys.path.append(str(config._project_dir))
-        for app_name in config.apps:
-            _app = config.apps[app_name]
-            app_dir = config._project_dir / app_name
-            if not app_dir.is_dir():
-                os.mkdir(app_dir)
-            app = self.load_package(app_name, _app["path"], config._project_dir)
-            self[app_name] = app
-
-    def save_config(self):
-        path = Path(os.getcwd())
-        with open(path / "mitama.json", "r") as f:
-            data = f.read()
-        config_json = json.loads(data)
-        for app_name, app in self.items():
-            config_json["apps"][app_name] = {
-                "path": app.path
-            }
-        with open(path / "mitama.json", "w") as f:
-            f.write(json.dumps(config_json, indent=4))
-'''
     def router(self):
         """アプリの情報に基づいてルーティングエンジンを生成します"""
         if self._router == None:
-            router = Router()
-            for k in self._map.keys():
-                app = self._map[k]
-                router.add_route(group(k, app))
+            router = Router(
+                middlewares=[_session_middleware()]
+            )
+            for app in self:
+                router.add_route(group(app.path, app))
             self._router = router
-        elif self.changed:
-            router = Router()
-            for k in self._map.keys():
-                app = self._map[k]
-                router.add_route(group(k, app))
-            self._router = router
-            self.changed = False
         return self._router
-'''
+
+
+
+def _session_middleware():
+    import base64
+
+    from Crypto.Random import get_random_bytes
+
+    from mitama.app import Middleware
+    from mitama.app.http.session import EncryptedCookieStorage
+
+    if "MITAMA_SESSION_KEY" in os.environ:
+        session_key = os.environ["MITAMA_SESSION_KEY"]
+    elif os.path.exists(".tmp/MITAMA_SESSION_KEY"):
+        with open(".tmp/MITAMA_SESSION_KEY", "r") as f:
+            session_key = f.read()
+    else:
+        key = get_random_bytes(16)
+        session_key = base64.urlsafe_b64encode(key).decode("utf-8")
+        if not os.path.exists(".tmp"):
+            os.mkdir(".tmp")
+        with open(".tmp/MITAMA_SESSION_KEY", "w") as f:
+            f.write(session_key)
+
+    class SessionMiddleware(Middleware):
+        fernet_key = session_key
+
+        def __init__(self):
+            secret_key = base64.urlsafe_b64decode(self.fernet_key.encode("utf-8"))
+            cookie_storage = EncryptedCookieStorage(secret_key)
+            self.storage = cookie_storage
+
+        def process(self, request, handler):
+            request["mitama_session_storage"] = self.storage
+            raise_response = False
+            response = handler(request)
+            if not isinstance(response, Response):
+                return response
+            session = request.get("mitama_session")
+            if session is not None:
+                if session._changed:
+                    self.storage.save_session(request, response, session)
+            if raise_response:
+                raise response
+            return response
+
+    return SessionMiddleware
+

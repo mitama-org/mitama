@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mitama"
-version = "4.1.3"
+version = "4.2.0"
 description = ""
 authors = ["boke0 <speken00.tt@gmail.com>"]
 license = "MIT"
@@ -17,7 +17,7 @@ include = [
 ]
 
 [tool.poetry.scripts]
-mitama = 'mitama.commands:exec'
+mitama = 'mitama:command_exec'
 
 [tool.poetry.dependencies]
 python = "^3.6"
@@ -32,8 +32,6 @@ watchdog = "^2.0.1"
 python-magic = "^0.4.22"
 jinja-markdown = "^1.200630"
 Markdown = "^3.3.3"
-mysqlclient = "^2.0.3"
-psycopg2 = "^2.8.6"
 Pillow = "^8.1.0"
 pycryptodome = "^3.10.1"
 

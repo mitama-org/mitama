@@ -38,6 +38,7 @@ class _QueryProperty:
         except UnmappedClassError:
             return None
 
+
 class DatabaseManager(_Singleton):
     engine = None
     metadata = None
@@ -52,6 +53,34 @@ class DatabaseManager(_Singleton):
         cls.engine = engine
         cls.metadata = MetaData(cls.engine)
         cls.session = Session(autocommit=False, autoflush=False, bind=engine)
+
+    def __init__(self, database=None):
+        if database is not None:
+            if database["type"] == "mysql":
+                engine = create_engine(
+                    "mysql://{}:{}@{}/{}".format(
+                        database["user"],
+                        database["password"],
+                        database["host"],
+                        database["name"]
+                    ),
+                    encoding="utf8"
+                )
+            elif database["type"] == "postgresql":
+                engine = create_engine(
+                    "postgresql://{}:{}@{}/{}".format(
+                        database["user"],
+                        database["password"],
+                        database["host"],
+                        database["name"]
+                    ),
+                    encoding="utf8",
+                    echo=True
+                )
+            else:
+                engine = create_engine("sqlite:///" + str(database["path"]))
+            self.set_engine(engine)
+
 
 class _Database():
     def __init__(self, model=None, metadata=None, query_class=Query):

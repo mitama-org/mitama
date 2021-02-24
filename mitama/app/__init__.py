@@ -7,7 +7,6 @@ from .builder import Builder
 from .hook import HookRegistry
 from .http import Request
 from .registry import AppRegistry
-from .project import Project
 from .router import Router
 
 

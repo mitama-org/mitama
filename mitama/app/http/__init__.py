@@ -10,5 +10,5 @@ from .response import Response
 
 
 def run_app(app, port, request_factory=Request.parse_stream):
-    with simple_server.make_server("", int(port), app) as server:
+    with simple_server.make_server("", int(port), app.wsgi) as server:
         server.serve_forever()
