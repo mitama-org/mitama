@@ -8,7 +8,7 @@ import os
 from mitama.project import Project, include
 from mitama.db import DatabaseManager
 
-project_dir = os.path.dirname(__file__)
+project_dir = os.path.dirname(os.path.abspath(__file__))
 
 DatabaseManager({
     "type":"sqlite",

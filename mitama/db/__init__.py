@@ -38,6 +38,7 @@ class _QueryProperty:
         except UnmappedClassError:
             return None
 
+
 class DatabaseManager(_Singleton):
     engine = None
     metadata = None
