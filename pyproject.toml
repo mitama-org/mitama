@@ -32,8 +32,6 @@ watchdog = "^2.0.1"
 python-magic = "^0.4.22"
 jinja-markdown = "^1.200630"
 Markdown = "^3.3.3"
-mysqlclient = "^2.0.3"
-psycopg2 = "^2.8.6"
 Pillow = "^8.1.0"
 pycryptodome = "^3.10.1"
 
