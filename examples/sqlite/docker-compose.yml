@@ -1,0 +1,9 @@
+version: "3"
+services:
+  mitama:
+    image: mitama:latest
+    volumes:
+      - "./:/project"
+    ports:
+      - 8080:80
+
