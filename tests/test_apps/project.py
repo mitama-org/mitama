@@ -8,7 +8,7 @@ import os
 from mitama.project import Project, include
 from mitama.db import DatabaseManager
 
-project_dir = os.path.dirname(__file__)
+project_dir = os.path.dirname(os.path.abspath(__file__))
 
 DatabaseManager({
     "type":"sqlite",
@@ -19,10 +19,11 @@ DatabaseManager({
     #"password":"mitama",
 })
 
-application = Project(
+project = Project(
     include("mitama.portal", path="/"),
     project_dir = project_dir
 )
+application = project.wsgi
 
 
 if __name__ == "__main__":

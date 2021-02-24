@@ -19,10 +19,11 @@ DatabaseManager({
     #"password":"mitama",
 })
 
-application = Project(
+project = Project(
     include("mitama.portal", path="/"),
     project_dir = project_dir
 )
+application = project.wsgi
 
 
 if __name__ == "__main__":
