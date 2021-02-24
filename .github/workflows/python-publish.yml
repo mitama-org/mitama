@@ -31,7 +31,7 @@ jobs:
       id: docker_meta
       uses: crazy-max/ghaction-docker-meta@v1
       with:
-        images: mitama-org/mitama
+        images: boke0/mitama
         tag-semver: |
           {{version}}
           {{major}}.{{minor}}
@@ -44,5 +44,5 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: mitama-org/mitama:latest, ${{ steps.docker_meta.outputs.tags }}
+        tags: boke0/mitama:latest, ${{ steps.docker_meta.outputs.tags }}
         file: ./Dockerfile
