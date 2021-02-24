@@ -17,7 +17,7 @@ include = [
 ]
 
 [tool.poetry.scripts]
-mitama = 'mitama.commands:exec'
+mitama = 'mitama:command_exec'
 
 [tool.poetry.dependencies]
 python = "^3.6"

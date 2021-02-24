@@ -19,8 +19,8 @@ class Builder(object):
     def set_path(self, path):
         self.data["path"] = path
 
-    def set_name(self, name):
-        self.data["name"] = name
+    def set_screen_name(self, screen_name):
+        self.data["screen_name"] = screen_name
 
     def set_package(self, package):
         self.data["package"] = package
@@ -30,6 +30,26 @@ class Builder(object):
 
     def set_project_root_dir(self, path):
         self.data["project_root_dir"] = path
+
+    @property
+    def path(self):
+        return self.data.get("path")
+
+    @property
+    def screen_name(self):
+        return self.data.get("screen_name")
+
+    @property
+    def package(self):
+        return self.data.get("package")
+
+    @property
+    def project_dir(self):
+        return self.data.get("project_dir")
+
+    @property
+    def project_root_dir(self):
+        return self.data.get("project_root_dir")
 
     def build(self):
         install_dir = os.path.dirname(inspect.getfile(self.__class__))

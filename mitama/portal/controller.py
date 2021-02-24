@@ -568,29 +568,6 @@ class GroupsController(Controller):
 
 
 class AppsController(Controller):
-    def update(self, req):
-        if Permission.is_forbidden('admin', req.user):
-            return self.app.error(req, 403)
-        template = self.view.get_template("apps/update.html")
-        apps = AppRegistry()
-        if req.method == "POST":
-            form = AppUpdateForm(req.post())
-            try:
-                prefix = form["prefix"]
-                for package, path in prefix.items():
-                    apps[package].path = path
-                apps.save_config()
-                return Response.render(
-                    template,
-                    {
-                        "message": "変更を保存しました",
-                        "apps": apps,
-                    },
-                )
-            except Exception as err:
-                return Response.render(template, {"apps": apps, "error": str(err)})
-        return Response.render(template, {"apps": apps})
-
     def list(self, req):
         template = self.view.get_template("apps/list.html")
         apps = AppRegistry()
