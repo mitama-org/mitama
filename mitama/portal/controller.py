@@ -90,7 +90,7 @@ class RegisterController(Controller):
                 user.set_password(form["password"])
                 user.screen_name = form["screen_name"]
                 user.name = form["name"]
-                user.icon = reize_icon(form["icon"]) if form["icon"] is not None else user.icon
+                user.icon = resize_icon(form["icon"]) if form["icon"] is not None else user.icon
                 user.update()
                 sess["jwt_token"] = User.get_jwt(user)
                 return Response.redirect(self.app.convert_url("/"))
