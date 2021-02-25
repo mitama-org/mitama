@@ -29,6 +29,7 @@ class InviteForm(Form):
     email = Field(label="メールアドレス", required=True)
     icon = FileField(label="プロフィール画像", initial=load_noimage_user())
     name = Field(label="名前")
+    roles = Field(label="役割", listed=True)
     screen_name = Field(label="ログイン名")
     editable = Field(label="プロフィールの変更を許可", initial=False)
 

@@ -18,6 +18,8 @@ import smtplib
 import bcrypt
 import jwt
 import magic
+from Crypto.Random import get_random_bytes
+from Crypto.Hash import SHA256
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy import event
@@ -52,7 +54,8 @@ class AuthorizationError(Exception):
             "パスワードが間違っています",
             "ユーザーが見つかりません"
         ][self.code]
-    pass
+    def __str__(self):
+        return self.message
 
 
 user_group = Table(
@@ -464,6 +467,35 @@ class Group(Node, db.Model):
             for group in self.groups:
                 group.mail(subject, body, type, to_all)
 
+def get_random_token():
+    s = get_random_bytes(32)
+    h = SHA256.new()
+    h.update(s)
+    return h.hexdigest()
+
+class UserInvite(db.Model):
+    __tablename__ = "mitama_user_invite"
+    token = Column(String(64), default=get_random_token, unique = True)
+    email = Column(String(255))
+    screen_name = Column(String(255))
+    name = Column(String(255))
+    _icon = Column(LargeBinary)
+    roles = Column(String(255), default = "")
+
+    def load_noimage(self):
+        return load_noimage_user()
+
+    @property
+    def icon(self):
+        return self._icon or self.load_noimage()
+
+    def icon_to_dataurl(self):
+        f = magic.Magic(mime=True, uncompress=True)
+        mime = f.from_buffer(self.icon)
+        return "data:" + mime + ";base64," + b64encode(self.icon).decode()
+
+    def mail(self, subject, body, type="html"):
+        self._project.send_mail(self.email, subject, body, type)
 
 role_user = Table(
     "mitama_role_user",

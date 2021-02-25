@@ -10,6 +10,7 @@ from mitama.models import (
     Group,
     User,
     Role,
+    UserInvite,
     InnerRole,
     Permission,
     InnerPermission,
@@ -35,7 +36,10 @@ from PIL import Image
 def resize_icon(icon):
     if icon is None:
         return None
-    img = Image.open(io.BytesIO(icon))
+    try:
+        img = Image.open(io.BytesIO(icon))
+    except Exception:
+        return icon
     width, height = img.size
     if width > height:
         scale = 200 / height
@@ -68,8 +72,8 @@ class SessionController(Controller):
                 sess["jwt_token"] = User.get_jwt(result)
                 redirect_to = request.query.get("redirect_to", ["/"])[0]
                 return Response.redirect(redirect_to)
-            except (ValidationError, AuthorizationError) as err:
-                return Response.render(template, {"error": str(err)}, status=401)
+            except Exception as err:
+                return Response.render(template, {"error": err}, status=401)
         return Response.render(template, status=401)
 
     def logout(self, request):
@@ -83,15 +87,21 @@ class RegisterController(Controller):
     def signup(self, request):
         sess = request.session()
         template = self.view.get_template("signup.html")
-        user = User.retrieve(_token=request.query["token"][0])
+        invite = UserInvite.retrieve(token=request.query["token"][0])
         if request.method == "POST":
             try:
                 form = RegisterForm(request.post())
+                user = User()
+                user.email = invite.email
                 user.set_password(form["password"])
                 user.screen_name = form["screen_name"]
                 user.name = form["name"]
                 user.icon = resize_icon(form["icon"]) if form["icon"] is not None else user.icon
-                user.update()
+                user.create()
+                invite.delete()
+                for role_screen_name in invite.roles.split(":"):
+                    role = Role.retrieve(screen_name = role_screen_name)
+                    role.append(user)
                 sess["jwt_token"] = User.get_jwt(user)
                 return Response.redirect(self.app.convert_url("/"))
             except (ValidationError, ValueError) as err:
@@ -100,8 +110,8 @@ class RegisterController(Controller):
                     template,
                     {
                         "error": err.messsage,
-                        "name": form["name"] or user.name,
-                        "screen_name": form["screen_name"] or user.screen_name,
+                        "name": form["name"] or invite.name,
+                        "screen_name": form["screen_name"] or invite.screen_name,
                         "password": form["password"] or "",
                         "icon": icon,
                     },
@@ -109,9 +119,9 @@ class RegisterController(Controller):
         return Response.render(
             template,
             {
-                "icon": user.icon,
-                "name": user.name or "",
-                "screen_name": user.screen_name or "",
+                "icon": invite.icon,
+                "name": invite.name or "",
+                "screen_name": invite.screen_name or "",
             },
         )
 
@@ -123,13 +133,13 @@ class RegisterController(Controller):
         if request.method == "POST":
             try:
                 form = SetupForm(request.post())
-                user = User()
+                user = UserInvite()
                 user.email = form["email"]
-                user._token = str(uuid4())
+                user.roles = "owner"
                 user.create()
                 user.mail(
                     "Mitamaへようこそ",
-                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.app.convert_fullurl(request, "/signup?token=" + user._token))
+                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.app.convert_fullurl(request, "/signup?token=" + user.token))
                 )
 
                 owner = Role()
@@ -178,9 +188,6 @@ class RegisterController(Controller):
                 InnerPermission.accept("remove_user", inner_owner)
                 InnerPermission.accept("add_group", inner_manager)
                 InnerPermission.accept("remove_group", inner_owner)
-
-                user.roles.append(owner)
-                user.update()
 
                 template = self.view.get_template("confirm.html")
                 return Response.render(template)
@@ -265,21 +272,26 @@ class UsersController(Controller):
         template = self.view.get_template("user/create.html")
         invites = User.query.filter(User.password==None).all()
         if req.method == "POST":
-            form = InviteForm(req.post())
             try:
-                user = User()
+                form = InviteForm(req.post())
+                user = UserInvite()
                 user.email = form["email"]
                 user.name = form["name"]
                 user.screen_name = form["screen_name"]
-                user.icon = resize_icon(form["icon"])
-                user._token = str(uuid4())
+                user._icon = resize_icon(form["icon"])
+                user.roles = ":".join(form["roles"])
                 user.create()
                 user.mail(
                     "Mitamaに招待されています",
-                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.app.convert_fullurl("/signup?token=" + invite.token))
+                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.app.convert_fullurl(req, "/signup?token=" + user.token))
                 )
                 return Response.render(
-                    template, {"invites": invites, "icon": load_noimage_user()}
+                    template,
+                    {
+                        "invites": invites,
+                        "roles": Role.list(),
+                        "icon": load_noimage_user()
+                    }
                 )
             except Exception as err:
                 error = str(err)
@@ -287,6 +299,7 @@ class UsersController(Controller):
                     template,
                     {
                         "invites": invites,
+                        "roles": Role.list(),
                         "name": form["name"],
                         "screen_name": form["screen_name"],
                         "icon": resize_icon(form["icon"]),
@@ -294,7 +307,12 @@ class UsersController(Controller):
                     },
                 )
         return Response.render(
-            template, {"invites": invites, "icon": load_noimage_user()}
+            template,
+            {
+                "invites": invites,
+                "roles": Role.list(),
+                "icon": load_noimage_user()
+            }
         )
 
     def cancel(self, req):

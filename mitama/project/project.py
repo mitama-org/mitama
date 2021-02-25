@@ -38,9 +38,10 @@ class Project(App):
             project_dir = Path(project_dir)
         self.project_dir = project_dir
 
-        from mitama.models import User, Group
+        from mitama.models import User, Group, UserInvite
         User._project = self
         Group._project = self
+        UserInvite._project = self
         self.port = port
         self.mail = mail
         self.password_validation = password_validation

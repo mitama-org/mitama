@@ -46,6 +46,15 @@
             <label class='form-label'>名前</label>
             <input class='form-control' type='text' name='name' placeholder='名前' value='{{ post.name }}'/>
         </div>
+        <div class='mb-3'>
+            <label class='form-label'>役割</label>
+            {% for role in roles %}
+            <div class='form-check'>
+                <input class='form-check-input' id='{{role.screen_name}}_role' type='checkbox' name='roles' value='{{ role.screen_name }}'/>
+                <label class='form-check-label' for='{{role.screen_name}}_role'>{{ role.name }}</label>
+            </div>
+            {% endfor %}
+        </div>
         <button type='submit' class='btn btn-primary'>ユーザーを招待</button>
         {% if error %}
         <p class='error'>{{ error }}</p>

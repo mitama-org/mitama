@@ -27,4 +27,4 @@ application = project.wsgi
 
 
 if __name__ == "__main__":
-    application.command()
+    project.command()
