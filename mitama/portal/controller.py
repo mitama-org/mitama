@@ -276,7 +276,7 @@ class UsersController(Controller):
                 user.create()
                 user.mail(
                     "Mitamaに招待されています",
-                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.convert_fullurl("/signup?token=" + invite.token))
+                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.app.convert_fullurl("/signup?token=" + invite.token))
                 )
                 return Response.render(
                     template, {"invites": invites, "icon": load_noimage_user()}
