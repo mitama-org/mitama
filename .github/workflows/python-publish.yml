@@ -44,7 +44,7 @@ jobs:
           {{version}}-mysql
           {{major}}.{{minor}}-mysql
     - name: Docker meta for postgresql edition
-      id: docker_meta_mysql
+      id: docker_meta_postgresql
       uses: crazy-max/ghaction-docker-meta@v1
       with:
         images: boke0/mitama
