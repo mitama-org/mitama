@@ -58,23 +58,21 @@ class DatabaseManager(_Singleton):
         if database is not None:
             if database["type"] == "mysql":
                 engine = create_engine(
-                    "mysql://{}:{}@{}/{}".format(
+                    "mysql://{}:{}@{}/{}?charset=utf8mb4".format(
                         database["user"],
                         database["password"],
                         database["host"],
                         database["name"]
-                    ),
-                    encoding="utf8"
+                    )
                 )
             elif database["type"] == "postgresql":
                 engine = create_engine(
-                    "postgresql://{}:{}@{}/{}".format(
+                    "postgresql://{}:{}@{}/{}?charset=utf8".format(
                         database["user"],
                         database["password"],
                         database["host"],
                         database["name"]
                     ),
-                    encoding="utf8",
                     echo=True
                 )
             else:
