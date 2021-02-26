@@ -36,6 +36,7 @@ class Project(App):
     ):
         if not isinstance(project_dir, PosixPath):
             project_dir = Path(project_dir)
+        self.install_dir = Path(os.path.dirname(os.path.abspath(__file__)))
         self.project_dir = project_dir
 
         from mitama.models import User, Group, UserInvite
