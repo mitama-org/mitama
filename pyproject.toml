@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mitama"
-version = "4.2.8"
+version = "4.2.9"
 description = ""
 authors = ["boke0 <speken00.tt@gmail.com>"]
 license = "MIT"
