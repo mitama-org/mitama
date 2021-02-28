@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://user-images.githubusercontent.com/50577904/94712498-86f98d00-0384-11eb-8d97-bbe79a165609.png" height="178" width="485" />
+  <img src='https://user-images.githubusercontent.com/48381296/109426356-b1816c00-7a30-11eb-988c-1928b0ab8a42.png' height="178" width="485" alt='Mitama'/>
 </h1>
 
 <p align="center">
@@ -13,9 +13,16 @@
 
 ## Mitamaとは
 
-Mitamaは悩めるシステム管理者のための<ruby>幸魂<rp>(</rp><rt>webアプリケーションフレームワーク</rt><rp>)</rp>です
+Mitamaは、Webベースの社内システムを構築するためのPython製フレームワークです。
+
+## 要件
+
+macOSから利用する場合、以下のライブラリを追加でインストールする必要があります。
+
+- libmagic
 
 ## インストール
+
 MitamaはPythonパッケージとして開発されているので、pipでインストールすることができます。
 
 ```bash
@@ -26,73 +33,137 @@ $ pip install mitama
 
 ```bash
 $ mitama version
-1.0.0
+4.3.0
 ```
+
+## 使い方
 
 無事インストールができたら、「プロジェクト」を作成してみましょう。プロジェクトとは、Mitamaを稼働させる時の単位で、プロジェクトごとにユーザーや組織の情報が生成されたり、アプリをインストールすることができます。アプリ内で使用するデータやリソースファイルもプロジェクトのフォルダ内に生成・設置されます。
 
 ```bash
 $ mitama new myfirstproject
 $ ls myfirstproject
-mitama.json
+project.py
 ```
-コマンドを叩くとディレクトリが作成され、中に mitama.json というファイルが置いてあると思います。こいつは設定ファイルです。
 
-## サーバーを立ち上げる
-作成したプロジェクトのディレクトリに入り、サーバーを起動します。
+コマンドを叩くとディレクトリが作成され、中に**project.py**というファイルが置いてあると思います。
+
+### サーバーを起動してみる
+
+ローカルで試しにサーバーを起動してみましょう。
 
 ```bash
-$ cd myfirstproject
-$ mitama run
+$ python project.py run
 ```
 
-デフォルトでは、8080番ポートでHTTPサーバーが起動します。http://localhost:8080 にアクセスし、確認してください。
+デフォルトでは8080番ポートにサーバーが起動しますので、ブラウザで開いてみてください。
+
+#### uWSGIを使って起動する
+
+uwsgiを使ってnginxなどで配信する場合は、次のような設定ファイルを作成し、起動します。
+
+```uwsgi.ini
+[uwsgi]
+chdir=/path/to/project.py
+socket=127.0.0.1:8080
+master=true
+vacuum=true
+pidfile=/tmp/uwsgi.pid
+module=project:application
+```
+
+```bash
+$ uwsgi --ini /path/to/uwsgi.ini
+```
+
+### MySQLやPostgreSQLを用いる場合
+
+project.pyを編集し、DatabaseManagerの引数に指定している*type*を*"mysql"*または*"postgresql"*に変更してください。
+
+```python
+## project.py
+
+...
+
+DatabaseManager({
+    "type":"mysql",
+    "host":"localhost",
+    "name":"mitama",
+    "user":"mitama",
+    "password":"mitama",
+})
+
+...
+
+```
+
+### Dockerで起動する
+
+対応しているデータベースそれぞれに対応したDockerイメージが存在します。
+
+- SQLite3: *boke0/mitama:latest*
+- MySQL: *boke0/mitama:latest-mysql*
+- PostgreSQL: *boke0/mitama:latest-postgresql*
+
+利用したいデータベース似合わせてイメージを選択してください。
+
+また、これらのイメージは自動的にPoetryによる依存解決を試みますので、サードパーティ製のMitamaアプリケーションを利用する場合などはpyproject.tomlを設置しておくと良いかもしれません。
+
+```bash
+$ poetry init
+$ poetry add izanami
+$ ls
+pyproject.toml poetry.lock project.py
+```
+
+プロジェクトが準備できたら、ディレクトリをコンテナの/projectにマウントして起動してください。
+
+```bash
+$ docker run -itd --name mitama_project \
+  -v "./:/project" \
+  -p 127.0.0.1:8080:80 \
+  boke0/mitama:latest
+```
+
+docker-composeを使うと、データベースなどの接続が楽にできます。
+
+```docker-compose.yml
+version: "3"
+services:
+  mitama:
+    image: boke0/mitama:latest-mysql
+    ports:
+      - 8080:80
+    volumes:
+      - ./:/project
+  mysql:
+    image: mysql:latest
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data:/var/lib/mysql
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_USER=mitama
+      - MYSQL_PASSWORD=mitama
+      - MYSQL_DATABASE=mitama
+```
 
 ## 設定
-プロジェクト内のmitama.jsonを開いてください。
-
-```json
-{
-  "apps": {
-    "mitama.portal": {
-      "path": "/"
-    }
-  }
-}
-```
-
-このファイルの中では、どのパッケージを、HTTPサーバーにおけるどのディレクトリで配信するかを設定します。デフォルトでは、Mitamaに標準で搭載されているポータルシステムである mitama.portal パッケージが、ルートパスで配信されています。
-
-試しに、以下の様に変更を加えてみてください。
-
-```json
-{
-  "apps": {
-    "mitama.portal": {
-      "path": "/portal"
-    }
-  }
-}
-```
-
-変更したら、サーバーを一度Ctrl-Cで止め、再度起動してみましょう。するとルートでは404エラーが表示され、ポータルはhttp://localhost:8080/portal で配信されるようになるはずです。
-
-もし有志の方が作ったアプリや自作のものを動かすときには、portalと同じ様にapps下にアプリの情報を書き加えてください。
-
-```json
-{
-  "apps": {
-    "mitama.portal": {
-      "path": "/"
-    },
-    "NewPackageName": {
-      "path": "/newapppath"
-    }
-  }
-}
-```
-
-アプリはpipでインストールすることもできますが、PyPIで公開されていない場合などはアプリのパッケージをまるごとプロジェクトディレクトリに設置することでインストールすることもできます。この場合、パッケージ名はフォルダ名などになるかと思います。詳しくは公開者の指示に従ってください。
 
 ## その他
 リファレンス、アプリ作成、その他詳細は[公式ドキュメント](https://mitama-docs.netlify.app/index.html)をご参照ください。
+
+## 作者
+
+- [@boke_0](https://twitter.com/boke_0)
+- [@takuan517](https://twitter.com/takuan517)
+- [@](https://twitter.com/)
+
+### Special thanks!
+
+- Seisuke Ito様
+
+## ライセンス
+
+MIT License
