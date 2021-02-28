@@ -1,8 +1,5 @@
 #!/usr/bin/python
 
-"""
-uwsgi --http=0.0.0.0:8080 --wsgi-file=/path/to/this --callable=app.wsgi
-"""
 import os
 
 from mitama.project import Project, include

@@ -151,6 +151,82 @@ services:
 
 ## 設定
 
+### アプリケーションの配信
+
+project.pyの中に設定を記述することで、自作、またはサードパーティ製のアプリケーションを配信できます。
+
+#### pipでアプリケーションをインストールして用いる場合
+
+以下のように*include("パッケージ名", path="配信先サブディレクトリ")*を記述してください。
+
+```python
+## project.py
+#!/usr/bin/python
+
+import os
+
+from mitama.project import Project, include
+from mitama.db import DatabaseManager
+
+project_dir = os.path.dirname(os.path.abspath(__file__))
+
+DatabaseManager({
+    "type":"sqlite",
+    "path": project_dir+'/db.sqlite3',
+})
+
+project = Project(
+    include("mitama.portal", path="/"),
+    include("thirdpartyapp", path="/thirdpartyapp"),
+    project_dir = project_dir
+)
+application = project.wsgi
+
+
+if __name__ == "__main__":
+    project.command()
+```
+
+#### 自作のアプリケーションを配信する場合
+
+自作のアプリケーションの場合、project.pyと同じディレクトリにPythonパッケージを設置することでもインストールが可能です。
+
+```
+.
+├── madebyme/
+├── db.sqlite3
+└── project.py
+```
+
+```python
+## project.py
+#!/usr/bin/python
+
+import os
+
+from mitama.project import Project, include
+from mitama.db import DatabaseManager
+
+project_dir = os.path.dirname(os.path.abspath(__file__))
+
+DatabaseManager({
+    "type":"sqlite",
+    "path": project_dir+'/db.sqlite3',
+})
+
+project = Project(
+    include("mitama.portal", path="/"),
+    include("madebyme", path="/"),
+    project_dir = project_dir
+)
+application = project.wsgi
+
+
+if __name__ == "__main__":
+    project.command()
+```
+
+
 ## その他
 リファレンス、アプリ作成、その他詳細は[公式ドキュメント](https://mitama-docs.netlify.app/index.html)をご参照ください。
 
