@@ -80,14 +80,14 @@ class Model:
         self.query.session.add(self)
         self.query.session.commit()
         try:
-            self.on("create")()
+            self.on("create")(self)
         except Exception:
             pass
 
     def update(self):
         self.query.session.commit()
         try:
-            self.on("update")()
+            self.on("update")(self)
         except Exception:
             pass
 
@@ -95,7 +95,7 @@ class Model:
         self.query.session.delete(self)
         self.query.session.commit()
         try:
-            self.on("delete")()
+            self.on("delete")(self)
         except Exception:
             pass
 
