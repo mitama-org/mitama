@@ -11,7 +11,6 @@ import uuid
 
 from mitama.noimage import load_noimage_app
 
-from .hook import HookRegistry
 from .http import Request, Response
 
 
@@ -25,6 +24,7 @@ class App:
     template_dir = "templates"
     description = ""
     name = ""
+    models = list()
 
     @property
     def icon(self):
@@ -38,19 +38,6 @@ class App:
         self.install_dir = Path(install_dir)
         self.params = kwargs
         self.router._app = self
-        hook_registry = HookRegistry()
-        if hasattr(self, "create_user"):
-            hook_registry.add_create_user_hook(self.create_user)
-        if hasattr(self, "create_group"):
-            hook_registry.add_create_group_hook(self.create_group)
-        if hasattr(self, "update_user"):
-            hook_registry.add_update_user_hook(self.update_user)
-        if hasattr(self, "update_group"):
-            hook_registry.add_update_group_hook(self.update_group)
-        if hasattr(self, "delete_user"):
-            hook_registry.add_delete_user_hook(self.delete_user)
-        if hasattr(self, "delete_group"):
-            hook_registry.add_delete_group_hook(self.delete_group)
         self.init_app()
 
     def init_app(self):
@@ -159,12 +146,13 @@ class App:
 
     def uninstall(self):
         db = DatabaseManager()
-        tables = db.engine.table_names()
-        prefix = _inspect.getmodule(self.__class__).__package__
-        for table in tables:
-            if table.startswith(prefix):
-                db.engine.execute("drop table :table", table=table)
+        for model in self.models:
+            model.__table__.drop(db.engine)
 
+    def model(self, modelname):
+        for model in self.models:
+            if model.__class__.__name__ == modelname:
+                return model
 
 def _session_middleware():
     import base64

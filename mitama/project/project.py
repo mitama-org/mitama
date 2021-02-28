@@ -72,23 +72,6 @@ class Project(App):
         smtp.send_message(msg)
         smtp.quit()
 
-    def install(self, package_name, path="/"):
-        app = self.apps.load_package(package_name, path, self._project_dir)
-        self.apps[path] = app
-        self.apps[path].install()
-        self.config[package_name] = {
-            "path": path
-        }
-        with open("mitama.json", "w") as f:
-            f.write(json.dumps(self.config.to_dict()))
-
-    def uninstall(self, package_name):
-        self.apps[package_name].uninstall()
-        del self.apps[package_name]
-        del self.config[package_name]
-        with open("mitama.json", "w") as f:
-            f.write(json.dumps(self.config.to_dict()))
-
     @property
     def arg_parser(self):
         if not hasattr(self, "_arg_parser"):
@@ -109,6 +92,11 @@ class Project(App):
         else:
             self.arg_parser.print_help()
 
+    def uninstall(self, screen_name):
+        self.apps[screen_name].uninstall()
+
+    def app(self, appname):
+        return self.apps[appname]
 
 def include(package, screen_name=None, project_dir=None, project_root_dir=None, path=None):
     if str(project_dir) not in sys.path:
