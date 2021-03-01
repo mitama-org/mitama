@@ -40,7 +40,7 @@ class TestForm(unittest.TestCase):
                 "name": "hoge"
             })
         except EmptyError as err:
-            self.assertEqual(err.message, "ログイン名 is required, but it is emtpy.")
+            self.assertEqual(err.message, "ログイン名が入力されていません")
 
         EmptyError.setTemplate("{{ label }}がからです")
         try:
@@ -57,7 +57,7 @@ class TestForm(unittest.TestCase):
                 "email": "hoge"
             })
         except FormatError as err:
-            self.assertEqual(err.message, "Invalid format for メールアドレス.")
+            self.assertEqual(err.message, "メールアドレスの形式が間違っています")
 
         FormatError.setTemplate("{{ label }}がへんです")
         try:

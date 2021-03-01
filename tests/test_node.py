@@ -1,8 +1,13 @@
 import unittest
 
-from mitama.db import Database
+from mitama.db import DatabaseManager, BaseDatabase
 
-db = Database.test()
+DatabaseManager.test()
+
+class Database(BaseDatabase):
+    pass
+
+db = Database()
 
 from mitama.models import Group, User
 from mitama.db.types import Column, Node

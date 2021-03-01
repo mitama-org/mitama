@@ -13,7 +13,6 @@ from mitama.app.http import Request
 from mitama.app import App, AppRegistry
 from mitama.app.app import _session_middleware
 from mitama.db import create_engine, DatabaseManager
-from mitama.conf import get_from_project_dir
 
 from . import commands
 

@@ -8,7 +8,6 @@ from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers import Observer
 
 from mitama._extra import _Singleton
-from mitama.conf import get_from_project_dir
 from mitama.app.http import Request, Response
 from mitama.app.app import _session_middleware
 
