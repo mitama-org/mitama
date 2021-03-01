@@ -142,30 +142,33 @@ class RegisterController(Controller):
                     "下記リンクから、Mitamaに参加しましょう\n{}".format(self.app.convert_fullurl(request, "/signup?token=" + user.token))
                 )
 
-                owner = Role()
-                owner.screen_name = "owner"
-                owner.name = "Owner"
-                owner.create()
-                manager = Role()
-                manager.screen_name = "manager"
-                manager.name = "Manager"
-                manager.create()
-                normal = Role()
-                normal.screen_name = "normal"
-                normal.name = "Normal"
-                normal.create()
-                inner_owner = InnerRole()
-                inner_owner.screen_name = "owner"
-                inner_owner.name = "Owner"
-                inner_owner.create()
-                inner_manager = InnerRole()
-                inner_manager.screen_name = "manager"
-                inner_manager.name = "Manager"
-                inner_manager.create()
-                inner_normal = InnerRole()
-                inner_normal.screen_name = "normal"
-                inner_normal.name = "Normal"
-                inner_normal.create()
+                try:
+                    owner = Role()
+                    owner.screen_name = "owner"
+                    owner.name = "Owner"
+                    owner.create()
+                    manager = Role()
+                    manager.screen_name = "manager"
+                    manager.name = "Manager"
+                    manager.create()
+                    normal = Role()
+                    normal.screen_name = "normal"
+                    normal.name = "Normal"
+                    normal.create()
+                    inner_owner = InnerRole()
+                    inner_owner.screen_name = "owner"
+                    inner_owner.name = "Owner"
+                    inner_owner.create()
+                    inner_manager = InnerRole()
+                    inner_manager.screen_name = "manager"
+                    inner_manager.name = "Manager"
+                    inner_manager.create()
+                    inner_normal = InnerRole()
+                    inner_normal.screen_name = "normal"
+                    inner_normal.name = "Normal"
+                    inner_normal.create()
+                except Exception:
+                    pass
 
                 Permission.accept("admin", owner)
                 Permission.accept("create_user", owner)
