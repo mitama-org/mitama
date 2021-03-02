@@ -1,8 +1,8 @@
-{% macro userItem(user, id=None, link=None) -%}
+{% macro userItem(user, id=None, link=None, small=False) -%}
 {% if link != None %}
-<a href="{{link}}" class="user-item" id='{{id}}'>
+<a href="{{link}}" class="user-item {% if small %}small{% endif %}" id='{{id}}'>
 {% else %}
-<div href="{{link}}" class="user-item" id='{{id}}'>
+<div href="{{link}}" class="user-item {% if small %}small{% endif %}" id='{{id}}'>
 {% endif %}
     <img src='{{ dataurl(user.icon) }}' class='icon' />
     <div class='detail'>
@@ -15,11 +15,11 @@
 </div>
 {% endif %}
 {%- endmacro %}
-{% macro userItemEx(user, id=None, link=None) -%}
+{% macro userItemEx(user, id=None, link=None, small=False) -%}
 {% if link != None %}
-<a href="{{link}}" class="user-item" id='{{id}}'>
+<a href="{{link}}" class="user-item {% if small %}small{% endif %}" id='{{id}}'>
 {% else %}
-<div href="{{link}}" class="user-item" id='{{id}}'>
+<div href="{{link}}" class="user-item {% if small %}small{% endif %}" id='{{id}}'>
 {% endif %}
     <img src='{{ dataurl(user.icon) }}' class='icon' />
     <div class='detail'>
@@ -33,8 +33,8 @@
 </div>
 {% endif %}
 {%- endmacro %}
-{% macro groupItem(group, id=None, link=None, tree=False) -%}
-<div class="group-item" id='{{id}}'>
+{% macro groupItem(group, id=None, link=None, tree=False, small=False) -%}
+<div class="group-item {% if small %}small{% endif %}" id='{{id}}'>
     <div class='branch'></div>
     <a {% if link != None %}href="{{link}}"{% endif %} class='profile'>
         <img src='{{ dataurl(group.icon) }}' class='icon' />
@@ -50,8 +50,8 @@
     {% endif %}
 </div>
 {%- endmacro %}
-{% macro groupItemEx(group, id=None, link=None, tree=False) -%}
-<div class="group-item" id='{{id}}'>
+{% macro groupItemEx(group, id=None, link=None, tree=False, small=False) -%}
+<div class="group-item {% if small %}small{% endif %}" id='{{id}}'>
     <div class='branch'></div>
     <a {% if link != None %}href="{{link}}"{% endif %} class='profile'>
         <img src='{{ dataurl(group.icon) }}' class='icon' />
@@ -68,11 +68,11 @@
     {% endif %}
 </div>
 {%- endmacro %}
-{% macro appItem(app, id=None, link=None) -%}
+{% macro appItem(app, id=None, link=None, small=False) -%}
 {% if link != None %}
-<a href="{{link}}" class="app-item" id='{{id}}'>
+<a href="{{link}}" class="app-item {% if small %}small{% endif %}" id='{{id}}'>
 {% else %}
-<div href="{{link}}" class="app-item" id='{{id}}'>
+<div href="{{link}}" class="app-item {% if small %}small{% endif %}" id='{{id}}'>
 {% endif %}
     <img src='{{ dataurl(app.icon) }}' class='icon' />
     <div class='detail'>
@@ -86,11 +86,11 @@
 </div>
 {% endif %}
 {%- endmacro %}
-{% macro appItemEx(app, id=None, link=None) -%}
+{% macro appItemEx(app, id=None, link=None, small=False) -%}
 {% if link != None %}
-<a href="{{link}}" class="app-item" id='{{id}}'>
+<a href="{{link}}" class="app-item {% if small %}small{% endif %}" id='{{id}}'>
 {% else %}
-<div href="{{link}}" class="app-item" id='{{id}}'>
+<div href="{{link}}" class="app-item {% if small %}small{% endif %}" id='{{id}}'>
 {% endif %}
     <img src='{{ dataurl(app.icon) }}' class='icon' />
     <div class='detail'>
