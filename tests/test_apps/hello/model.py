@@ -1,4 +1,5 @@
 from mitama.db import BaseDatabase
+from mitama.models import permission
 # from mitama.db.types import *
 
 
@@ -8,4 +9,11 @@ class Database(BaseDatabase):
 
 db = Database()
 
-# db.create_all()
+Permission = permission(db, [
+    {
+        "name": "test",
+        "screen_name": "test"
+    }
+])
+
+db.create_all()

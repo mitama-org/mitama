@@ -21,7 +21,6 @@ def permission(db_, permissions):
         roles = relationship(
             "Role",
             secondary=role_permission,
-            backref="permissions",
             cascade="all, delete"
         )
 

@@ -21,6 +21,7 @@ DatabaseManager({
 
 project = Project(
     include("mitama.portal", path="/"),
+    include("hello", path="/hel"),
     project_dir = project_dir
 )
 application = project.wsgi

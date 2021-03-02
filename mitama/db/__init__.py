@@ -53,6 +53,7 @@ class DatabaseManager(_Singleton):
         cls.engine = engine
         cls.metadata = MetaData(cls.engine)
         cls.session = Session(autocommit=False, autoflush=False, bind=engine)
+        cls.Model = declarative_base(cls=Model, name="Model", metadata=cls.metadata)
 
     def __init__(self, database=None):
         if database is not None:
@@ -88,7 +89,7 @@ class _Database():
 
     def make_declarative_base(self, model=None, metadata=None):
         if model == None:
-            model = Model
+            model = self.manager.Model
         if not isinstance(model, DeclarativeMeta):
             model = declarative_base(cls=model, name="Model", metadata=metadata)
         if metadata is not None and model.metadata is not metadata:
