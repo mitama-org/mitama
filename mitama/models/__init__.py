@@ -79,4 +79,7 @@ InnerPermission = inner_permission(db, [
     }
 ])
 
+def is_admin(node):
+    return Permission.is_accepted('admin', node)
+
 db.create_all()
