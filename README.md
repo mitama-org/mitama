@@ -234,7 +234,7 @@ if __name__ == "__main__":
 
 - [@boke_0](https://twitter.com/boke_0)
 - [@takuan517](https://twitter.com/takuan517)
-- [@](https://twitter.com/)
+- [@1105tigery](https://twitter.com/1105tigery)
 
 ### Special thanks!
 
