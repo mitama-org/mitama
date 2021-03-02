@@ -103,6 +103,10 @@ class Model:
         return self._event_handlers[evt]
 
     @classmethod
+    def listen(self, evt):
+        self._event_handlers[evt] = Event()
+
+    @classmethod
     def list(cls, cond=None):
         if cond != None:
             return cls.query.filter(cond).all()
