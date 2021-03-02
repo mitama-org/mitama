@@ -28,6 +28,8 @@ jobs:
         poetry build
         twine upload dist/*
   deploy-docker:
+    runs-on: ubuntu-latest
+    steps:
     - name: Docker meta
       id: docker_meta
       uses: crazy-max/ghaction-docker-meta@v1
