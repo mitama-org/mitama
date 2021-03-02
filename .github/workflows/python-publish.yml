@@ -8,7 +8,7 @@ on:
     types: [created]
 
 jobs:
-  deploy:
+  deploy-pypi:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -27,6 +27,7 @@ jobs:
       run: |
         poetry build
         twine upload dist/*
+  deploy-docker:
     - name: Docker meta
       id: docker_meta
       uses: crazy-max/ghaction-docker-meta@v1
