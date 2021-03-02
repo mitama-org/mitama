@@ -30,11 +30,9 @@ def UUID(prefix = None):
 class Model:
     prefix = None
     _id = Column(String(64), default=UUID(), primary_key=True, nullable=False)
-    _event_handlers = {
-        "create": Event(),
-        "update": Event(),
-        "delete": Event()
-    }
+    create = Event()
+    update = Event()
+    delete = Event()
 
     @classmethod
     def attribute_names(cls):
@@ -80,14 +78,14 @@ class Model:
         self.query.session.add(self)
         self.query.session.commit()
         try:
-            self.on("create")(self)
+            self.on("create")()
         except Exception:
             pass
 
     def update(self):
         self.query.session.commit()
         try:
-            self.on("update")(self)
+            self.on("update")()
         except Exception:
             pass
 
@@ -95,16 +93,16 @@ class Model:
         self.query.session.delete(self)
         self.query.session.commit()
         try:
-            self.on("delete")(self)
+            self.on("delete")()
         except Exception:
             pass
 
     def on(self, evt):
-        return self._event_handlers[evt]
+        return getattr(self, evt)
 
     @classmethod
-    def listen(self, evt):
-        self._event_handlers[evt] = Event()
+    def listen(cls, evt):
+        setattr(cls, evt, Event())
 
     @classmethod
     def list(cls, cond=None):
