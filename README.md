@@ -101,9 +101,9 @@ DatabaseManager({
 
 対応しているデータベースそれぞれに対応したDockerイメージが存在します。
 
-- SQLite3: *boke0/mitama:latest*
-- MySQL: *boke0/mitama:latest-mysql*
-- PostgreSQL: *boke0/mitama:latest-postgresql*
+- SQLite3: *mitamaorg/mitama:latest*
+- MySQL: *mitamaorg/mitama:latest-mysql*
+- PostgreSQL: *mitamaorg/mitama:latest-postgresql*
 
 利用したいデータベース似合わせてイメージを選択してください。
 
@@ -122,7 +122,7 @@ pyproject.toml poetry.lock project.py
 $ docker run -itd --name mitama_project \
   -v "./:/project" \
   -p 127.0.0.1:8080:80 \
-  boke0/mitama:latest
+  mitamaorg/mitama:latest
 ```
 
 docker-composeを使うと、データベースなどの接続が楽にできます。
@@ -131,7 +131,7 @@ docker-composeを使うと、データベースなどの接続が楽にできま
 version: "3"
 services:
   mitama:
-    image: boke0/mitama:latest-mysql
+    image: mitamaorg/mitama:latest-mysql
     ports:
       - 8080:80
     volumes:
