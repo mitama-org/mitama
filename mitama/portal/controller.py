@@ -101,6 +101,7 @@ class RegisterController(Controller):
                     user.roles.append(
                         Role.retrieve(screen_name = role_screen_name)
                     )
+                user.update()
                 invite.delete()
                 sess["jwt_token"] = user.get_jwt()
                 return Response.redirect(self.app.convert_url("/"))
