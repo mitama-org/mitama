@@ -47,13 +47,11 @@ def resize_icon(icon):
         scale = 200 / width
     width *= scale
     height *= scale
-    print(width, height)
     resize = img.resize((int(width), int(height)), resample=Image.NEAREST)
     if width > height:
         cropped = resize.crop((int((width-height)/2), 0, width - int((width-height)/2), height))
     else:
         cropped = resize.crop((0, int((height-width)/2), width, height - int((height-width)/2)))
-    print(cropped.size, width, height, int((width-height)/2))
     export = io.BytesIO()
     cropped.save(export, format="PNG")
     return export.getvalue()
@@ -98,11 +96,13 @@ class RegisterController(Controller):
                 user.name = form["name"]
                 user.icon = resize_icon(form["icon"]) if form["icon"] is not None else user.icon
                 user.create()
-                invite.delete()
+                roles = invite.roles;
                 for role_screen_name in invite.roles.split(":"):
-                    role = Role.retrieve(screen_name = role_screen_name)
-                    role.append(user)
-                sess["jwt_token"] = User.get_jwt(user)
+                    user.roles.append(
+                        Role.retrieve(screen_name = role_screen_name)
+                    )
+                invite.delete()
+                sess["jwt_token"] = user.get_jwt()
                 return Response.redirect(self.app.convert_url("/"))
             except (ValidationError, ValueError) as err:
                 icon = form["icon"]
