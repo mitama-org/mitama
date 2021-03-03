@@ -38,22 +38,6 @@ jobs:
         tag-semver: |
           {{version}}
           {{major}}.{{minor}}
-    - name: Docker meta for mysql edition
-      id: docker_meta_mysql
-      uses: crazy-max/ghaction-docker-meta@v1
-      with:
-        images: mitamaorg/mitama
-        tag-semver: |
-          {{version}}-mysql
-          {{major}}.{{minor}}-mysql
-    - name: Docker meta for postgresql edition
-      id: docker_meta_postgresql
-      uses: crazy-max/ghaction-docker-meta@v1
-      with:
-        images: mitamaorg/mitama
-        tag-semver: |
-          {{version}}-postgresql
-          {{major}}.{{minor}}-postgresql
     - name: Docker login
       uses: docker/login-action@v1
       with:
@@ -65,12 +49,44 @@ jobs:
         push: true
         tags: mitamaorg/mitama:latest, ${{ steps.docker_meta.outputs.tags }}
         file: ./Dockerfile
+  deploy-docker-mysql:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Docker login
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Docker meta for mysql edition
+      id: docker_meta_mysql
+      uses: crazy-max/ghaction-docker-meta@v1
+      with:
+        images: mitamaorg/mitama
+        tag-semver: |
+          {{version}}-mysql
+          {{major}}.{{minor}}-mysql
     - name: Build docker and publish for mysql edition
       uses: docker/build-push-action@v2
       with:
         push: true
         tags: mitamaorg/mitama:latest-mysql, ${{ steps.docker_meta_mysql.outputs.tags }}
         file: ./Dockerfile.mysql
+  deploy-docker-postgresql:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Docker login
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Docker meta for postgresql edition
+      id: docker_meta_postgresql
+      uses: crazy-max/ghaction-docker-meta@v1
+      with:
+        images: mitamaorg/mitama
+        tag-semver: |
+          {{version}}-postgresql
+          {{major}}.{{minor}}-postgresql
     - name: Build docker and publish for postgresql edition
       uses: docker/build-push-action@v2
       with:
