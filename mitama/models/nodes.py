@@ -63,10 +63,6 @@ class Node(object):
     _icon_proxy = list()
 
     @property
-    def id(self):
-        return self._id
-
-    @property
     def name(self):
         name = self._name
         for fn in self._name_proxy:
@@ -168,27 +164,6 @@ class User(Node, db.Model):
     def load_noimage(self):
         return load_noimage_user()
 
-    def delete(self):
-        """ユーザーを削除します"""
-        from mitama.app.hook import HookRegistry
-        hook_registry = HookRegistry()
-        hook_registry.delete_user(self)
-        super().delete()
-
-    def update(self):
-        """ユーザー情報を更新します"""
-        super().update()
-        from mitama.app.hook import HookRegistry
-        hook_registry = HookRegistry()
-        hook_registry.update_user(self)
-
-    def create(self):
-        """ユーザーを作成します"""
-        super().create()
-        from mitama.app.hook import HookRegistry
-        hook_registry = HookRegistry()
-        hook_registry.create_user(self)
-
     def password_check(self, password):
         password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
         password_ = self.password
@@ -258,7 +233,6 @@ class User(Node, db.Model):
     def get_jwt(self):
         nonce = "".join([str(random.randint(0, 9)) for i in range(16)])
         result = jwt.encode({"id": self._id, "nonce": nonce}, secret, algorithm="HS256")
-        #return result.decode()
         return result
 
     @classmethod

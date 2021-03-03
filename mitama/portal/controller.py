@@ -67,7 +67,7 @@ class SessionController(Controller):
                     form["password"]
                 )
                 sess = request.session()
-                sess["jwt_token"] = User.get_jwt(result)
+                sess["jwt_token"] = result.get_jwt()
                 redirect_to = request.query.get("redirect_to", ["/"])[0]
                 return Response.redirect(redirect_to)
             except Exception as err:
@@ -97,12 +97,16 @@ class RegisterController(Controller):
                 user.icon = resize_icon(form["icon"]) if form["icon"] is not None else user.icon
                 user.create()
                 roles = invite.roles;
-                for role_screen_name in invite.roles.split(":"):
-                    user.roles.append(
-                        Role.retrieve(screen_name = role_screen_name)
-                    )
+                if len(roles) > 0:
+                    for role_screen_name in invite.roles.split(":"):
+                        role = Role.retrieve(screen_name = role_screen_name)
+                        role.append(user)
                 user.update()
                 invite.delete()
+                try:
+                    print(user._id)
+                except Exception as err:
+                    print(err)
                 sess["jwt_token"] = user.get_jwt()
                 return Response.redirect(self.app.convert_url("/"))
             except (ValidationError, ValueError) as err:
