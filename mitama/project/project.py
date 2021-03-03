@@ -80,6 +80,10 @@ class Project(App):
             cmd_run = subparser.add_parser("run", help="Start serving project")
             cmd_run.add_argument("-p", "--port", help="serving port", type=int, default=8080)
             cmd_run.set_defaults(handler=commands.run)
+            cmd_auth= subparser.add_parser("auth", help="Authenticate user identified by screen name and password")
+            cmd_auth.add_argument("-u", "--user", help="user's screen name", type=str)
+            cmd_auth.add_argument("-p", "--password", help="password", type=str, nargs="?", default="", const="")
+            cmd_auth.set_defaults(handler=commands.auth)
             #cmd_cleandb = subparser.add_parser("cleandb", help="Clean up unused App's database")
             #cmd_cleandb.add_argument("prefix", help="")
         return self._arg_parser

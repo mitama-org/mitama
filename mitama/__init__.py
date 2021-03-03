@@ -6,6 +6,8 @@
     * 抽象化はするかどうか迷ってる（Pythonで抽象化がどれくらい尊いものかよくわかんない）
     * argparseを入れようか迷ったけど、位置引数しか必要に成る予定が無いのでとりあえず入れてない
 """
+import warnings
+warnings.simplefilter("ignore")
 
 import argparse
 import mitama.commands
