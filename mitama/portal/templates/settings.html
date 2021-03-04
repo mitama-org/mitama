@@ -35,8 +35,8 @@
                     <td>
                         <input
                             type='checkbox'
-                            name='role.{{role.screen_name}}'
-                            value='{{permission.screen_name}}'
+                            name='permission.{{permission.screen_name}}'
+                            value='{{role.screen_name}}'
                             {% if role in permission.roles %}
                             checked
                             {% endif %}
@@ -71,8 +71,8 @@
                     <td>
                         <input
                             type='checkbox'
-                            name='inner_role.{{role.screen_name}}'
-                            value='{{permission.screen_name}}'
+                            name='inner_permission.{{permission.screen_name}}'
+                            value='{{role.screen_name}}'
                             {% if role in permission.roles %}
                             checked
                             {% endif %}

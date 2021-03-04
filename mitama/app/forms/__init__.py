@@ -25,10 +25,11 @@ class Form:
                         k_ = k.split('.')
                         name = k_[0]
                         key = '.'.join(k_[1:])
-                        if field.listed:
-                            field.data[key] = data.getlist(k)
-                        else:
-                            field.data[key] = data.get(k)
+                        if name == field.name:
+                            if field.listed:
+                                field.data[key] = data.getlist(k)
+                            else:
+                                field.data[key] = data.get(k)
             elif field.listed:
                 field.data = data.getlist(field.name)
             elif field.name in data:

@@ -8,10 +8,10 @@ class SettingsForm(Form):
     welcome_message = Field(label="ウェルカムボード", required=True)
     role_name = Field(label='役割名')
     role_screen_name = Field(label='役割ID', regex=r'^([0-9a-zA-Z_-]+)$')
-    role = DictField(listed=True)
+    permission = DictField(listed=True)
     inner_role_name = Field(label='グループ役割名')
     inner_role_screen_name = Field(label='グループ役割ID', regex=r'^([0-9a-zA-Z_-]+)$')
-    inner_role = DictField(listed=True)
+    inner_permission = DictField(listed=True)
 
 class LoginForm(Form):
     screen_name = Field(label="ログイン名", required=True)

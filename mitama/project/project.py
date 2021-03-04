@@ -6,6 +6,7 @@ import mitama
 import inspect
 import smtplib
 import argparse
+from traceback import print_exc
 from pathlib import Path, PosixPath
 from email.mime.text import MIMEText
 import json
@@ -112,7 +113,7 @@ class Project(App):
             DatabaseManager.start_session()
             body = super().wsgi(env, start_response)
         except Exception as err:
-            print(err)
+            print_exc(err)
             DatabaseManager.rollback_session()
             request = Request(env)
             body = self.error(request, 500).start(request, start_response)

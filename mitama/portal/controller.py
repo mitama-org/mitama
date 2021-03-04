@@ -235,19 +235,19 @@ class HomeController(Controller):
                     role.screen_name = form['role_screen_name']
                     role.name = form['role_name'] if form['role_name'] is not None else form['role_screen_name']
                     role.create()
-                for role_screen_name, role_permissions in form['role'].items():
-                    role = Role.retrieve(screen_name = role_screen_name)
-                    role.permissions = [Permission.retrieve(screen_name=permission) for permission in role_permissions]
-                    role.update()
+                for permission_screen_name, permission_roles in form['permission'].items():
+                    permission = Permission.retrieve(screen_name = permission_screen_name)
+                    permission.roles = [Role.retrieve(screen_name=role) for role in permission_roles]
+                    permission.update()
                 if form["inner_role_screen_name"] is not None:
                     inner_role = InnerRole()
                     inner_role.screen_name = form['inner_role_screen_name']
                     inner_role.name = form['inner_role_name'] if form['inner_role_name'] is not None else form['inner_role_screen_name']
                     inner_role.create()
-                for inner_role_screen_name, inner_role_permissions in form['inner_role'].items():
-                    inner_role = InnerRole.retrieve(screen_name = inner_role_screen_name)
-                    inner_role.permissions = [InnerPermission.retrieve(screen_name=permission) for permission in inner_role_permissions]
-                    inner_role.update()
+                for inner_permission_screen_name, inner_permission_roles in form['inner_permission'].items():
+                    inner_permission = InnerPermission.retrieve(screen_name=inner_permission_screen_name)
+                    inner_permission.roles = [InnerRole.retrieve(screen_name=role) for role in inner_permission_roles]
+                    inner_permission.update()
                 with open(self.app.project_dir / "welcome_message.md", "w") as f:
                     f.write(welcome_message_)
                 error = "変更を保存しました"
