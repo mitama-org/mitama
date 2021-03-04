@@ -48,8 +48,9 @@ class App:
         try:
             response = self(request)
             body = response.start(request, start_response)
-        except Exception:
-            return self.error(request, 500)
+        except Exception as err:
+            print(err)
+            body = self.error(request, 500).start(request, start_response)
         return body
 
     def __call__(self, request):

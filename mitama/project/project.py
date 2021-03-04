@@ -115,7 +115,7 @@ class Project(App):
             print(err)
             DatabaseManager.rollback_session()
             request = Request(env)
-            return self.error(request, 500)
+            body = self.error(request, 500).start(request, start_response)
         finally:
             DatabaseManager.close_session()
         return body
