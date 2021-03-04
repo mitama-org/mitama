@@ -35,7 +35,7 @@ class InviteForm(Form):
 
 
 class UserUpdateForm(Form):
-    icon = FileField(label="プロフィール画像", initial=load_noimage_user())
+    icon = FileField(label="プロフィール画像")
     name = Field(label="名前", required=True)
     screen_name = Field(label="ログイン名")
     roles = Field(label="役割", listed=True)
@@ -49,7 +49,7 @@ class GroupCreateForm(Form):
 
 
 class GroupUpdateForm(Form):
-    icon = FileField(label="プロフィール画像", initial=load_noimage_group())
+    icon = FileField(label="プロフィール画像")
     name = Field(label="名前", required=True)
     screen_name = Field(label="ドメイン名", required=True)
     parent = Field(label="親グループ")

@@ -344,20 +344,12 @@ class UsersController(Controller):
                 user.screen_name = form["screen_name"]
                 user.name = form["name"]
                 user.icon = resize_icon(form["icon"]) if form["icon"] is not None else user.icon
+                roles_ = []
                 for role in form["roles"]:
-                    user.roles.append(Role.retrieve(screen_name=role))
+                    roles_.append(Role.retrieve(screen_name=role))
+                user.roles = roles_
                 user.update()
-                return Response.render(
-                    template,
-                    {
-                        "message": "変更を保存しました",
-                        "user": user,
-                        "screen_name": user.screen_name,
-                        "name": user.name,
-                        "icon": user.icon,
-                        "roles": roles
-                    },
-                )
+                return Response.redirect(self.app.convert_url("/users/" + user.screen_name + "/settings"))
             except Exception as err:
                 error = str(err)
                 return Response.render(

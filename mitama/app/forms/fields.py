@@ -223,11 +223,12 @@ class FileFieldInstance(FieldInstance):
     @property
     def data(self):
         if self._data is not None:
-            if self._bin is not None:
+            if self._bin is None:
+                self._bin = self._data.file.read()
+            if self._bin is not None or len(self._bin) > 0:
                 return self._bin
             else:
-                self._bin = self._data.file.read()
-                return self._bin
+                return None
         elif self.initial is not None:
             return self.initial
         else:
