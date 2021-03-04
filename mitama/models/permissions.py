@@ -1,4 +1,4 @@
-from mitama.db import DatabaseManager, BaseDatabase, func, ForeignKey, relationship, Table, backref
+from mitama.db import DatabaseManager, BaseDatabase, func, ForeignKey, relationship, Table
 from mitama.db.types import Column, Group, Integer, LargeBinary
 from mitama.db.types import Node as NodeType
 from mitama.db.types import String
@@ -97,7 +97,6 @@ def inner_permission(db_, permissions):
         roles = relationship(
             "InnerRole",
             secondary=inner_role_permission,
-            backref="permissions",
             cascade="all, delete"
         )
 
