@@ -54,7 +54,8 @@ class UserGroup(db.Model):
     user = relationship("User")
     group = relationship("Group")
 
-class Node(object):
+
+class AbstractNode(object):
     _icon = Column(LargeBinary)
     _name = Column("name", String(255))
     _screen_name = Column("screen_name", String(255))
@@ -134,7 +135,7 @@ class Node(object):
     def __eq__(self, other):
         return self._id == other._id
 
-class User(Node, db.Model):
+class User(AbstractNode, db.Model):
     """ユーザーのモデルクラスです
 
     :param _id: 固有のID
@@ -266,7 +267,7 @@ class User(Node, db.Model):
         return False
 
 
-class Group(Node, db.Model):
+class Group(AbstractNode, db.Model):
     """グループのモデルクラスです
 
     :param _id: 固有のID
@@ -536,4 +537,40 @@ class InnerRole(db.Model):
         relation = UserGroup.retrieve(group=group, user=user)
         return relation in self.relations
 
+class Node(db.Model):
+    __tablename__ = "mitama_node"
+    user_id = Column(String(64), ForeignKey("mitama_user._id", ondelete="CASCADE"), unique=True)
+    group_id = Column(String(64), ForeignKey("mitama_group._id", ondelete="CASCADE"), unique=True)
+    user = relationship(User)
+    group = relationship(Group)
 
+    @classmethod
+    def retrieve(cls, obj=None, id=None, **kwargs):
+        if obj is not None:
+            if isinstance(obj, str):
+                if obj.split("-")[0] == "user":
+                    obj = User.retrieve(obj)
+                else:
+                    obj = Group.retrieve(obj)
+            try:
+                if isinstance(obj, User):
+                    return cls.query.filter(cls.user == obj).one()
+                else:
+                    return cls.query.filter(cls.group == obj).one()
+            except Exception:
+                if isinstance(obj, User):
+                    node = cls()
+                    node.user = obj
+                    node.create()
+                    return node
+                else:
+                    node = cls()
+                    node.group = obj
+                    node.create()
+                    return node
+        else:
+            return super().retrieve(id=id, **kwargs)
+
+    @property
+    def object(self):
+        return self.user if self.user is not None else self.group
