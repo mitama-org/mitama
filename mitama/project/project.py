@@ -91,7 +91,13 @@ class Project(App):
     def command(self):
         args = self.arg_parser.parse_args()
         if hasattr(args, 'handler'):
-            args.handler(self, args)
+            try:
+                DatabaseManager.start_session()
+                args.handler(self, args)
+            except Exception:
+                DatabaseManager.rollback_session()
+            finally:
+                DatabaseManager.close_session()
         else:
             self.arg_parser.print_help()
 
@@ -100,6 +106,19 @@ class Project(App):
 
     def app(self, appname):
         return self.apps[appname]
+
+    def wsgi(self, env, start_response):
+        try:
+            DatabaseManager.start_session()
+            body = super().wsgi(env, start_response)
+        except Exception as err:
+            print(err)
+            DatabaseManager.rollback_session()
+            request = Request(env)
+            return self.error(request, 500)
+        finally:
+            DatabaseManager.close_session()
+        return body
 
 def include(package, screen_name=None, project_dir=None, project_root_dir=None, path=None):
     if str(project_dir) not in sys.path:

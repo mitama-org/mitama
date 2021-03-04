@@ -45,8 +45,11 @@ class App:
 
     def wsgi(self, env, start_response):
         request = Request(env)
-        response = self(request)
-        body = response.start(request, start_response)
+        try:
+            response = self(request)
+            body = response.start(request, start_response)
+        except Exception:
+            return self.error(request, 500)
         return body
 
     def __call__(self, request):

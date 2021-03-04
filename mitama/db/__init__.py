@@ -25,7 +25,6 @@ from mitama._extra import _Singleton
 from .driver.sqlite3 import get_test_engine
 from .model import Model
 
-
 class _QueryProperty:
     def __init__(self, db):
         self.db = db
@@ -52,8 +51,19 @@ class DatabaseManager(_Singleton):
     def set_engine(cls, engine):
         cls.engine = engine
         cls.metadata = MetaData(cls.engine)
-        cls.session = Session(autocommit=False, autoflush=False, bind=engine)
         cls.Model = declarative_base(cls=Model, name="Model", metadata=cls.metadata)
+
+    @classmethod
+    def start_session(cls):
+        cls.session = Session(autocommit=False, autoflush=False, bind=cls.engine)
+
+    @classmethod
+    def close_session(cls):
+        cls.session.close()
+
+    @classmethod
+    def rollback_session(cls):
+        cls.session.rollback()
 
     def __init__(self, database=None):
         if database is not None:

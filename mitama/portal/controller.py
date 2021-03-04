@@ -96,18 +96,14 @@ class RegisterController(Controller):
                 user.name = form["name"]
                 user.icon = resize_icon(form["icon"]) if form["icon"] is not None else user.icon
                 user.create()
+                print(user._id)
+                sess["jwt_token"] = user.get_jwt()
                 roles = invite.roles;
                 if len(roles) > 0:
                     for role_screen_name in invite.roles.split(":"):
                         role = Role.retrieve(screen_name = role_screen_name)
                         role.append(user)
-                user.update()
                 invite.delete()
-                try:
-                    print(user._id)
-                except Exception as err:
-                    print(err)
-                sess["jwt_token"] = user.get_jwt()
                 return Response.redirect(self.app.convert_url("/"))
             except (ValidationError, ValueError) as err:
                 icon = form["icon"]

@@ -21,8 +21,7 @@ from mitama.noimage import load_noimage_group, load_noimage_user
 from mitama._extra import _classproperty
 
 from .core_db import db
-from .roles import Role, InnerRole
-from .nodes import User, Group, UserGroup, UserInvite, AuthorizationError
+from .nodes import User, Group, UserGroup, UserInvite, AuthorizationError, Role, InnerRole
 from .permissions import permission, inner_permission
 
 Permission = permission(db, [

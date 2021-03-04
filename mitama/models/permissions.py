@@ -1,12 +1,11 @@
-from mitama.db import BaseDatabase, func, ForeignKey, relationship, Table, backref
+from mitama.db import DatabaseManager, BaseDatabase, func, ForeignKey, relationship, Table, backref
 from mitama.db.types import Column, Group, Integer, LargeBinary
 from mitama.db.types import Node as NodeType
 from mitama.db.types import String
 from sqlalchemy import event
 
 def permission(db_, permissions):
-    from .roles import Role, InnerRole
-    from .nodes import User, Group, UserGroup
+    from .nodes import User, Group, UserGroup, Role, InnerRole
     role_permission = Table(
         db_.Model.prefix + "_role_permission",
         db_.metadata,
@@ -62,12 +61,19 @@ def permission(db_, permissions):
             return not cls.is_accepted(screen_name, node)
 
     def after_create(target, conn, **kw):
-        for perm_ in permissions:
-            perm = Permission()
-            perm.name = perm_["name"]
-            perm.screen_name = perm_["screen_name"]
-            Permission.query.session.add(perm)
-        Permission.query.session.commit()
+        try:
+            DatabaseManager.start_session()
+            for perm_ in permissions:
+                perm = Permission()
+                perm.name = perm_["name"]
+                perm.screen_name = perm_["screen_name"]
+                db_.session.add(perm)
+            db_.session.commit()
+        except Exception as err:
+            print(err)
+            DatabaseManager.rollback_session()
+        finally:
+            DatabaseManager.close_session()
 
     event.listen(Permission.__table__, "after_create", after_create)
 
@@ -75,6 +81,8 @@ def permission(db_, permissions):
 
 
 def inner_permission(db_, permissions):
+    from .nodes import User, Group, UserGroup, Role, InnerRole
+
     inner_role_permission = Table(
         db_.Model.prefix + "_inner_role_permission",
         db_.metadata,
@@ -125,12 +133,19 @@ def inner_permission(db_, permissions):
             return not cls.is_accepted(screen_name, node)
 
     def after_create(target, conn, **kw):
-        for perm_ in permissions:
-            perm = InnerPermission()
-            perm.name = perm_["name"]
-            perm.screen_name = perm_["screen_name"]
-            InnerPermission.query.session.add(perm)
-        InnerPermission.query.session.commit()
+        try:
+            DatabaseManager.start_session()
+            for perm_ in permissions:
+                perm = InnerPermission()
+                perm.name = perm_["name"]
+                perm.screen_name = perm_["screen_name"]
+                db_.session.add(perm)
+            db_.session.commit()
+        except Exception as err:
+            print(err)
+            DatabaseManager.rollback_session()
+        finally:
+            DatabaseManager.close_session()
 
     event.listen(InnerPermission.__table__, "after_create", after_create)
 
