@@ -31,17 +31,17 @@ def init(args):
 
 def mkapp(args):
     try:
-        project_name = argv[0]
+        project_name = args.name
     except IndexError:
         raise IndexError("No app name given to command arguments.")
     current_dir = Path(os.getcwd())
     project_dir = current_dir / project_name
-    src = Path(os.path.dirname(__file__)) / "../skeleton/app_templates"
+    src = Path(os.path.dirname(__file__)) / "skeleton/app_templates"
     shutil.copytree(src, project_dir, symlinks=False)
 
 def new(args):
     try:
-        project_name = argv[0]
+        project_name = args.name
     except IndexError:
         raise IndexError("No project name given to command arguments.")
     current_dir = Path(os.getcwd())

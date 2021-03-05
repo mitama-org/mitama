@@ -19,9 +19,11 @@ init = subparser.add_parser("init", help="Initialize directory as a Mitama proje
 init.set_defaults(handler=commands.init)
 
 new = subparser.add_parser("new", help="Create new Mitama project directory")
+new.add_argument("name", help="new project's name")
 new.set_defaults(handler=commands.new)
 
 mkapp = subparser.add_parser("mkapp", help="Create new Mitam application")
+mkapp.add_argument("name", help="new app's name")
 mkapp.set_defaults(handler=commands.mkapp)
 
 version = subparser.add_parser("version", help="Check version code")
