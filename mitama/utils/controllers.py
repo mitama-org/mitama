@@ -99,6 +99,67 @@ def mitama_favicon(*paths):
 
     return FaviconController
 
+def mitama_service_worker(*paths):
+    paths_ = list(paths)
+
+    class ServiceWorkerController(Controller):
+        """静的ファイルを配信するController
+
+        デフォルトではアプリのパッケージ内の :file:`static/` の中身を配信する。
+        """
+
+        paths = paths_
+
+        def __init__(self, app):
+            super().__init__(app)
+            app_mod_dir = Path(os.path.dirname(__file__))
+            self.view = Environment(
+                loader=FileSystemLoader(
+                    [app_mod_dir / "templates", app_mod_dir / "../app/templates"]
+                )
+            )
+            if len(self.paths) == 0:
+                self.paths.append(app_mod_dir / "../app/static")
+
+        def handle(self, req: Request):
+            for path in self.paths:
+                filename = path / "sw.js"
+                if filename.is_file():
+                    mime = guess_type(str(filename)) or ("application/octet-stream",)
+                    with open(filename, "rb") as f:
+                        return Response(body=f.read(), content_type=mime[0])
+            for path in self.paths:
+                filename = path / "404.html"
+                if filename.is_file():
+                    with open(filename) as f:
+                        return Response(
+                            text=f.read(),
+                            status=404,
+                            headers={"content-type": "text/html"},
+                        )
+            template = self.view.get_template("404.html")
+            return Response.render(template, status=404)
+
+    return ServiceWorkerController
+
+def mitama_manifest():
+    class ManifestController(Controller):
+        def handle(self, req: Request):
+            manifest = {
+                "name": "Mitama",
+                "short_name": "Mitama",
+                "icons": [{
+                    "src": self.app.convert_fullurl(req, "/static/icon.png"),
+                    "sizes": "243x243",
+                    "type": "image/png"
+                }],
+                "start_url": "/",
+                "display": "standalone"
+            }
+            return Response.json(manifest)
+
+    return ManifestController
+
 
 class UserCRUDController(Controller):
     def create(self, request):

@@ -34,6 +34,9 @@ jinja-markdown = "^1.200630"
 Markdown = "^3.3.3"
 Pillow = "^8.1.0"
 pycryptodome = "^3.10.1"
+pywebpush = "^1.11.0"
+gevent = "^21.1.2"
+gevent-websocket = "^0.10.1"
 
 [tool.poetry.dev-dependencies]
 unittest = "^0.0"

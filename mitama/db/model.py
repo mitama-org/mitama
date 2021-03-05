@@ -90,12 +90,12 @@ class Model:
             pass
 
     def delete(self):
-        self.query.session.delete(self)
-        self.query.session.commit()
         try:
             self.on("delete")()
         except Exception:
             pass
+        self.query.session.delete(self)
+        self.query.session.commit()
 
     def on(self, evt):
         return getattr(self, evt)

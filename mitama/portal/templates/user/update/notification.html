@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block header %}
+    {% include 'header.html' %}
+{% endblock %}
+{% block content %}
+{% if error == None %}
+{% set post = request.post() %}
+{% else %}
+{% set post = {} %}
+{% endif %}
+    <div class='container'>
+        <nav class='nav nav-tabs mt-3'>
+            <a class='nav-link' href='{{ url('/users/' + user.screen_name + '/settings/profile') }}'>プロフィール</a>
+            <a class='nav-link' href='{{ url('/users/' + user.screen_name + '/settings/password') }}'>パスワード</a>
+            <a class='nav-link active' href='{{ url('/users/' + user.screen_name + '/settings/notification') }}'>通知</a>
+        </nav>
+        <h2 class='mt-4 mb-4'>通知設定</h2>
+        <div class='mb-3'>
+            {% if vapid_public_key %}
+            <button type='button' class='btn btn-primary' id='subscribe'>通知を受け取る</button>
+            <button type='button' class='btn btn-primary' id='unsubscribe'>通知を解除する</button>
+            <p>{{ error }}</p>
+            <form id="form" method="POST">
+                <input type='hidden' name='action' id='action' />
+                <input type='hidden' name='subscription' id='subscription' />
+                {{ forms.csrf(request) }}
+            </form>
+            <script>
+                function urlB64ToUint8Array(base64String) {
+                    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                    const base64 = (base64String + padding)
+                            .replace(/\-/g, '+')
+                            .replace(/_/g, '/');
+
+                    const rawData = window.atob(base64);
+                    const outputArray = new Uint8Array(rawData.length);
+
+                    for (let i = 0; i < rawData.length; ++i) {
+                        outputArray[i] = rawData.charCodeAt(i);
+                    }
+                    return outputArray;
+                }
+                window.addEventListener("load", () => {
+                    if('serviceWorker' in navigator){
+                        navigator.serviceWorker.register("{{ url('/sw.js') }}", { scope: "/" });
+                        navigator.serviceWorker.ready.then(function(reg) {
+                            const sub = document.querySelector("#subscribe")
+                            const unsub = document.querySelector("#unsubscribe")
+                            const form = document.querySelector("#form")
+                            const action_form = document.querySelector("#action")
+                            const subscription_form = document.querySelector("#subscription")
+                            reg.pushManager.getSubscription().then(function(sub_){
+                                if(sub_){
+                                    sub.style.display="none"
+                                }else{
+                                    unsub.style.display="none"
+                                }
+                            })
+                            const key = urlB64ToUint8Array("{{ vapid_public_key }}")
+                            sub.onclick=function() {
+                                reg.pushManager.subscribe({
+                                    userVisibleOnly: true,
+                                    applicationServerKey: key 
+                                }).then(function(sub_){
+                                    action_form.value = "subscribe"
+                                    subscription_form.value = JSON.stringify(sub_.toJSON())
+                                    form.submit()
+                                })
+                            }
+                            unsub.onclick=function() {
+                                reg.pushManager.getSubscription().then(function(sub_){
+                                    sub_.unsubscribe().then(_ => {
+                                        action_form.value = "unsubscribe"
+                                        subscription_form.value = JSON.stringify(sub_.toJSON())
+                                        form.submit()
+                                    })
+                                })
+                            }
+                        })
+
+                    }
+
+                })
+            </script>
+            {% else %}
+            このサーバーでは通知は送信できません
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

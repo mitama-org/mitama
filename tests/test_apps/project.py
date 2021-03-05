@@ -22,7 +22,12 @@ DatabaseManager({
 project = Project(
     include("mitama.portal", path="/"),
     include("hello", path="/hel"),
-    project_dir = project_dir
+    project_dir = project_dir,
+    vapid = {
+        "public_key": "BBE84JBBsED5HMkkKspKFxf-1UcQfd3VXATjghJD3Gr0u2ewBcxmCpQFuRgs4vQeFknJeoler61xxiOyfXACakQ",
+        "private_key": "1whN4CfJiPqNCfpG7xpLue_evaWuZnlKdqbSqKoWnbs",
+        "mailto": "mitama@example.com"
+    }
 )
 application = project.wsgi
 
