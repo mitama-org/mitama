@@ -157,6 +157,14 @@ class Request:
             self._body = self._rfile.read(int(length))
         return self._body
 
+    @property
+    def websocket(self):
+        if hasattr(self, "_websocket"):
+            return self._websocket
+        else:
+            self._websocket = self.environ.get("wsgi.websocket")
+        return self._websocket
+
     def post(self):
         if hasattr(self, "_post"):
             return self._post

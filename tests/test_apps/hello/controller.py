@@ -6,6 +6,16 @@ from .model import Permission
 
 class WelcomeController(Controller):
     def handle(self, request):
-        Permission.accept('test', Role.retrieve(screen_name='owner'))
         template = self.view.get_template("welcome.html")
         return Response.render(template)
+
+    def sock(self, request):
+        ws = request.websocket
+        while True:
+            mes = ws.receive()
+            print(mes)
+            try:
+                ws.send(mes)
+            except:
+                break
+        return Response()

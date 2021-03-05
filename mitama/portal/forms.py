@@ -40,6 +40,13 @@ class UserUpdateForm(Form):
     screen_name = Field(label="ログイン名")
     roles = Field(label="役割", listed=True)
 
+class SubscriptionForm(Form):
+    action = Field(required=True)
+    subscription = Field()
+
+class UserPasswordUpdateForm(Form):
+    password = Field(label="パスワード", required=True)
+    password_ = Field(label="確認用パスワード", required=True)
 
 class GroupCreateForm(Form):
     icon = FileField(label="プロフィール画像", initial=load_noimage_group())

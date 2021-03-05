@@ -29,6 +29,11 @@ class Project(App):
             "port": 25,
             "address": "mitama@example.com"
         },
+        vapid = {
+            "private_key": None,
+            "public_key": None,
+            "mailto": None
+        },
         database = {
             "type": "sqlite"
         },
@@ -45,6 +50,7 @@ class Project(App):
         UserInvite._project = self
         self.port = port
         self.mail = mail
+        self.vapid = vapid
         self.password_validation = password_validation
         self.apps = AppRegistry()
         self.apps.project = self

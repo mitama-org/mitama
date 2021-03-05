@@ -52,17 +52,26 @@
         </style>
     </head>
     <body>
-        <div id='wrapper'>
-            <img src='{{ url('/static/vertical-logo.svg') }}' id='logo'>
-            <h1>Mitama is ready...</h1>
-            <menu>
-                <a href='https://mitama-docs.netlify.app'>
-                    <button>Documentation</button>
-                </a>
-                <a href='https://github.com/mitama-org/mitama'>
-                    <button>GitHub</button>
-                </a>
-            </menu>
-        </div>
+        <pre id='hogehoge'></pre>
+        <input type='text' id='input' />
+        <button id='send'>butn</button>
+        <script>
+            window.onload = () => {
+                const input = document.querySelector("#input")
+                const hogehoge = document.querySelector("#hogehoge")
+                const send = document.querySelector("#send")
+                const ws = new WebSocket("{{ fullurl(request, "/sock", "ws") }}")
+                send.onclick=() => {
+                    hogehoge.append(input.value + '\n')
+                    ws.send(input.value)
+                }
+                ws.onopen = e => {
+                    ws.send('open')
+                }
+                ws.onmessage = e => {
+                    hogehoge.append(e.data + '\n')
+                }
+            }
+        </script>
     </body>
 </html>

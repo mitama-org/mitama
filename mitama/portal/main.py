@@ -5,7 +5,7 @@ from mitama.app import App as BaseApp
 from mitama.app import Router
 from mitama.app.method import view, post
 from mitama.models import Permission, InnerPermission
-from mitama.utils.controllers import static_files, mitama_favicon
+from mitama.utils.controllers import static_files, mitama_favicon, mitama_service_worker, mitama_manifest
 from mitama.utils.middlewares import SessionMiddleware, CsrfMiddleware
 
 from .controller import (
@@ -44,6 +44,8 @@ class App(BaseApp):
             [
                 view("/static/<path:path>", static_files()),
                 view("/favicon.ico", mitama_favicon()),
+                view("/sw.js", mitama_service_worker()),
+                view("/manifest.json", mitama_manifest()),
                 Router(
                     [
                         view("/setup", RegisterController, "setup"),
@@ -58,7 +60,10 @@ class App(BaseApp):
                                 view("/users/invite", UsersController, "create"),
                                 view("/users/invite/<id>/delete", UsersController, "cancel"),
                                 view("/users/<id>", UsersController, "retrieve"),
-                                view("/users/<id>/settings", UsersController, "update"),
+                                view("/users/<id>/settings", UsersController, "update_profile"),
+                                view("/users/<id>/settings/profile", UsersController, "update_profile"),
+                                view("/users/<id>/settings/password", UsersController, "update_password"),
+                                view("/users/<id>/settings/notification", UsersController, "update_notification"),
                                 view("/users/<id>/delete", UsersController, "delete"),
                                 view("/groups", GroupsController, "list"),
                                 view("/groups/create", GroupsController, "create"),

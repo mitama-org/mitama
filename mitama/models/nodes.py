@@ -3,10 +3,12 @@ import hashlib
 import random
 import secrets
 import smtplib
+import pywebpush
 
 import bcrypt
 import jwt
 import magic
+import json
 from Crypto.Random import get_random_bytes
 from Crypto.Hash import SHA256
 
@@ -266,6 +268,9 @@ class User(AbstractNode, db.Model):
             layer = layer_
         return False
 
+    def push(self, data):
+        for subscription in self.subscriptions:
+            subscription.push(data)
 
 class Group(AbstractNode, db.Model):
     """グループのモデルクラスです
@@ -574,3 +579,22 @@ class Node(db.Model):
     @property
     def object(self):
         return self.user if self.user is not None else self.group
+
+class PushSubscription(db.Model):
+    __tablename__ = "mitama_push_subscription"
+    user_id = Column(String(64), ForeignKey("mitama_user._id", ondelete="CASCADE"))
+    user = relationship("User", backref="subscriptions")
+    subscription = Column(String(1024))
+
+    def push(self, data):
+        try:
+            webpush(
+                subscription_info=json.loads(self.subscription),
+                data=data,
+                vapid_private_key=self.project.vapid.private_key,
+                vapid_claims={
+                    "sub": "mailto:{}".format(self.project.vapid.mailto)
+                }
+            )
+        except Exception as err:
+            print(err)

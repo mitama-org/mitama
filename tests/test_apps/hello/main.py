@@ -11,6 +11,7 @@ class App(App):
     router = Router(
         [
             view("/", WelcomeController),
+            view("/sock", WelcomeController, 'sock'),
             view("/static/<path:path>", static_files()),
         ]
     )

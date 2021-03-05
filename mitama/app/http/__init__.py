@@ -1,14 +1,18 @@
 import base64
 import re
 import ssl
-from http.server import HTTPServer
-from socketserver import StreamRequestHandler
-from wsgiref import simple_server
+
+from gevent.pywsgi import WSGIServer
+from geventwebsocket.handler import WebSocketHandler
 
 from .request import Request
 from .response import Response
 
 
-def run_app(app, port, request_factory=Request.parse_stream):
-    with simple_server.make_server("", int(port), app.wsgi) as server:
-        server.serve_forever()
+def run_app(app, port):
+    server = WSGIServer(
+        ("localhost", int(port)),
+        app.wsgi,
+        handler_class=WebSocketHandler
+    )
+    server.serve_forever()

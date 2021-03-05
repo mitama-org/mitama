@@ -8,13 +8,17 @@
 {% else %}
 {% set post = {} %}
 {% endif %}
-<div id='content' class='container'>
+    <form method='POST' action='' enctype='multipart/form-data' class='container'>
     {% if request.user.id == user.id %}
+        <nav class='nav nav-tabs mt-3'>
+            <a class='nav-link active' href='{{ url('/users/' + user.screen_name + '/settings/profile') }}'>プロフィール</a>
+            <a class='nav-link' href='{{ url('/users/' + user.screen_name + '/settings/password') }}'>パスワード</a>
+            <a class='nav-link' href='{{ url('/users/' + user.screen_name + '/settings/notification') }}'>通知</a>
+        </nav>
         <h2 class='mt-4 mb-3'>プロフィール変更</h2>
     {% else %}
         <h2 class='mt-4 mb-3'>{{user.name}}のプロフィール変更</h2>
     {% endif %}
-    <form method='POST' action='' enctype='multipart/form-data' class="mb-5">
         <div class='mb-3'>
             <label class='form-label'>アイコン</label>
             <div id='image-form'>
@@ -67,7 +71,4 @@
         {% endif %}
         {{ forms.csrf(request) }}
     </form>
-    {% if request.user == user %}
-    {% endif %}
-</div>
 {% endblock %}

@@ -15,6 +15,7 @@ from mitama.models import (
     Permission,
     InnerPermission,
     UserGroup,
+    PushSubscription
 )
 from mitama.app.forms import ValidationError
 from mitama.noimage import load_noimage_group, load_noimage_user
@@ -25,6 +26,8 @@ from .forms import (
     RegisterForm,
     InviteForm,
     UserUpdateForm,
+    UserPasswordUpdateForm,
+    SubscriptionForm,
     GroupCreateForm,
     GroupUpdateForm,
     AppUpdateForm,
@@ -96,7 +99,6 @@ class RegisterController(Controller):
                 user.name = form["name"]
                 user.icon = resize_icon(form["icon"]) if form["icon"] is not None else user.icon
                 user.create()
-                print(user._id)
                 sess["jwt_token"] = user.get_jwt()
                 roles = invite.roles;
                 if len(roles) > 0:
@@ -334,10 +336,11 @@ class UsersController(Controller):
             },
         )
 
-    def update(self, req):
-        template = self.view.get_template("user/update.html")
+    def update_profile(self, req):
+        template = self.view.get_template("user/update/profile.html")
         user = User.retrieve(screen_name=req.params["id"])
         roles = Role.list()
+        error = ""
         if req.method == "POST":
             form = UserUpdateForm(req.post())
             try:
@@ -352,17 +355,6 @@ class UsersController(Controller):
                 return Response.redirect(self.app.convert_url("/users/" + user.screen_name + "/settings"))
             except Exception as err:
                 error = str(err)
-                return Response.render(
-                    template,
-                    {
-                        "error": error,
-                        "user": user,
-                        "screen_name": form["screen_name"] or user.screen_name,
-                        "name": form["name"] or user.name,
-                        "icon": resize_icon(form["icon"]),
-                        "roles": roles
-                    },
-                )
         return Response.render(
             template,
             {
@@ -370,7 +362,63 @@ class UsersController(Controller):
                 "screen_name": user.screen_name,
                 "name": user.name,
                 "icon": user.icon,
-                "roles": roles
+                "roles": roles,
+                "error": error
+            },
+        )
+
+    def update_password(self, req):
+        template = self.view.get_template("user/update/password.html")
+        user = User.retrieve(screen_name=req.params["id"])
+        if user._id != req.user._id:
+            return Response.redirect(self.app.convert_url("/"))
+        error = ""
+        if req.method == "POST":
+            form = UserPasswordUpdateForm(req.post())
+            try:
+                if form["password"] != form["password_"]:
+                    raise Exception("パスワードが一致しません")
+                user.set_password(form["password"])
+                user.update()
+                error = "パスワードを変更しました"
+            except Exception as err:
+                error = str(err)
+        return Response.render(
+            template,
+            {
+                "user": user,
+                "error": error
+            },
+        )
+
+    def update_notification(self, req):
+        template = self.view.get_template("user/update/notification.html")
+        user = User.retrieve(screen_name=req.params["id"])
+        if user._id != req.user._id:
+            return Response.redirect(self.app.convert_url("/"))
+        error = ""
+        if req.method == "POST":
+            form = SubscriptionForm(req.post())
+            try:
+                if form["action"] == "subscribe":
+                    subscription = PushSubscription()
+                    subscription.subscription = form["subscription"]
+                    subscription.create()
+                    user.subscriptions.append(subscription)
+                    user.update()
+                    error="通知の購読を設定しました"
+                else:
+                    subscription = PushSubscription.retrieve(subscription = form["subscription"])
+                    subscription.delete()
+                    error="通知の購読を解除しました"
+            except Exception as err:
+                error = str(err)
+        return Response.render(
+            template,
+            {
+                "user": user,
+                "vapid_public_key": self.app.project.vapid["public_key"],
+                "error": error
             },
         )
 
