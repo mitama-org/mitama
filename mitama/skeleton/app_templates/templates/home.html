@@ -1,0 +1,17 @@
+{% extends "base/plain" %}        
+{% block body %}
+<div class='container d-flex justify-content-center align-items-center' style='height: 100vh'>
+    <div class='d-flex flex-column' style='width: 320px'>
+        <img src='{{ url('/static/vertical-logo.svg') }}' style='width: 200px'>
+        <h1>Mitama is ready...</h1>
+        <menu>
+            <a href='https://mitama-docs.netlify.app'>
+                <button>Documentation</button>
+            </a>
+            <a href='https://github.com/mitama-org/mitama'>
+                <button>GitHub</button>
+            </a>
+        </menu>
+    </div>
+</div>
+{% endblock %}
