@@ -592,9 +592,9 @@ class PushSubscription(db.Model):
             webpush(
                 subscription_info=json.loads(self.subscription),
                 data=json.dumps(data),
-                vapid_private_key=self._project.vapid.private_key,
+                vapid_private_key=self._project.vapid['private_key'],
                 vapid_claims={
-                    "sub": "mailto:{}".format(self._project.vapid.mailto)
+                    "sub": "mailto:{}".format(self._project.vapid['mailto'])
                 }
             )
         except Exception as err:
