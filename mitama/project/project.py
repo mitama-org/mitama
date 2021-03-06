@@ -91,8 +91,9 @@ class Project(App):
             cmd_auth.add_argument("-u", "--user", help="user's screen name", type=str)
             cmd_auth.add_argument("-p", "--password", help="password", type=str, nargs="?", default="", const="")
             cmd_auth.set_defaults(handler=commands.auth)
-            #cmd_cleandb = subparser.add_parser("cleandb", help="Clean up unused App's database")
-            #cmd_cleandb.add_argument("prefix", help="")
+            cmd_uninstall = subparser.add_parser("uninstall", help="Uninstall app from project clearly")
+            cmd_uninstall.add_argument("app", help="app's screen name")
+            cmd_uninstall.set_defaults(handler=commands.uninstall)
         return self._arg_parser
 
     def command(self):

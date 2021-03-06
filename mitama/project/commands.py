@@ -24,3 +24,6 @@ def auth(project, args):
     except Exception:
         print("Authentication failed")
         sys.exit(1)
+
+def uninstall(project, args):
+    project.uninstall(args.app)

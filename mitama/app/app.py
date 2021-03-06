@@ -6,7 +6,6 @@ from pathlib import Path
 import magic
 import markdown
 from jinja2 import Markup, Environment, ChoiceLoader, FileSystemLoader
-from yarl import URL
 import uuid
 
 from mitama.noimage import load_noimage_app

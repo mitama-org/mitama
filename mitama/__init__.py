@@ -11,6 +11,10 @@ warnings.simplefilter("ignore")
 
 import argparse
 import mitama.commands
+import gevent.monkey
+#import sqlalchemy_gevent
+
+gevent.monkey.patch_all()
 
 parser = argparse.ArgumentParser(description="Mitama command utilities")
 subparser = parser.add_subparsers()
