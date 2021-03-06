@@ -3,7 +3,7 @@ import hashlib
 import random
 import secrets
 import smtplib
-import pywebpush
+from pywebpush import webpush
 
 import bcrypt
 import jwt
