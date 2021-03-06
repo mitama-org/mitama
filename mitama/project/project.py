@@ -44,10 +44,11 @@ class Project(App):
         self.install_dir = Path(os.path.dirname(os.path.abspath(__file__)))
         self.project_dir = project_dir
 
-        from mitama.models import User, Group, UserInvite
+        from mitama.models import User, Group, UserInvite, PushSubscription
         User._project = self
         Group._project = self
         UserInvite._project = self
+        PushSubscription._project = self
         self.port = port
         self.mail = mail
         self.vapid = vapid

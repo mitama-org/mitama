@@ -582,6 +582,7 @@ class Node(db.Model):
 
 class PushSubscription(db.Model):
     __tablename__ = "mitama_push_subscription"
+    _project = None
     user_id = Column(String(64), ForeignKey("mitama_user._id", ondelete="CASCADE"))
     user = relationship("User", backref="subscriptions")
     subscription = Column(String(1024))
@@ -591,9 +592,9 @@ class PushSubscription(db.Model):
             webpush(
                 subscription_info=json.loads(self.subscription),
                 data=json.dumps(data),
-                vapid_private_key=self.project.vapid.private_key,
+                vapid_private_key=self._project.vapid.private_key,
                 vapid_claims={
-                    "sub": "mailto:{}".format(self.project.vapid.mailto)
+                    "sub": "mailto:{}".format(self._project.vapid.mailto)
                 }
             )
         except Exception as err:
