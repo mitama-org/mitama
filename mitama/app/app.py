@@ -114,7 +114,7 @@ class App:
             return [group for group in arg if group.__class__.__name__ == "Group"]
 
         def markdown_(text):
-            return Markup(markdown.markdown(text))
+            return Markup(markdown.markdown(text, extensions=['fenced_code', 'def_list', 'attr_list', 'abbr', 'footnotes', 'tables', 'wikilinks', 'toc']))
 
         self._view.filters["user"] = filter_user
         self._view.filters["group"] = filter_group
