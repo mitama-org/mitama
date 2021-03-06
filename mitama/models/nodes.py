@@ -590,7 +590,7 @@ class PushSubscription(db.Model):
         try:
             webpush(
                 subscription_info=json.loads(self.subscription),
-                data=data,
+                data=json.dumps(data),
                 vapid_private_key=self.project.vapid.private_key,
                 vapid_claims={
                     "sub": "mailto:{}".format(self.project.vapid.mailto)
