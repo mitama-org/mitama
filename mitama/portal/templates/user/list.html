@@ -28,7 +28,9 @@
             <div class='user-list'>
             {% if users|length %}
             {% for user in users %}
+            <div class='mb-3 mt-3'>
                 {{ lists.userItem(user, link=url("/users/"+user.screen_name)) }}
+            </div>
             {% endfor %}
             {% else%}
                 <div class='no-item'>ユーザーはいません</div>

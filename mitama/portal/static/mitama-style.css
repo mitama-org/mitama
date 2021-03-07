@@ -12,6 +12,11 @@
   object-fit: cover;
 }
 
+:root {
+  --main-text-lighter: #777;
+  --main-color: #ccc;
+}
+
 .no-item {
   color: var(--main-text-lighter);
   font-size: 0.8rem;
@@ -36,7 +41,6 @@
   grid-column: 2/3;
   grid-template-columns: 56px 1fr;
   grid-gap: 16px;
-  padding: 8px;
 }
 .group-item .profile .icon {
   width: 56px;
@@ -54,7 +58,7 @@
   font-weight: bold;
 }
 .group-item .profile .detail .screen-name {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--main-text-lighter);
 }
 .group-item.small .profile {
@@ -65,19 +69,19 @@
   height: 32px;
   border-radius: 16px;
 }
+.group-item.small .profile .screen-name {
+  font-size: 0.9rem;
+  color: #000;
+  font-weight: 600;
+}
+.group-item.small .profile .name {
+  display: none;
+}
 
 .children {
   grid-column: 2/3;
+  grid-gap: 8px;
   position: relative;
-}
-.children::before {
-  content: "";
-  display: block;
-  position: absolute;
-  width: 2px;
-  height: calc(100% - 45px);
-  left: 16px;
-  background: var(--main-color);
 }
 .children .branch {
   width: 24px;
@@ -111,7 +115,6 @@
   grid-gap: 16px;
   text-decoration: none;
   color: var(--main-text);
-  padding: 8px;
 }
 .user-item .icon,
 .invite-item .icon {
@@ -129,6 +132,7 @@
 .invite-item .detail {
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 .user-item .detail .name,
 .invite-item .detail .name {
@@ -137,7 +141,7 @@
 }
 .user-item .detail .screen-name,
 .invite-item .detail .screen-name {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--main-text-lighter);
 }
 .user-item .detail .buttons,
@@ -158,13 +162,24 @@
 }
 .user-item.small,
 .invite-item.small {
-  grid-template-columns: 32px 1fr;
+  grid-template-columns: 40px 1fr;
+  grid-gap: 8px;
 }
 .user-item.small .icon,
 .invite-item.small .icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+}
+.user-item.small .screen-name,
+.invite-item.small .screen-name {
+  font-size: 0.9rem;
+  color: #000;
+  font-weight: 600;
+}
+.user-item.small .name,
+.invite-item.small .name {
+  display: none;
 }
 
 .member-control-list h4 {
@@ -197,7 +212,7 @@
   font-weight: bold;
 }
 .member-control-item .detail .screen-name {
-  font-size: 0.85rem;
+  font-size: 0.65rem;
   color: var(--main-text-lighter);
 }
 .member-control-item .actions {
@@ -215,6 +230,14 @@
   width: 32px;
   height: 32px;
   border-radius: 16px;
+}
+.member-control-item.small .screen-name {
+  color: #000;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.member-control-item.small .name {
+  display: none;
 }
 
 .app-list {

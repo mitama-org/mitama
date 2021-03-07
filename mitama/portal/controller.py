@@ -441,6 +441,7 @@ class GroupsController(Controller):
     def create(self, req):
         template = self.view.get_template("group/create.html")
         groups = Group.list()
+        error = ""
         if req.method == "POST":
             form = GroupCreateForm(req.post())
             try:
@@ -454,12 +455,13 @@ class GroupsController(Controller):
                 group.append(req.user)
                 return Response.redirect(self.app.convert_url("/groups"))
             except ValidationError as err:
-                return Response.render(
-                    template,
-                    {"groups": groups, "icon": load_noimage_group(), "error": str(err)},
-                )
+                error = str(err)
         return Response.render(
-            template, {"groups": groups, "icon": load_noimage_group()}
+            template, {
+                "groups": groups,
+                "icon": load_noimage_group(),
+                "error": error
+            }
         )
 
     def retrieve(self, req):
@@ -474,14 +476,15 @@ class GroupsController(Controller):
 
     def update(self, req):
         template = self.view.get_template("group/update.html")
-        roles = Role.list()
-        inner_roles = InnerRole.list()
         group = Group.retrieve(screen_name=req.params["id"])
+
         groups = list()
         for g in Group.list():
             if not (group.is_ancestor(g) or group.is_descendant(g) or g == group):
                 groups.append(g)
         users = list()
+        error = ""
+        message = ""
         for u in User.list():
             if not group.is_in(u):
                 users.append(u)
@@ -491,6 +494,7 @@ class GroupsController(Controller):
                 icon = resize_icon(form["icon"]) if form["icon"] is not None else group.icon
                 group.screen_name = form["screen_name"]
                 group.name = form["name"]
+                group.parent = Group.retrieve(form["parent"]) if form["parent"] is not None else None
                 for role in form["roles"]:
                     group.roles.append(Role.retrieve(screen_name=role))
                 group.icon = icon
@@ -501,39 +505,16 @@ class GroupsController(Controller):
                     rel = UserGroup.retrieve(group = group, user = User.retrieve(user))
                     rel.roles = [InnerRole.retrieve(screen_name = role) for role in roles]
                 group.update()
-                return Response.render(
-                    template,
-                    {
-                        "message": "変更を保存しました",
-                        "group": group,
-                        "screen_name": group.screen_name,
-                        "name": group.name,
-                        "all_groups": groups,
-                        "all_users": users,
-                        "icon": group.icon,
-                        "roles": Role.list(),
-                        "inner_roles": inner_roles
-                    },
-                )
+                message = "変更を保存しました"
             except ValidationError as err:
                 error = str(err)
-                return Response.render(
-                    template,
-                    {
-                        "error": error,
-                        "all_groups": groups,
-                        "all_users": users,
-                        "group": group,
-                        "screen_name": form["screen_name"],
-                        "name": form["name"],
-                        "icon": group.icon,
-                        "roles": Role.list(),
-                        "inner_roles": inner_roles
-                    },
-                )
+        roles = Role.list()
+        inner_roles = InnerRole.list()
         return Response.render(
             template,
             {
+                "message": message,
+                "error": error,
                 "group": group,
                 "all_groups": groups,
                 "all_users": users,

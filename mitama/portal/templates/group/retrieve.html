@@ -29,7 +29,9 @@
         <h3 class="mini-title">メンバー</h3>
         <div class="user-list">
             {% for user in group.users %}
+            <div class='mb-2'>
                 {{ lists.userItem(user, link=url('/users/'+user.screen_name)) }}
+            </div>
             {% endfor %}
         </div>
     </div>

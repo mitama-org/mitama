@@ -374,7 +374,8 @@ class Group(AbstractNode, db.Model):
                         return True
             layer_ = list()
             for node_ in layer:
-                layer_.extend([node_.parent])
+                if node_.parent is not None:
+                    layer_.extend([node_.parent])
             layer = layer_
         return False
 

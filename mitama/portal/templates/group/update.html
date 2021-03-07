@@ -35,9 +35,10 @@
         </div>
         <div class='mb-3'>
             <label class='form-label'>親チーム</label>
-            <select class='form-select' name='parent' value='{{ name }}'>
-                {% for group in groups %}
-                <option value='{{group._id}}'>{{group.name}}</option>
+            <select class='form-select' name='parent'>
+                <option value=''></option>
+                {% for group_ in all_groups %}
+                <option value='{{group_._id}}' {% if group._id == group_._id %}selected{% endif %}>{{group_.name}}</option>
                 {% endfor %}
             </select>
         </div>
@@ -68,32 +69,37 @@
         </h3>
         <div class='user-list mt-2 mb-2'>
             {% for user in group.users %}
-            {% call lists.userItemEx(user, id='user_'+user._id) %}
-            <div data-bs-toggle='collapse' data-bs-target='#user_{{user.screen_name}}'><i class='bi-gear'></i>設定</div>
-            <div class='mt-1 collapse' id='user_{{user.screen_name}}'>
-                <input type='hidden' name='users' value='{{user._id}}'/>
-                {% for inner_role in inner_roles %}
-                <div class='form-check form-check-inline'>
-                    <input
-                        class='form-check-input'
-                        id='inner_role_{{user.screen_name}}_{{inner_role.screen_name}}'
-                        type='checkbox'
-                        name='inner_roles.{{user._id}}'
-                        value='{{inner_role.screen_name}}'
-                        {% if inner_role.exists(group, user) %}
-                        checked
-                        {% endif %}
-                        />
-                    <label class='form-check-label' for='inner_role_{{user.screen_name}}_{{inner_role.screen_name}}'>{{ inner_role.name }}</label>
+            <div class='container'>
+                <div class='d-flex justify-content-between'>
+                    {{ lists.userItem(user, id='user_'+user._id) }}
+                    <div class='d-flex justify-content-end'>
+                        <button type='button' data-bs-toggle='collapse' data-bs-target='#user_{{user.screen_name}}' class='btn bi bi-gear-fill'></button>
+                    </div>
                 </div>
-                {% endfor %}
-                {% if permission('update_group', request.user) or inner_permission('remove_user', group, request.user) %}
-                <div class='d-flex'>
-                    <button class='ms-auto btn btn-danger' onclick='exclude("{{user._id}}")'>外す</button>
+                <div class='mt-2 collapse' id='user_{{user.screen_name}}'>
+                    <input type='hidden' name='users' value='{{user._id}}'/>
+                    {% for inner_role in inner_roles %}
+                    <div class='form-check form-check-inline'>
+                        <input
+                            class='form-check-input'
+                            id='inner_role_{{user.screen_name}}_{{inner_role.screen_name}}'
+                            type='checkbox'
+                            name='inner_roles.{{user._id}}'
+                            value='{{inner_role.screen_name}}'
+                            {% if inner_role.exists(group, user) %}
+                            checked
+                            {% endif %}
+                            />
+                        <label class='form-check-label' for='inner_role_{{user.screen_name}}_{{inner_role.screen_name}}'>{{ inner_role.name }}</label>
+                    </div>
+                    {% endfor %}
+                    {% if permission('update_group', request.user) or inner_permission('remove_user', group, request.user) %}
+                    <div class='d-flex'>
+                        <button class='ms-auto btn btn-danger' onclick='exclude("{{user._id}}")'>外す</button>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
-            {% endcall %}
             {% endfor %}
         </div>
         <script>

@@ -22,7 +22,9 @@
         <h3>所属</h3>
         <div class='group-list'>
         {% for g in user.groups %}
+            <div class='mb-2'>
             {{ lists.groupItem(g, link=url('/groups/'+g.screen_name)) }}
+            </div>
         {% endfor %}
         </div>
     </div>

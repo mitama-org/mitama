@@ -1,4 +1,7 @@
-
+:root {
+    --main-text-lighter: #777;
+    --main-color: #ccc;
+}
 .no-item{
     color: var(--main-text-lighter);
     font-size: 0.8rem;
@@ -22,7 +25,6 @@
         grid-column: 2/3;
         grid-template-columns: 56px 1fr;
         grid-gap: 16px;
-        padding: 8px;
         .icon {
             width: 56px;
             height: 56px;
@@ -38,7 +40,7 @@
                 font-weight: bold;
             }
             .screen-name{ 
-                font-size: 0.85rem;
+                font-size: 0.75rem;
                 color: var(--main-text-lighter);
             }
         }
@@ -51,22 +53,22 @@
                 height: 32px;
                 border-radius: 16px;
             }
+            .screen-name {
+                font-size: 0.9rem;
+                color: #000;
+                font-weight: 600;
+            }
+            .name { 
+                display: none;
+            }
         }
     }
 }
 
 .children {
     grid-column: 2/3;
+    grid-gap: 8px;
     position: relative;
-    &::before{
-        content: '';
-        display: block;
-        position: absolute;
-        width: 2px;
-        height: calc(100% - 45px);
-        left: 16px;
-        background: var(--main-color);
-    }
     .branch {
         width: 24px;
         display: block;
@@ -102,7 +104,6 @@
     grid-gap: 16px;
     text-decoration: none;
     color: var(--main-text);
-    padding: 8px;
     .icon {
         display: block;
         width: 56px;
@@ -116,12 +117,13 @@
     .detail {
         display: flex;
         flex-direction: column;
+        justify-content: center;
         .name{
             font-size: 1rem;
             font-weight: bold;
         }
         .screen-name{ 
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: var(--main-text-lighter);
         }
         .buttons{
@@ -139,11 +141,20 @@
         }
     }
     &.small {
-        grid-template-columns: 32px 1fr;
+        grid-template-columns: 40px 1fr;
+        grid-gap: 8px;
         .icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+        }
+        .screen-name {
+            font-size: 0.9rem;
+            color: #000;
+            font-weight: 600;
+        }
+        .name { 
+            display: none;
         }
     }
 }
@@ -178,7 +189,7 @@
             font-weight: bold;
         }
         .screen-name{ 
-            font-size: 0.85rem;
+            font-size: 0.65rem;
             color: var(--main-text-lighter);
         }
     }
@@ -196,6 +207,14 @@
             width: 32px;
             height: 32px;
             border-radius: 16px;
+        }
+        .screen-name {
+            color: #000;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .name { 
+            display: none;
         }
     }
 }

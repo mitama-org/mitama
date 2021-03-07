@@ -28,7 +28,9 @@
             <div class='group-list'>
             {% if groups|length %}
             {% for group in groups recursive %}
+            <div class='mt-2'>
                 {{ lists.groupItem(group, link=url("/groups/" + group.screen_name), tree=loop) }}
+            </div>
             {% endfor %}
             {% else%}
                 <div class='no-item'>グループは存在しません</div>

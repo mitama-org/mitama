@@ -1,77 +1,9 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset='utf-8'>
-        <title>Welcome to 棺桶</title>
-        <style type='text/css'>
-            body{
-                margin: 0;
-                height: 100vh;
-                width: 100vw;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            #wrapper{
-                width: 100%;
-                max-width: 300px;
-            }
-            #logo{
-                width: 80%;
-                display: block;
-                margin: 0 auto;
-            }
-            menu {
-                display: flex;
-                justify-content: space-around;
-                margin-top: 16px;
-                height: 40px;
-                padding: 0;
-            }
-            menu button{
-                height: 40px;
-                width: 120px;
-                display: inline-flex;
-                justify-content: center;
-                align-items: center;
-                border-radius: 4px;
-                color: #000;
-                background: #0000;
-                border: 1px solid #000;
-                padding: 0 16px;
-            }
-            a{
-                text-decoration: none;
-            }
-            h1{
-                font-size: 1.2rem;
-                color: #444;
-                text-align: center;
-                margin: 24px 0;
-            }
-        </style>
-    </head>
-    <body>
-        <pre id='hogehoge'></pre>
-        <input type='text' id='input' />
-        <button id='send'>butn</button>
-        <script>
-            window.onload = () => {
-                const input = document.querySelector("#input")
-                const hogehoge = document.querySelector("#hogehoge")
-                const send = document.querySelector("#send")
-                const ws = new WebSocket("{{ fullurl(request, "/sock", "ws") }}")
-                send.onclick=() => {
-                    hogehoge.append(input.value + '\n')
-                    ws.send(input.value)
-                }
-                ws.onopen = e => {
-                    ws.send('open')
-                }
-                ws.onmessage = e => {
-                    hogehoge.append(e.data + '\n')
-                }
-            }
-        </script>
-    </body>
-</html>
+{% extends "base/plain" %}
+{% block body %}
+{% for user in users %}
+{{ lists.userItem(user) }}
+{% endfor %}
+{% for user in users %}
+{{ lists.userItem(user, small=True) }}
+{% endfor %}
+{% endblock %}

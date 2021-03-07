@@ -7,15 +7,7 @@ from .model import Permission
 class WelcomeController(Controller):
     def handle(self, request):
         template = self.view.get_template("welcome.html")
-        return Response.render(template)
+        return Response.render(template, {
+            "users": User.list()
+        })
 
-    def sock(self, request):
-        ws = request.websocket
-        while True:
-            mes = ws.receive()
-            print(mes)
-            try:
-                ws.send(mes)
-            except:
-                break
-        return Response()
