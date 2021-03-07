@@ -36,6 +36,7 @@ pycryptodome = "^3.10.1"
 pywebpush = "^1.11.0"
 gevent = "^21.1.2"
 gevent-websocket = "^0.10.1"
+uWSGI = "^2.0.19"
 
 [tool.poetry.dev-dependencies]
 unittest = "^0.0"

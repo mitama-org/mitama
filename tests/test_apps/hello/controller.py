@@ -10,4 +10,14 @@ class WelcomeController(Controller):
         return Response.render(template, {
             "users": User.list()
         })
-
+    def sock(self, request):
+        ws = request.websocket
+        while True:
+            msg = ws.receive()
+            print(msg)
+            try:
+                ws.send(msg)
+            except:
+                ws.close()
+                break
+        return Response()

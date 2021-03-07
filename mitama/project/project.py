@@ -6,6 +6,7 @@ import mitama
 import inspect
 import smtplib
 import argparse
+import uwsgi
 from traceback import print_exc
 from pathlib import Path, PosixPath
 from email.mime.text import MIMEText

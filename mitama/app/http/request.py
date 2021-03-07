@@ -4,6 +4,7 @@ import http.cookies
 import io
 import json
 import wsgiref.util as wsgiutil
+import uwsgi
 from urllib.parse import parse_qs
 
 
@@ -23,6 +24,14 @@ class _Cookies:
         else:
             return None
 
+
+class uWSGIWebSocket:
+    def __init__(self, env):
+        uwsgi.websocket_handshake(env['HTTP_SEC_WEBSOCKET_KEY'], env.get('HTTP_ORIGIN', ''))
+    def receive(self):
+        return uwsgi.websocket_recv()
+    def send(self, message):
+        uwsgi.websocket_send(message)
 
 class _RequestPayload:
     def __init__(self, field_storage):
@@ -162,7 +171,13 @@ class Request:
         if hasattr(self, "_websocket"):
             return self._websocket
         else:
-            self._websocket = self.environ.get("wsgi.websocket")
+            if "wsgi.websocket" in self.environ and self.environ.get("wsgi.websocket") is not None:
+                self._websocket = self.environ["wsgi.websocket"]
+            else:
+                try:
+                    self._websocket = uWSGIWebSocket(self.environ)
+                except Exception as err:
+                    print(err)
         return self._websocket
 
     def post(self):

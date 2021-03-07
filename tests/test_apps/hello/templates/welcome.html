@@ -6,4 +6,12 @@
 {% for user in users %}
 {{ lists.userItem(user, small=True) }}
 {% endfor %}
+<button onclick="send()">hhh</button>
+<script>
+    const ws = new WebSocket("{{ fullurl(request, "/sock", scheme="ws") }}")
+    ws.onmessage = (e) => console.log(e.data)
+    function send() {
+        ws.send('hhh')
+    }
+</script>
 {% endblock %}
