@@ -2,7 +2,6 @@ import base64
 import hashlib
 import random
 import secrets
-import smtplib
 from pywebpush import webpush
 
 import bcrypt
@@ -12,9 +11,8 @@ import json
 from Crypto.Random import get_random_bytes
 from Crypto.Hash import SHA256
 
-from mitama.db import BaseDatabase, func, ForeignKey, relationship, Table, backref
-from mitama.db.types import Column, Group, Integer, LargeBinary
-from mitama.db.types import Node as NodeType
+from mitama.db import ForeignKey, relationship, Table, backref
+from mitama.db.types import Column, LargeBinary
 from mitama.db.types import String
 from mitama.db.model import UUID
 from mitama.noimage import load_noimage_group, load_noimage_user
@@ -24,12 +22,15 @@ from .core_db import db
 
 secret = secrets.token_hex(32)
 
+
 class AuthorizationError(Exception):
     INVALID_TOKEN = 0
     WRONG_PASSWORD = 1
-    USER_NOT_FOUND= 2
+    USER_NOT_FOUND = 2
+
     def __init__(self, code):
         self.code = code
+
     @property
     def message(self):
         return [
@@ -37,21 +38,32 @@ class AuthorizationError(Exception):
             "パスワードが間違っています",
             "ユーザーが見つかりません"
         ][self.code]
+
     def __str__(self):
         return self.message
+
 
 user_group = Table(
     "mitama_user_group",
     db.metadata,
     Column("_id", String(64), default=UUID(), primary_key=True),
-    Column("group_id", String(64), ForeignKey("mitama_group._id", ondelete="CASCADE")),
-    Column("user_id", String(64), ForeignKey("mitama_user._id", ondelete="CASCADE")),
+    Column(
+        "group_id",
+        String(64),
+        ForeignKey("mitama_group._id", ondelete="CASCADE")
+    ),
+    Column(
+        "user_id",
+        String(64),
+        ForeignKey("mitama_user._id", ondelete="CASCADE")
+    ),
 )
+
 
 class UserGroup(db.Model):
     __table__ = user_group
     _id = user_group.c._id
-    group_id= user_group.c.group_id
+    group_id = user_group.c.group_id
     user_id = user_group.c.user_id
     user = relationship("User")
     group = relationship("Group")
@@ -88,7 +100,7 @@ class AbstractNode(object):
 
     @property
     def icon(self):
-        if self._icon != None:
+        if self._icon is not None:
             icon = self._icon
         else:
             icon = self.load_noimage()
@@ -111,7 +123,12 @@ class AbstractNode(object):
     def icon_to_dataurl(self):
         f = magic.Magic(mime=True, uncompress=True)
         mime = f.from_buffer(self.icon)
-        return "data:" + mime + ";base64," + base64.b64encode(self.icon).decode()
+        return "".join([
+            "data:",
+            mime,
+            ";base64,",
+            base64.b64encode(self.icon).decode()
+        ])
 
     @classmethod
     def add_name_proxy(cls, fn):
@@ -128,14 +145,15 @@ class AbstractNode(object):
     @classmethod
     def retrieve(cls, _id=None, screen_name=None, **kwargs):
         if _id is not None:
-            return super().retrieve(_id = _id)
+            return super().retrieve(_id=_id)
         elif screen_name is not None:
-            return super().retrieve(_screen_name = screen_name)
+            return super().retrieve(_screen_name=screen_name)
         else:
             return super().retrieve(**kwargs)
 
     def __eq__(self, other):
         return self._id == other._id
+
 
 class User(AbstractNode, db.Model):
     """ユーザーのモデルクラスです
@@ -148,7 +166,12 @@ class User(AbstractNode, db.Model):
     """
 
     __tablename__ = "mitama_user"
-    _id = Column(String(64), default=UUID("user"), primary_key = True, nullable=False)
+    _id = Column(
+        String(64),
+        default=UUID("user"),
+        primary_key=True,
+        nullable=False
+    )
     _project = None
     _token = Column(String(64))
     email = Column(String(64), nullable=False)
@@ -168,7 +191,9 @@ class User(AbstractNode, db.Model):
         return load_noimage_user()
 
     def password_check(self, password):
-        password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
+        password = base64.b64encode(
+            hashlib.sha256(password.encode() * 10).digest()
+        )
         password_ = self.password
         if isinstance(password_, str):
             password_ = password_.encode()
@@ -186,9 +211,11 @@ class User(AbstractNode, db.Model):
             user = cls.retrieve(_screen_name=screen_name)
             if user is None:
                 raise AuthorizationError(AuthorizationError.USER_NOT_FOUND)
-        except:
+        except Exception:
             raise AuthorizationError(AuthorizationError.USER_NOT_FOUND)
-        password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
+        password = base64.b64encode(
+            hashlib.sha256(password.encode() * 10).digest()
+        )
         password_ = user.password
         if isinstance(password_, str):
             password_ = password_.encode()
@@ -208,13 +235,23 @@ class User(AbstractNode, db.Model):
         project = self._project
         if project.password_validation is None:
             return password
-        MIN_PASSWORD_LEN = project.password_validation.get('min_password_len', None)
-        COMPLICATED_PASSWORD = project.password_validation.get('complicated_password', False)
+        MIN_PASSWORD_LEN = project.password_validation.get(
+            'min_password_len',
+            None
+        )
+        COMPLICATED_PASSWORD = project.password_validation.get(
+            'complicated_password',
+            False
+        )
 
         if MIN_PASSWORD_LEN and len(password) < MIN_PASSWORD_LEN:
             raise ValueError('パスワードは{}文字以上である必要があります'.format(MIN_PASSWORD_LEN))
 
-        if COMPLICATED_PASSWORD and (not any(c.isdigit() for c in password)) or (not any(c.isalpha() for c in password)):
+        if (
+            COMPLICATED_PASSWORD and (
+                not any(c.isdigit() for c in password)
+            ) or (not any(c.isalpha() for c in password))
+        ):
             raise ValueError('パスワードは数字とアルファベットの両方を含む必要があります')
 
         return password
@@ -227,7 +264,9 @@ class User(AbstractNode, db.Model):
         """
         password = self.valid_password(password)
         salt = bcrypt.gensalt()
-        password = base64.b64encode(hashlib.sha256(password.encode() * 10).digest())
+        password = base64.b64encode(
+            hashlib.sha256(password.encode() * 10).digest()
+        )
         self.password = bcrypt.hashpw(password, salt)
 
     def mail(self, subject, body, type="html"):
@@ -235,7 +274,10 @@ class User(AbstractNode, db.Model):
 
     def get_jwt(self):
         nonce = "".join([str(random.randint(0, 9)) for i in range(16)])
-        result = jwt.encode({"id": self._id, "nonce": nonce}, secret, algorithm="HS256")
+        result = jwt.encode({
+            "id": self._id,
+            "nonce": nonce
+        }, secret, algorithm="HS256")
         return result
 
     @classmethod
@@ -247,7 +289,7 @@ class User(AbstractNode, db.Model):
         """
         try:
             result = jwt.decode(token, secret, algorithms="HS256")
-        except jwt.exceptions.InvalidTokenError as err:
+        except jwt.exceptions.InvalidTokenError:
             raise AuthorizationError(AuthorizationError.INVALID_TOKEN)
         return cls.retrieve(result["id"])
 
@@ -272,6 +314,7 @@ class User(AbstractNode, db.Model):
         for subscription in self.subscriptions:
             subscription.push(data)
 
+
 class Group(AbstractNode, db.Model):
     """グループのモデルクラスです
 
@@ -282,7 +325,12 @@ class Group(AbstractNode, db.Model):
     """
 
     __tablename__ = "mitama_group"
-    _id = Column(String(64), default=UUID("group"), primary_key=True, nullable=False)
+    _id = Column(
+        String(64),
+        default=UUID("group"),
+        primary_key=True,
+        nullable=False
+    )
     _project = None
     users = relationship(
         "User",
@@ -298,8 +346,8 @@ class Group(AbstractNode, db.Model):
         profile = super().to_dict()
         if not only_profile:
             profile["parent"] = self.parent.to_dict()
-            profile["groups"] = [n.to_dict(True) for n in self.groups ]
-            profile["users"] = [n.to_dict(True) for n in self.users ]
+            profile["groups"] = [n.to_dict(True) for n in self.groups]
+            profile["users"] = [n.to_dict(True) for n in self.users]
         return profile
 
     def load_noimage(self):
@@ -311,7 +359,7 @@ class Group(AbstractNode, db.Model):
 
     @_classproperty
     def relations(cls):
-        return relation("mitama_group._id", cascade="all, delete")
+        return relationship("mitama_group._id", cascade="all, delete")
 
     @_classproperty
     def relation_or_null(cls):
@@ -319,7 +367,7 @@ class Group(AbstractNode, db.Model):
 
     @classmethod
     def tree(cls):
-        return Group.query.filter(Group.parent == None).all()
+        return Group.query.filter(Group.parent is None).all()
 
     def append(self, node):
         if isinstance(node, User):
@@ -337,7 +385,9 @@ class Group(AbstractNode, db.Model):
             elif isinstance(node, Group):
                 self.groups.append(node)
             else:
-                raise TypeError("Appending object must be Group or User instance")
+                raise TypeError(
+                    "Appending object must be Group or User instance"
+                )
         self.query.session.commit()
 
     def remove(self, node):
@@ -352,7 +402,9 @@ class Group(AbstractNode, db.Model):
     def remove_all(self, nodes):
         for node in nodes:
             if not isinstance(node, Group) and not isinstance(node, User):
-                raise TypeError("Appending object must be Group or User instance")
+                raise TypeError(
+                    "Appending object must be Group or User instance"
+                )
             if isinstance(node, Group):
                 self.groups.remove(node)
             else:
@@ -400,6 +452,9 @@ class Group(AbstractNode, db.Model):
         else:
             raise TypeError("Checking object must be Group or User instance")
 
+    def __contains__(self, node):
+        return self.is_in(node)
+
     def delete(self):
         """グループを削除します"""
         from mitama.app.hook import HookRegistry
@@ -428,20 +483,22 @@ class Group(AbstractNode, db.Model):
             for group in self.groups:
                 group.mail(subject, body, type, to_all)
 
+
 def get_random_token():
     s = get_random_bytes(32)
     h = SHA256.new()
     h.update(s)
     return h.hexdigest()
 
+
 class UserInvite(db.Model):
     __tablename__ = "mitama_user_invite"
-    token = Column(String(64), default=get_random_token, unique = True)
+    token = Column(String(64), default=get_random_token, unique=True)
     email = Column(String(255))
     screen_name = Column(String(255))
     name = Column(String(255))
     _icon = Column(LargeBinary)
-    roles = Column(String(255), default = "")
+    roles = Column(String(255), default="")
 
     def load_noimage(self):
         return load_noimage_user()
@@ -453,24 +510,47 @@ class UserInvite(db.Model):
     def icon_to_dataurl(self):
         f = magic.Magic(mime=True, uncompress=True)
         mime = f.from_buffer(self.icon)
-        return "data:" + mime + ";base64," + b64encode(self.icon).decode()
+        return ''.join([
+            "data:",
+            mime,
+            ";base64,",
+            base64.b64encode(self.icon).decode()
+        ])
 
     def mail(self, subject, body, type="html"):
         self._project.send_mail(self.email, subject, body, type)
 
+
 role_user = Table(
     "mitama_role_user",
     db.metadata,
-    Column("role_id", String(64), ForeignKey("mitama_role._id", ondelete="CASCADE")),
-    Column("user_id", String(64), ForeignKey("mitama_user._id", ondelete="CASCADE"))
+    Column(
+        "role_id",
+        String(64),
+        ForeignKey("mitama_role._id", ondelete="CASCADE")
+    ),
+    Column(
+        "user_id",
+        String(64),
+        ForeignKey("mitama_user._id", ondelete="CASCADE")
+    )
 )
 
 role_group = Table(
     "mitama_role_group",
     db.metadata,
-    Column("role_id", String(64), ForeignKey("mitama_role._id", ondelete="CASCADE")),
-    Column("group_id", String(64), ForeignKey("mitama_group._id", ondelete="CASCADE"))
+    Column(
+        "role_id",
+        String(64),
+        ForeignKey("mitama_role._id", ondelete="CASCADE")
+    ),
+    Column(
+        "group_id",
+        String(64),
+        ForeignKey("mitama_group._id", ondelete="CASCADE")
+    )
 )
+
 
 class Role(db.Model):
     __tablename__ = "mitama_role"
@@ -508,15 +588,25 @@ role_relation = Table(
     "mitama_role_relation",
     db.metadata,
     Column("_id", String(64), default=UUID(), primary_key=True),
-    Column("role_id", String(64), ForeignKey("mitama_inner_role._id", ondelete="CASCADE")),
-    Column("relation_id", String(64), ForeignKey("mitama_user_group._id", ondelete="CASCADE"))
+    Column(
+        "role_id",
+        String(64),
+        ForeignKey("mitama_inner_role._id", ondelete="CASCADE")
+    ),
+    Column(
+        "relation_id",
+        String(64),
+        ForeignKey("mitama_user_group._id", ondelete="CASCADE")
+    )
 )
+
 
 class RoleRelation(db.Model):
     __table__ = role_relation
     _id = role_relation.c._id
     role_id = role_relation.c.role_id
     relation_id = role_relation.c.relation_id
+
 
 class InnerRole(db.Model):
     __tablename__ = "mitama_inner_role"
@@ -543,10 +633,19 @@ class InnerRole(db.Model):
         relation = UserGroup.retrieve(group=group, user=user)
         return relation in self.relations
 
+
 class Node(db.Model):
     __tablename__ = "mitama_node"
-    user_id = Column(String(64), ForeignKey("mitama_user._id", ondelete="CASCADE"), unique=True)
-    group_id = Column(String(64), ForeignKey("mitama_group._id", ondelete="CASCADE"), unique=True)
+    user_id = Column(
+        String(64),
+        ForeignKey("mitama_user._id", ondelete="CASCADE"),
+        unique=True
+    )
+    group_id = Column(
+        String(64),
+        ForeignKey("mitama_group._id", ondelete="CASCADE"),
+        unique=True
+    )
     user = relationship(User)
     group = relationship(Group)
 
@@ -581,10 +680,35 @@ class Node(db.Model):
     def object(self):
         return self.user if self.user is not None else self.group
 
+    def is_ancestor(self, node):
+        if self.group is not None:
+            return self.group.is_ancestor(node)
+        else:
+            return False
+
+    def is_descendant(self, node):
+        if self.group is not None:
+            return self.group.is_descendant(node)
+        else:
+            return False
+
+    def is_in(self, node):
+        if self.group is not None:
+            return self.group.is_in(node)
+        else:
+            return False
+
+    def __contains__(self, node):
+        return self.is_in(node)
+
+
 class PushSubscription(db.Model):
     __tablename__ = "mitama_push_subscription"
     _project = None
-    user_id = Column(String(64), ForeignKey("mitama_user._id", ondelete="CASCADE"))
+    user_id = Column(
+        String(64),
+        ForeignKey("mitama_user._id", ondelete="CASCADE")
+    )
     user = relationship("User", backref="subscriptions")
     subscription = Column(String(1024))
 

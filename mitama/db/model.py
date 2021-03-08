@@ -10,22 +10,24 @@
 
 import uuid
 
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import ColumnProperty, class_mapper
 from sqlalchemy.types import TypeDecorator
 
 from mitama._extra import _classproperty, tosnake
 
-from .types import Column, Group, Integer, LargeBinary, Node, String
+from .types import Column, Integer, String
 from .event import Event
 
-def UUID(prefix = None):
+
+def UUID(prefix=None):
     def genUUID():
         s = str(uuid.uuid4())
         if prefix is not None:
             s = prefix + "-" + s
         return s
     return genUUID
+
 
 class Model:
     prefix = None
@@ -56,13 +58,13 @@ class Model:
             impl = Integer
 
             def process_bind_param(self, value, dialect):
-                if value == None:
+                if value is None:
                     return None
                 else:
                     return value._id
 
             def process_result_value(self, value, dialect):
-                if value == None:
+                if value is None:
                     return None
                 else:
                     user = cls.retrieve(value)
@@ -72,7 +74,11 @@ class Model:
 
     @declared_attr
     def __tablename__(cls):
-        return ("" if cls.prefix is None else cls.prefix + "_")  + tosnake(cls.__name__)
+        return (
+            ""
+            if cls.prefix is None
+            else cls.prefix + "_"
+        ) + tosnake(cls.__name__)
 
     def create(self):
         self.query.session.add(self)
@@ -105,15 +111,15 @@ class Model:
         setattr(cls, evt, Event())
 
     @classmethod
-    def list(cls, cond=None):
-        if cond != None:
-            return cls.query.filter(cond).all()
+    def list(cls, *args):
+        if len(args) > 0:
+            return cls.query.filter(args).all()
         else:
             return cls.query.filter().all()
 
     @classmethod
     def retrieve(cls, id=None, **kwargs):
-        if id != None:
+        if id is not None:
             node = cls.query.filter(cls._id == id).one()
         elif len(kwargs) > 0:
             q = cls.query

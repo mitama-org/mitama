@@ -25,6 +25,7 @@ from mitama._extra import _Singleton
 from .driver.sqlite3 import get_test_engine
 from .model import Model
 
+
 class _QueryProperty:
     def __init__(self, db):
         self.db = db
@@ -51,7 +52,11 @@ class DatabaseManager(_Singleton):
     def set_engine(cls, engine):
         cls.engine = engine
         cls.metadata = MetaData(cls.engine)
-        cls.Model = declarative_base(cls=Model, name="Model", metadata=cls.metadata)
+        cls.Model = declarative_base(
+            cls=Model,
+            name="Model",
+            metadata=cls.metadata
+        )
 
     @classmethod
     def start_session(cls):
@@ -98,10 +103,12 @@ class _Database():
         self.Model = self.make_declarative_base(model, metadata)
 
     def make_declarative_base(self, model=None, metadata=None):
-        if model == None:
+        if model is None:
             model = self.manager.Model
         if not isinstance(model, DeclarativeMeta):
-            model = declarative_base(cls=model, name="Model", metadata=metadata)
+            model = declarative_base(
+                cls=model, name="Model", metadata=metadata
+            )
         if metadata is not None and model.metadata is not metadata:
             model.metadata = metadata
         else:
@@ -135,10 +142,10 @@ class BaseDatabase(_Database):
 
     def __init__(self, prefix=None, model=None, metadata=None, query_class=Query):
         super().__init__(
-            model = model,
-            metadata = metadata,
-            query_class = query_class
+            model=model,
+            metadata=metadata,
+            query_class=query_class
         )
-        if prefix == None:
+        if prefix is None:
             prefix = _inspect.getmodule(self.__class__).__package__
         self.Model.prefix = prefix

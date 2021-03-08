@@ -2,8 +2,6 @@ import copy
 import inspect
 import re
 
-from .http import Request, Response
-
 
 class RoutingError(Exception):
     pass
@@ -87,7 +85,7 @@ class Router:
             for route in self.routes:
                 request.subpath = path
                 result = route.match(request)
-                if result != False:
+                if result is not False:
                     request, result, method = result
 
                     def get_response_handler(result, method):
@@ -104,7 +102,10 @@ class Router:
                                     def result(request):
                                         return inst(request, method)
 
-                            if i >= len(self.middlewares) or len(self.middlewares) == 0:
+                            if (
+                                i >= len(self.middlewares) or
+                                len(self.middlewares) == 0
+                            ):
                                 if callable(result):
                                     return result(request)
                                 else:
@@ -113,7 +114,9 @@ class Router:
                                     )
                             else:
                                 if hasattr(request, "app"):
-                                    middleware = self.middlewares[i](request.app)
+                                    middleware = self.middlewares[i](
+                                        request.app
+                                    )
                                 else:
                                     middleware = self.middlewares[i]()
                                 i += 1
