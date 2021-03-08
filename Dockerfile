@@ -1,14 +1,11 @@
 FROM alpine:3.13
-RUN mkdir /code
-ADD ./mitama /code/mitama
-ADD ./pyproject.toml /code/pyproject.toml
-ADD ./.git /code/.git
-WORKDIR /code
+RUN mkdir /pkg
+ADD /dist /pkg
+WORKDIR /pkg
 RUN apk add --no-cache python3 python3-dev py3-pip libmagic nginx build-base gcc libffi-dev openssl-dev rust cargo zlib-dev jpeg-dev nginx postfix git \
     && pip3 install --upgrade pip \
-    && pip3 install uwsgi poetry wheel poetry-dynamic-versioning \
-    && poetry config virtualenvs.create false \
-    && poetry install --no-dev \
+    && pip3 install uwsgi poetry \
+    && pip3 install /pkg/* \
     && apk del --purge zlib-dev gcc openssl-dev rust cargo python3-dev build-base libffi-dev
 RUN mkdir /conf
 RUN mkdir /log
