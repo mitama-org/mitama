@@ -3,8 +3,8 @@ import http
 import http.cookies
 import io
 import json
+import importlib
 import wsgiref.util as wsgiutil
-import uwsgi
 from urllib.parse import parse_qs
 
 
@@ -27,11 +27,18 @@ class _Cookies:
 
 class uWSGIWebSocket:
     def __init__(self, env):
-        uwsgi.websocket_handshake(env['HTTP_SEC_WEBSOCKET_KEY'], env.get('HTTP_ORIGIN', ''))
+        self.uwsgi = importlib.import_module("uwsgi")
+        self.uwsgi.websocket_handshake(
+            env['HTTP_SEC_WEBSOCKET_KEY'],
+            env.get('HTTP_ORIGIN', '')
+        )
+
     def receive(self):
-        return uwsgi.websocket_recv()
+        return self.uwsgi.websocket_recv()
+
     def send(self, message):
-        uwsgi.websocket_send(message)
+        self.uwsgi.websocket_send(message)
+
 
 class _RequestPayload:
     def __init__(self, field_storage):
