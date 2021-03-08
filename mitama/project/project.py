@@ -1,41 +1,36 @@
 import os
 import sys
 import importlib
-import subprocess
-import mitama
-import inspect
 import smtplib
 import argparse
-import uwsgi
 from traceback import print_exc
 from pathlib import Path, PosixPath
 from email.mime.text import MIMEText
-import json
 from mitama.app.http import Request
 from mitama.app import App, AppRegistry
-from mitama.app.app import _session_middleware
-from mitama.db import create_engine, DatabaseManager
+from mitama.db import DatabaseManager
 
 from . import commands
+
 
 class Project(App):
     def __init__(
         self,
         *app_builders,
-        port = 80,
-        password_validation = None,
-        project_dir = Path(os.getcwd()),
-        mail = {
+        port=80,
+        password_validation=None,
+        project_dir=Path(os.getcwd()),
+        mail={
             "host": "localhost",
             "port": 25,
             "address": "mitama@example.com"
         },
-        vapid = {
+        vapid={
             "private_key": None,
             "public_key": None,
             "mailto": None
         },
-        database = {
+        database={
             "type": "sqlite"
         },
         **kwargs
@@ -87,13 +82,38 @@ class Project(App):
             subparser = self._arg_parser.add_subparsers()
 
             cmd_run = subparser.add_parser("run", help="Start serving project")
-            cmd_run.add_argument("-p", "--port", help="serving port", type=int, default=8080)
+            cmd_run.add_argument(
+                "-p",
+                "--port",
+                help="serving port",
+                type=int,
+                default=8080
+            )
             cmd_run.set_defaults(handler=commands.run)
-            cmd_auth= subparser.add_parser("auth", help="Authenticate user identified by screen name and password")
-            cmd_auth.add_argument("-u", "--user", help="user's screen name", type=str)
-            cmd_auth.add_argument("-p", "--password", help="password", type=str, nargs="?", default="", const="")
+            cmd_auth = subparser.add_parser(
+                "auth",
+                help="Authenticate user identified by screen name and password"
+            )
+            cmd_auth.add_argument(
+                "-u",
+                "--user",
+                help="user's screen name",
+                type=str
+            )
+            cmd_auth.add_argument(
+                "-p",
+                "--password",
+                help="password",
+                type=str,
+                nargs="?",
+                default="",
+                const=""
+            )
             cmd_auth.set_defaults(handler=commands.auth)
-            cmd_uninstall = subparser.add_parser("uninstall", help="Uninstall app from project clearly")
+            cmd_uninstall = subparser.add_parser(
+                "uninstall",
+                help="Uninstall app from project clearly"
+            )
             cmd_uninstall.add_argument("app", help="app's screen name")
             cmd_uninstall.set_defaults(handler=commands.uninstall)
         return self._arg_parser
@@ -130,7 +150,14 @@ class Project(App):
             DatabaseManager.close_session()
         return body
 
-def include(package, screen_name=None, project_dir=None, project_root_dir=None, path=None):
+
+def include(
+    package,
+    screen_name=None,
+    project_dir=None,
+    project_root_dir=None,
+    path=None
+):
     if str(project_dir) not in sys.path:
         sys.path.append(str(project_dir))
     if package not in sys.modules:
