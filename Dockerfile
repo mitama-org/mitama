@@ -5,8 +5,7 @@ WORKDIR /pkg
 RUN apk add --no-cache python3 python3-dev py3-pip libmagic nginx build-base gcc libffi-dev openssl-dev rust cargo zlib-dev jpeg-dev nginx postfix git \
     && pip3 install --upgrade pip \
     && pip3 install uwsgi poetry \
-    && pip3 install --find-links=/pkg mitama \
-    && apk del --purge zlib-dev gcc openssl-dev rust cargo python3-dev build-base libffi-dev
+    && pip3 install --find-links=/pkg mitama
 RUN mkdir /conf
 RUN mkdir /log
 RUN mkdir /project
