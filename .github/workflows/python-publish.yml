@@ -26,7 +26,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: dist
-        path: dist/
+        path: dist/*.tar.gz
   deploy-pypi:
     needs: build
     runs-on: ubuntu-latest
@@ -49,7 +49,7 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        twine upload dist/*
+        twine upload mitama-*.tar.gz
   deploy-docker:
     needs: build
     runs-on: ubuntu-latest
