@@ -11,6 +11,7 @@ import uuid
 from mitama.noimage import load_noimage_app
 
 from .http import Request, Response
+from mitama.db import DatabaseManager
 
 
 def dataurl(blob):
@@ -94,7 +95,7 @@ class App:
         if path[-1] == "/":
             path = path[0:-2]
         url = str(url)
-        url = url[len(path) :]
+        url = url[len(path):]
         return url
 
     @property
@@ -111,10 +112,29 @@ class App:
             return [user for user in arg if user.__class__.__name__ == "User"]
 
         def filter_group(arg):
-            return [group for group in arg if group.__class__.__name__ == "Group"]
+            return [
+                group
+                for group in arg
+                if group.__class__.__name__ == "Group"
+            ]
 
         def markdown_(text):
-            return Markup(markdown.markdown(text, extensions=['fenced_code', 'def_list', 'attr_list', 'abbr', 'footnotes', 'tables', 'wikilinks', 'toc', 'nl2br']))
+            return Markup(
+                markdown.markdown(
+                    text,
+                    extensions=[
+                        'fenced_code',
+                        'def_list',
+                        'attr_list',
+                        'abbr',
+                        'footnotes',
+                        'tables',
+                        'wikilinks',
+                        'toc',
+                        'nl2br'
+                    ]
+                )
+            )
 
         self._view.filters["user"] = filter_user
         self._view.filters["group"] = filter_group
@@ -133,7 +153,7 @@ class App:
 
     def match(self, request):
         result = self.router.match(request)
-        if result == False:
+        if result is False:
             return False
         else:
             request, handle, method = result
@@ -154,8 +174,9 @@ class App:
 
     def model(self, modelname):
         for model in self.models:
-            if model.__class__.__name__ == modelname:
+            if model.__name__ == modelname:
                 return model
+
 
 def _session_middleware():
     import base64
