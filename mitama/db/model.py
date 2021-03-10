@@ -17,7 +17,7 @@ from sqlalchemy.types import TypeDecorator
 from mitama._extra import _classproperty, tosnake
 
 from .types import Column, Integer, String
-from .event import Event
+from .event import EventManager
 
 
 def UUID(prefix=None):
@@ -32,9 +32,11 @@ def UUID(prefix=None):
 class Model:
     prefix = None
     _id = Column(String(64), default=UUID(), primary_key=True, nullable=False)
-    create = Event()
-    update = Event()
-    delete = Event()
+    event = EventManager([
+        "create",
+        "update",
+        "delete"
+    ])
 
     @classmethod
     def attribute_names(cls):
@@ -84,31 +86,28 @@ class Model:
         self.query.session.add(self)
         self.query.session.commit()
         try:
-            self.on("create")()
+            self.event["create"]()
         except Exception:
             pass
 
     def update(self):
         self.query.session.commit()
         try:
-            self.on("update")()
+            self.event["update"]()
         except Exception:
             pass
 
     def delete(self):
         try:
-            self.on("delete")()
+            self.event["delete"]()
         except Exception:
             pass
         self.query.session.delete(self)
         self.query.session.commit()
 
-    def on(self, evt):
-        return getattr(self, evt)
-
     @classmethod
     def listen(cls, evt):
-        setattr(cls, evt, Event())
+        cls.event.listen(evt)
 
     @classmethod
     def list(cls, *args):
