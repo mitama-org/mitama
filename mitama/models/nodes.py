@@ -367,7 +367,7 @@ class Group(AbstractNode, db.Model):
 
     @classmethod
     def tree(cls):
-        return Group.query.filter(Group.parent != None).all()
+        return Group.query.filter(Group.parent == None).all()
 
     def append(self, node):
         if isinstance(node, User):
