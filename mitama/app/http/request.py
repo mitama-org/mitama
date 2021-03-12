@@ -129,7 +129,11 @@ class Request:
     @property
     def raw_path(self):
         return self.path + (
-            "?" + "&".join(["%s=%s" % (kv[0], kv[1][0]) for kv in self.query.items()])
+            "?" + "&".join([
+                "%s=%s" % (kv[0], kv[1][0])
+                for kv
+                in self.query.items()
+            ])
             if "QUERY_STRING" in self.environ
             else ""
         )

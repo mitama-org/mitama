@@ -20,14 +20,18 @@ class SessionMiddleware(Middleware):
                 request.user = User.check_jwt(sess["jwt_token"])
             else:
                 return Response.redirect(
-                    "/login?redirect_to="
+                    request.app.project.login_page
+                    + "?redirect_to="
                     + urllib.parse.quote(str(request.url), safe="")
                 )
-        except Exception as err:
+        except Exception:
             return Response.redirect(
-                "/login?redirect_to=" + urllib.parse.quote(str(request.url), safe="")
+                request.app.project.login_page
+                + "?redirect_to="
+                + urllib.parse.quote(str(request.url), safe="")
             )
         return handler(request)
+
 
 class BasicMiddleware(Middleware):
     """BASIC認証ミドルウェア"""
@@ -39,15 +43,24 @@ class BasicMiddleware(Middleware):
                 login, password = base64.b64decode(token).decode().split(":")
                 request.user = User.password_auth(login, password)
             else:
-                return Response(status=401, reason="Authorization Required", headers = {
-                    "WWW-Authenticate": "Basic realm=\"mitama authorization\""
-                })
+                return Response(
+                    status=401,
+                    reason="Authorization Required",
+                    headers={
+                        "WWW-Authenticate": "Basic realm=\"mitama authorization\""
+                    }
+                )
         except Exception as err:
             print(err)
-            return Response(status=401, reason="Authorization Required", headers = {
-                "WWW-Authenticate": "Basic realm=\"mitama authorization\""
-            })
+            return Response(
+                status=401,
+                reason="Authorization Required",
+                headers={
+                    "WWW-Authenticate": "Basic realm=\"mitama authorization\""
+                }
+            )
         return handler(request)
+
 
 class CsrfMiddleware(Middleware):
     def process(self, request, handler):

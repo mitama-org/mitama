@@ -20,6 +20,7 @@ class Project(App):
         port=80,
         password_validation=None,
         project_dir=Path(os.getcwd()),
+        login_page="/login",
         mail={
             "host": "localhost",
             "port": 25,
@@ -49,6 +50,7 @@ class Project(App):
         self.mail = mail
         self.vapid = vapid
         self.password_validation = password_validation
+        self.login_page = login_page
         self.apps = AppRegistry()
         self.apps.project = self
         for builder in app_builders:
