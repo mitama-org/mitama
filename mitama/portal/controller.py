@@ -1,12 +1,8 @@
-import json
-import traceback
 import io
-from uuid import uuid4
 
 from mitama.app import AppRegistry, Controller
 from mitama.app.http import Response
 from mitama.models import (
-    AuthorizationError,
     Group,
     User,
     Role,
@@ -30,11 +26,11 @@ from .forms import (
     SubscriptionForm,
     GroupCreateForm,
     GroupUpdateForm,
-    AppUpdateForm,
     SettingsForm
 )
 
 from PIL import Image
+
 
 def resize_icon(icon):
     if icon is None:
@@ -52,12 +48,17 @@ def resize_icon(icon):
     height *= scale
     resize = img.resize((int(width), int(height)), resample=Image.NEAREST)
     if width > height:
-        cropped = resize.crop((int((width-height)/2), 0, width - int((width-height)/2), height))
+        cropped = resize.crop(
+            (int((width-height)/2), 0, width - int((width-height)/2), height)
+        )
     else:
-        cropped = resize.crop((0, int((height-width)/2), width, height - int((height-width)/2)))
+        cropped = resize.crop(
+            (0, int((height-width)/2), width, height - int((height-width)/2))
+        )
     export = io.BytesIO()
     cropped.save(export, format="PNG")
     return export.getvalue()
+
 
 class SessionController(Controller):
     def login(self, request):
@@ -97,13 +98,17 @@ class RegisterController(Controller):
                 user.set_password(form["password"])
                 user.screen_name = form["screen_name"]
                 user.name = form["name"]
-                user.icon = resize_icon(form["icon"]) if form["icon"] is not None else user.icon
+                user.icon = (
+                    resize_icon(form["icon"])
+                    if form["icon"] is not None
+                    else user.icon
+                )
                 user.create()
                 sess["jwt_token"] = user.get_jwt()
-                roles = invite.roles;
+                roles = invite.roles
                 if len(roles) > 0:
                     for role_screen_name in invite.roles.split(":"):
-                        role = Role.retrieve(screen_name = role_screen_name)
+                        role = Role.retrieve(screen_name=role_screen_name)
                         role.append(user)
                 invite.delete()
                 return Response.redirect(self.app.convert_url("/"))
@@ -114,7 +119,9 @@ class RegisterController(Controller):
                     {
                         "error": err.messsage,
                         "name": form["name"] or invite.name,
-                        "screen_name": form["screen_name"] or invite.screen_name,
+                        "screen_name": (
+                            form["screen_name"] or invite.screen_name
+                        ),
                         "password": form["password"] or "",
                         "icon": icon,
                     },
@@ -129,7 +136,6 @@ class RegisterController(Controller):
         )
 
     def setup(self, request):
-        sess = request.session()
         template = self.view.get_template("setup.html")
         if len(User.list()) > 0:
             return Response.redirect(self.app.convert_url("/login"))
@@ -142,7 +148,12 @@ class RegisterController(Controller):
                 user.create()
                 user.mail(
                     "Mitamaへようこそ",
-                    "下記リンクから、Mitamaに参加しましょう\n{}".format(self.app.convert_fullurl(request, "/signup?token=" + user.token))
+                    "下記リンクから、Mitamaに参加しましょう\n{}".format(
+                        self.app.convert_fullurl(
+                            request,
+                            "/signup?token=" + user.token
+                        )
+                    )
                 )
 
                 try:
@@ -217,6 +228,7 @@ class HomeController(Controller):
         return Response.render(template, {
             "welcome_message": welcome_message
         })
+
     def settings(self, request):
         template = self.view.get_template("settings.html")
         try:
@@ -235,20 +247,34 @@ class HomeController(Controller):
                 if form["role_screen_name"] is not None:
                     role = Role()
                     role.screen_name = form['role_screen_name']
-                    role.name = form['role_name'] if form['role_name'] is not None else form['role_screen_name']
+                    role.name = (
+                        form['role_name']
+                        if form['role_name'] is not None
+                        else form['role_screen_name']
+                    )
                     role.create()
-                for permission_screen_name, permission_roles in form['permission'].items():
-                    permission = Permission.retrieve(screen_name = permission_screen_name)
-                    permission.roles = [Role.retrieve(screen_name=role) for role in permission_roles]
+                for screen_name, roles in form['permission'].items():
+                    permission = Permission.retrieve(screen_name=screen_name)
+                    permission.roles = [
+                        Role.retrieve(screen_name=role) for role in roles
+                    ]
                     permission.update()
                 if form["inner_role_screen_name"] is not None:
                     inner_role = InnerRole()
                     inner_role.screen_name = form['inner_role_screen_name']
-                    inner_role.name = form['inner_role_name'] if form['inner_role_name'] is not None else form['inner_role_screen_name']
+                    inner_role.name = (
+                        form['inner_role_name']
+                        if form['inner_role_name'] is not None
+                        else form['inner_role_screen_name']
+                    )
                     inner_role.create()
-                for inner_permission_screen_name, inner_permission_roles in form['inner_permission'].items():
-                    inner_permission = InnerPermission.retrieve(screen_name=inner_permission_screen_name)
-                    inner_permission.roles = [InnerRole.retrieve(screen_name=role) for role in inner_permission_roles]
+                for screen_name, roles in form['inner_permission'].items():
+                    inner_permission = InnerPermission.retrieve(
+                        screen_name=screen_name
+                    )
+                    inner_permission.roles = [
+                        InnerRole.retrieve(screen_name=role) for role in roles
+                    ]
                     inner_permission.update()
                 with open(self.app.project_dir / "welcome_message.md", "w") as f:
                     f.write(welcome_message_)
@@ -322,7 +348,7 @@ class UsersController(Controller):
         )
 
     def cancel(self, req):
-        invite = Invite.retrieve(req.params["id"])
+        invite = UserInvite.retrieve(req.params["id"])
         invite.delete()
         return Response.redirect(self.app.convert_url("/users/invite"))
 
@@ -342,17 +368,25 @@ class UsersController(Controller):
         roles = Role.list()
         error = ""
         if req.method == "POST":
-            form = UserUpdateForm(req.post())
             try:
+                form = UserUpdateForm(req.post())
                 user.screen_name = form["screen_name"]
                 user.name = form["name"]
-                user.icon = resize_icon(form["icon"]) if form["icon"] is not None else user.icon
+                user.icon = (
+                    resize_icon(form["icon"])
+                    if form["icon"] is not None
+                    else user.icon
+                )
                 roles_ = []
                 for role in form["roles"]:
                     roles_.append(Role.retrieve(screen_name=role))
                 user.roles = roles_
                 user.update()
-                return Response.redirect(self.app.convert_url("/users/" + user.screen_name + "/settings"))
+                return Response.redirect(
+                    self.app.convert_url(
+                        "/users/" + user.screen_name + "/settings"
+                    )
+                )
             except Exception as err:
                 error = str(err)
         return Response.render(
@@ -374,8 +408,8 @@ class UsersController(Controller):
             return Response.redirect(self.app.convert_url("/"))
         error = ""
         if req.method == "POST":
-            form = UserPasswordUpdateForm(req.post())
             try:
+                form = UserPasswordUpdateForm(req.post())
                 if form["password"] != form["password_"]:
                     raise Exception("パスワードが一致しません")
                 user.set_password(form["password"])
@@ -398,19 +432,19 @@ class UsersController(Controller):
             return Response.redirect(self.app.convert_url("/"))
         error = ""
         if req.method == "POST":
-            form = SubscriptionForm(req.post())
             try:
+                form = SubscriptionForm(req.post())
                 if form["action"] == "subscribe":
                     subscription = PushSubscription()
                     subscription.subscription = form["subscription"]
                     subscription.create()
                     user.subscriptions.append(subscription)
                     user.update()
-                    error="通知の購読を設定しました"
+                    error = "通知の購読を設定しました"
                 else:
-                    subscription = PushSubscription.retrieve(subscription = form["subscription"])
+                    subscription = PushSubscription.retrieve(subscription=form["subscription"])
                     subscription.delete()
-                    error="通知の購読を解除しました"
+                    error = "通知の購読を解除しました"
             except Exception as err:
                 error = str(err)
         return Response.render(
@@ -443,14 +477,14 @@ class GroupsController(Controller):
         groups = Group.list()
         error = ""
         if req.method == "POST":
-            form = GroupCreateForm(req.post())
             try:
+                form = GroupCreateForm(req.post())
                 group = Group()
                 group.name = form["name"]
                 group.screen_name = form["screen_name"]
                 group.icon = resize_icon(form["icon"])
                 group.create()
-                if form["parent"] != None:
+                if form["parent"] is not None:
                     Group.retrieve(form["parent"]).append(group)
                 group.append(req.user)
                 return Response.redirect(self.app.convert_url("/groups"))
@@ -489,8 +523,8 @@ class GroupsController(Controller):
             if not group.is_in(u):
                 users.append(u)
         if req.method == "POST":
-            form = GroupUpdateForm(req.post())
             try:
+                form = GroupUpdateForm(req.post())
                 icon = resize_icon(form["icon"]) if form["icon"] is not None else group.icon
                 group.screen_name = form["screen_name"]
                 group.name = form["name"]
@@ -535,13 +569,13 @@ class GroupsController(Controller):
                 for uid in form.getlist("user"):
                     try:
                         nodes.append(User.retrieve(uid))
-                    except Exception as err:
+                    except Exception:
                         pass
             if "group" in form:
                 for gid in form.getlist("group"):
                     try:
                         nodes.append(Group.retrieve(gid))
-                    except Exception as err:
+                    except Exception:
                         pass
             group.append_all(nodes)
         except Exception:
@@ -580,7 +614,7 @@ class GroupsController(Controller):
     def accept(self, req):
         group = Group.retrieve(screen_name=req.params["id"])
         user = User.retrieve(req.params["uid"])
-        inner_role = InnerRole.retrieve(screen_name = "admin")
+        inner_role = InnerRole.retrieve(screen_name="admin")
         inner_role.append(group, user)
         return Response.redirect(
             self.app.convert_url("/groups/" + group.screen_name + "/settings")
@@ -589,7 +623,7 @@ class GroupsController(Controller):
     def forbit(self, req):
         group = Group.retrieve(screen_name=req.params["id"])
         user = User.retrieve(req.params["uid"])
-        inner_role = InnerRole.retrieve(screen_name = "admin")
+        inner_role = InnerRole.retrieve(screen_name="admin")
         inner_role.remove(group, user)
         return Response.redirect(
             self.app.convert_url("/groups/" + group.screen_name + "/settings")

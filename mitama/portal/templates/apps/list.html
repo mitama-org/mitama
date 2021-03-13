@@ -19,11 +19,6 @@
         </li>
     </ul>
     <div class='container'>
-        {% if permission('admin', request.user) %}
-        <div class='mb-3 mt-3'>
-            <a href='{{ url('/apps/settings') }}'><button class='btn btn-primary'>アプリ設定</button></a>
-        </div>
-        {% endif %}
         <div class="inner">
             <div class='app-list'>
             {% for app in apps %}
