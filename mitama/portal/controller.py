@@ -107,8 +107,8 @@ class RegisterController(Controller):
                 sess["jwt_token"] = user.get_jwt()
                 roles = invite.roles
                 if len(roles) > 0:
-                    for role_screen_name in invite.roles.split(":"):
-                        role = Role.retrieve(screen_name=role_screen_name)
+                    for role_id in invite.roles.split(":"):
+                        role = Role.retrieve(role_id)
                         role.append(user)
                 invite.delete()
                 return Response.redirect(self.app.convert_url("/"))
@@ -158,27 +158,21 @@ class RegisterController(Controller):
 
                 try:
                     owner = Role()
-                    owner.screen_name = "owner"
                     owner.name = "Owner"
                     owner.create()
                     manager = Role()
-                    manager.screen_name = "manager"
                     manager.name = "Manager"
                     manager.create()
                     normal = Role()
-                    normal.screen_name = "normal"
                     normal.name = "Normal"
                     normal.create()
                     inner_owner = InnerRole()
-                    inner_owner.screen_name = "owner"
                     inner_owner.name = "Owner"
                     inner_owner.create()
                     inner_manager = InnerRole()
-                    inner_manager.screen_name = "manager"
                     inner_manager.name = "Manager"
                     inner_manager.create()
                     inner_normal = InnerRole()
-                    inner_normal.screen_name = "normal"
                     inner_normal.name = "Normal"
                     inner_normal.create()
                 except Exception:

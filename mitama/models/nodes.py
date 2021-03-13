@@ -554,7 +554,6 @@ role_group = Table(
 
 class Role(db.Model):
     __tablename__ = "mitama_role"
-    screen_name = Column(String(64), unique=True, nullable=False)
     name = Column(String(64))
     users = relationship(
         "User",
@@ -610,7 +609,6 @@ class RoleRelation(db.Model):
 
 class InnerRole(db.Model):
     __tablename__ = "mitama_inner_role"
-    screen_name = Column(String(64), unique=True, nullable=False)
     name = Column(String(64))
     relations = relationship(
         "UserGroup",

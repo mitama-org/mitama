@@ -35,8 +35,8 @@
                     <td>
                         <input
                             type='checkbox'
-                            name='permission.{{permission.screen_name}}'
-                            value='{{role.screen_name}}'
+                            name='permission.{{permission._id}}'
+                            value='{{role._id}}'
                             {% if role in permission.roles %}
                             checked
                             {% endif %}
@@ -71,8 +71,8 @@
                     <td>
                         <input
                             type='checkbox'
-                            name='inner_permission.{{permission.screen_name}}'
-                            value='{{role.screen_name}}'
+                            name='inner_permission.{{permission._id}}'
+                            value='{{role._id}}'
                             {% if role in permission.roles %}
                             checked
                             {% endif %}
@@ -96,10 +96,6 @@
                     </div>
                     <div class='modal-body'>
                         <div class='mb-3'>
-                            <label class='form-label'>役割ID<span style='font-size:0.75rem'>(半角英数、ハイフン、アンダーバー)</span></label>
-                            <input class='form-control' type='text' name='role_screen_name' pattern='^[0-9a-zA-Z_-]+$'/>
-                        </div>
-                        <div class='mb-3'>
                             <label class='form-label'>役割名</label>
                             <input class='form-control' type='text' name='role_name'/>
                         </div>
@@ -118,10 +114,6 @@
                         <h5 class='modal-title'>グループ内役割を追加</h5>
                     </div>
                     <div class='modal-body'>
-                        <div class='mb-3'>
-                            <label class='form-label'>グループ内役割ID<span style='font-size:0.75rem'>(半角英数、ハイフン、アンダーバー)</span></label>
-                            <input class='form-control' type='text' name='inner_role_screen_name' pattern='^[0-9a-zA-Z_-]+$'/>
-                        </div>
                         <div class='mb-3'>
                             <label class='form-label'>グループ内役割名</label>
                             <input class='form-control' type='text' name='inner_role_name'/>
