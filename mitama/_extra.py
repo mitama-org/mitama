@@ -24,3 +24,11 @@ def tosnake(s):
     return re.sub(
         "(.[A-Z])", lambda x: x.group(1)[0] + "_" + x.group(1)[1], s
     ).lower()
+
+
+def deepupdate(base, other):
+    for k, v in other.items():
+        if isinstance(other[k], dict) and k in base:
+            deepupdate(base[k], v)
+        else:
+            base[k] = v

@@ -1,5 +1,6 @@
 from .fields import *
 from .errors import *
+from mitama._extra import deepupdate
 
 class Form:
     def __new__(cls, data=None):
@@ -23,13 +24,20 @@ class Form:
                 for k in data.keys():
                     if '.' in k:
                         k_ = k.split('.')
-                        name = k_[0]
-                        key = '.'.join(k_[1:])
+                        name = k_.pop(0)
+                        last_key = '.'.join(k_[(field.depth-1):])
+                        data_ = {}
                         if name == field.name:
                             if field.listed:
-                                field.data[key] = data.getlist(k)
+                                data_[last_key] = data.getlist(k)
                             else:
-                                field.data[key] = data.get(k)
+                                data_[last_key] = data.get(k)
+                            if field.depth > 1:
+                                for k__ in k_[:(field.depth-1)]:
+                                    data_ = {
+                                        k__: data_
+                                    }
+                            deepupdate(field.data, data_)
             elif field.listed:
                 field.data = data.getlist(field.name)
             elif field.name in data:
