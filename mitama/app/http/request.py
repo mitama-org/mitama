@@ -116,7 +116,11 @@ class Request:
 
     @property
     def scheme(self):
-        return wsgiutil.guess_scheme(self.environ)
+        return (
+            self.environ["wsgi.url_scheme"]
+            if "wsgi.url_scheme" in self.environ
+            else wsgiutil.guess_scheme(self.environ)
+        )
 
     @property
     def host(self):
