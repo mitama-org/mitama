@@ -15,8 +15,7 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.sql import *
 from sqlalchemy.types import *
 from sqlalchemy.orm import *
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.declarative.api import DeclarativeMeta
+from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 from sqlalchemy.orm.exc import UnmappedClassError
 from sqlalchemy.sql import func
 
