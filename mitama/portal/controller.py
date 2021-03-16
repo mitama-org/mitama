@@ -240,12 +240,7 @@ class HomeController(Controller):
                 welcome_message_ = form["welcome_message"]
                 if form["role_screen_name"] is not None:
                     role = Role()
-                    role.screen_name = form['role_screen_name']
-                    role.name = (
-                        form['role_name']
-                        if form['role_name'] is not None
-                        else form['role_screen_name']
-                    )
+                    role.name = form['role_name']
                     role.create()
                 for screen_name, roles in form['permission'].items():
                     permission = Permission.retrieve(screen_name=screen_name)
@@ -255,19 +250,14 @@ class HomeController(Controller):
                     permission.update()
                 if form["inner_role_screen_name"] is not None:
                     inner_role = InnerRole()
-                    inner_role.screen_name = form['inner_role_screen_name']
-                    inner_role.name = (
-                        form['inner_role_name']
-                        if form['inner_role_name'] is not None
-                        else form['inner_role_screen_name']
-                    )
+                    inner_role.name = form['inner_role_name']
                     inner_role.create()
                 for screen_name, roles in form['inner_permission'].items():
                     inner_permission = InnerPermission.retrieve(
                         screen_name=screen_name
                     )
                     inner_permission.roles = [
-                        InnerRole.retrieve(screen_name=role) for role in roles
+                        InnerRole.retrieve(role) for role in roles
                     ]
                     inner_permission.update()
                 with open(self.app.project_dir / "welcome_message.md", "w") as f:
@@ -373,7 +363,7 @@ class UsersController(Controller):
                 )
                 roles_ = []
                 for role in form["roles"]:
-                    roles_.append(Role.retrieve(screen_name=role))
+                    roles_.append(Role.retrieve(role))
                 user.roles = roles_
                 user.update()
                 return Response.redirect(
@@ -530,8 +520,11 @@ class GroupsController(Controller):
                 if form['new_user'] is not None:
                     group.users.append(User.retrieve(form['new_user']))
                 for user, roles in form['inner_roles'].items():
-                    rel = UserGroup.retrieve(group = group, user = User.retrieve(user))
-                    rel.roles = [InnerRole.retrieve(screen_name = role) for role in roles]
+                    rel = UserGroup.retrieve(
+                        group=group,
+                        user=User.retrieve(user)
+                    )
+                    rel.roles = [InnerRole.retrieve(role) for role in roles]
                 group.update()
                 message = "変更を保存しました"
             except ValidationError as err:
@@ -604,24 +597,6 @@ class GroupsController(Controller):
             return Response.redirect(
                 self.app.convert_url("/groups/" + group.screen_name + "/settings")
             )
-
-    def accept(self, req):
-        group = Group.retrieve(screen_name=req.params["id"])
-        user = User.retrieve(req.params["uid"])
-        inner_role = InnerRole.retrieve(screen_name="admin")
-        inner_role.append(group, user)
-        return Response.redirect(
-            self.app.convert_url("/groups/" + group.screen_name + "/settings")
-        )
-
-    def forbit(self, req):
-        group = Group.retrieve(screen_name=req.params["id"])
-        user = User.retrieve(req.params["uid"])
-        inner_role = InnerRole.retrieve(screen_name="admin")
-        inner_role.remove(group, user)
-        return Response.redirect(
-            self.app.convert_url("/groups/" + group.screen_name + "/settings")
-        )
 
     def delete(self, req):
         template = self.view.get_template("group/delete.html")
