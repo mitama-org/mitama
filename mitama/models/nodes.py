@@ -15,6 +15,7 @@ from mitama.db import ForeignKey, relationship, Table, backref
 from mitama.db.types import Column, LargeBinary
 from mitama.db.types import String
 from mitama.db.model import UUID
+from mitama.db.dialects import mysql
 from mitama.noimage import load_noimage_group, load_noimage_user
 from mitama._extra import _classproperty
 
@@ -70,7 +71,11 @@ class UserGroup(db.Model):
 
 
 class AbstractNode(object):
-    _icon = Column(LargeBinary)
+    _icon = Column(
+        LargeBinary().with_variant(
+            mysql.MEDIUMBLOB, "mysql"
+        )
+    )
     _name = Column("name", String(255))
     _screen_name = Column("screen_name", String(255))
     _name_proxy = list()
