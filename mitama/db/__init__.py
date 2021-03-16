@@ -8,6 +8,7 @@ Databaseはシングルトンの接続のインスタンスを生成するクラ
 
 import inspect as _inspect
 
+import sqlalchemy
 from sqlalchemy import *
 from sqlalchemy.engine import *
 from sqlalchemy.schema import *

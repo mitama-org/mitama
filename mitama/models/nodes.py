@@ -15,8 +15,10 @@ from mitama.db import ForeignKey, relationship, Table, backref
 from mitama.db.types import Column, LargeBinary
 from mitama.db.types import String
 from mitama.db.model import UUID
-from mitama.db.dialects import mysql
 from mitama.noimage import load_noimage_group, load_noimage_user
+
+from sqlalchemy.dialects import mysql
+
 from mitama._extra import _classproperty
 
 from .core_db import db
