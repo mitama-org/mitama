@@ -43,8 +43,8 @@
             <label class='form-label'>役割</label>
             {% for role in roles %}
             <div class='form-check'>
-                <input class='form-check-input' id='{{role.screen_name}}-roles-input' type='checkbox' name='roles' value='{{ role.screen_name }}' {% if role in user.roles %}checked{% endif %}/>
-                <label class='form-check-label' for='{{role.screen_name}}-roles-input'>
+                <input class='form-check-input' id='{{role._id}}-roles-input' type='checkbox' name='roles' value='{{ role.screen_name }}' {% if role in user.roles %}checked{% endif %}/>
+                <label class='form-check-label' for='{{role._id}}-roles-input'>
                     {{ role.name }}
                 </label>
             </div>

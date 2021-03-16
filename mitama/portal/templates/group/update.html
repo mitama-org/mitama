@@ -47,7 +47,7 @@
             <label class='form-label'>役割</label>
             {% for role in roles %}
             <div class='form-check'>
-                <input class='form-check-input' type='checkbox' name='roles' value='{{ role.screen_name }}' {% if role in group.roles %}checked{% endif %}/>
+                <input class='form-check-input' type='checkbox' name='roles' value='{{role._id}}' {% if role in group.roles %}checked{% endif %}/>
                 <label class='form-check-label'>
                     {{ role.name }}
                 </label>
@@ -82,7 +82,7 @@
                     <div class='form-check form-check-inline'>
                         <input
                             class='form-check-input'
-                            id='inner_role_{{user.screen_name}}_{{inner_role.screen_name}}'
+                            id='inner_role_{{user._id}}_{{inner_role._id}}'
                             type='checkbox'
                             name='inner_roles.{{user._id}}'
                             value='{{inner_role.screen_name}}'
@@ -90,7 +90,7 @@
                             checked
                             {% endif %}
                             />
-                        <label class='form-check-label' for='inner_role_{{user.screen_name}}_{{inner_role.screen_name}}'>{{ inner_role.name }}</label>
+                        <label class='form-check-label' for='inner_role_{{user._id}}_{{inner_role._id}}'>{{ inner_role.name }}</label>
                     </div>
                     {% endfor %}
                     {% if permission('update_group', request.user) or inner_permission('remove_user', group, request.user) %}
