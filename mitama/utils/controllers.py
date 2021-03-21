@@ -42,8 +42,8 @@ def static_files(*paths):
                     with open(filename, "rb") as f:
                         return Response(body=f.read(), content_type=mime[0])
                 elif (filename / 'index.html').is_file():
-                    mime = guess_type(str(filename))
-                    with open(filename, "rb") as f:
+                    mime = guess_type(str(filename / 'index.html'))
+                    with open(filename / 'index.html', "rb") as f:
                         return Response(body=f.read(), content_type=mime[0])
             for path in self.paths:
                 filename = path / "404.html"
