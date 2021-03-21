@@ -41,6 +41,10 @@ def static_files(*paths):
                     mime = guess_type(str(filename)) or ("application/octet-stream",)
                     with open(filename, "rb") as f:
                         return Response(body=f.read(), content_type=mime[0])
+                elif (filename / 'index.html').is_dir():
+                    mime = guess_type(str(filename))
+                    with open(filename, "rb") as f:
+                        return Response(body=f.read(), content_type=mime[0])
             for path in self.paths:
                 filename = path / "404.html"
                 if filename.is_file():
