@@ -21,9 +21,7 @@ def static_files(*paths):
         デフォルトではアプリのパッケージ内の :file:`static/` の中身を配信する。
         """
 
-        paths = paths_
-
-        def __init__(self, app):
+        def __init__(self, app=None):
             super().__init__(app)
             app_mod_dir = Path(os.path.dirname(__file__))
             self.view = Environment(
@@ -56,6 +54,8 @@ def static_files(*paths):
                         )
             template = self.view.get_template("404.html")
             return Response.render(template, status=404)
+
+    StaticFileController.paths = paths_
 
     return StaticFileController
 

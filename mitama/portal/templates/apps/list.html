@@ -22,7 +22,7 @@
         <div class="inner">
             <div class='app-list'>
             {% for app in apps %}
-                {{ lists.appItem(app, link=url(app.path)) }}
+                {{ lists.appItem(app, link=app.path) }}
             {% endfor %}
             </div>
         </div>

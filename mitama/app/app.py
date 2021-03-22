@@ -5,6 +5,7 @@ from pathlib import Path
 
 import magic
 import markdown
+import traceback
 from jinja2 import Markup, Environment, ChoiceLoader, FileSystemLoader
 import uuid
 
@@ -56,8 +57,8 @@ class App:
         try:
             response = self(request)
             body = response.start(request, start_response)
-        except Exception as err:
-            print(err)
+        except Exception:
+            print(traceback.format_exc())
             body = self.error(request, 500).start(request, start_response)
         return body
 

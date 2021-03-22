@@ -3,7 +3,7 @@ import sys
 import importlib
 import smtplib
 import argparse
-from traceback import print_exc
+import traceback
 from pathlib import Path, PosixPath
 from email.mime.text import MIMEText
 from mitama.app.http import Request
@@ -143,8 +143,8 @@ class Project(App):
         try:
             DatabaseManager.start_session()
             body = super().wsgi(env, start_response)
-        except Exception as err:
-            print_exc(err)
+        except Exception:
+            print(traceback.format_exc())
             DatabaseManager.rollback_session()
             request = Request(env)
             body = self.error(request, 500).start(request, start_response)

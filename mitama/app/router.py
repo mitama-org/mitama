@@ -95,7 +95,10 @@ class Router:
                             nonlocal i
                             nonlocal result
                             if inspect.isclass(result):
-                                result = result(request.app)
+                                if hasattr(request, "app"):
+                                    result = result(request.app)
+                                else:
+                                    result = result()
                                 if method is not None:
                                     inst = result
 

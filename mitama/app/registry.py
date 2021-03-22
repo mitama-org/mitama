@@ -1,14 +1,11 @@
-import importlib
 import os
-import sys
 from pathlib import Path
-import json
 
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers import Observer
 
 from mitama._extra import _Singleton
-from mitama.app.http import Request, Response
+from mitama.app.http import Response
 from mitama.app.app import _session_middleware
 
 from .method import group
@@ -61,29 +58,17 @@ class AppRegistry(_Singleton):
         """アプリの一覧をリセットします"""
         self._map = dict()
 
-    def load_package(self, package, screen_name=None, path="/"):
-        project_dir = self.project.project_dir
-        if str(project_dir) not in sys.path:
-            sys.path.append(str(project_dir))
-        if app_name not in sys.modules:
-            init = importlib.__import__(app_name, fromlist=["AppBuilder"])
-        else:
-            init = importlib.reload(app_name)
-        builder = init.AppBuilder()
-        if screen_name is None:
-            screen_name = package
-        builder.set_package(package)
-        builder.set_screen_name(screen_name)
-        builder.set_project_root_dir(project_dir)
-        builder.set_project_dir(project_dir / screen_name)
-        builder.set_path(path)
-        app = builder.build()
-        return app
-
     def router(self):
         """アプリの情報に基づいてルーティングエンジンを生成します"""
-        if self._router == None:
+
+        from mitama.app.method import view
+        from mitama.utils.controllers import static_files
+        if self._router is None:
+            app_mod_dir = Path(os.path.dirname(__file__))
             router = Router(
+                [
+                    view("/_mitama/<path:path>", static_files(app_mod_dir / "static"))
+                ],
                 middlewares=[_session_middleware()]
             )
             for app in self:
@@ -118,7 +103,9 @@ def _session_middleware():
         fernet_key = session_key
 
         def __init__(self):
-            secret_key = base64.urlsafe_b64decode(self.fernet_key.encode("utf-8"))
+            secret_key = base64.urlsafe_b64decode(
+                self.fernet_key.encode("utf-8")
+            )
             cookie_storage = EncryptedCookieStorage(secret_key)
             self.storage = cookie_storage
 
@@ -137,4 +124,3 @@ def _session_middleware():
             return response
 
     return SessionMiddleware
-

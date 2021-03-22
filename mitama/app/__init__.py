@@ -22,9 +22,10 @@ class Controller:
     app = None
     view = None
 
-    def __init__(self, app):
+    def __init__(self, app=None):
         self.app = app
-        self.view = app.view
+        if app:
+            self.view = app.view
 
     def handle(self, request: Request):
         """リクエストハンドラ
@@ -37,7 +38,7 @@ class Controller:
         pass
 
     def __call__(self, request, method=None):
-        if method == None:
+        if method is None:
             return self.handle(request)
         else:
             func = getattr(self, method)
@@ -52,9 +53,10 @@ class Middleware(metaclass=ABCMeta):
     :param view: Middlewareが利用するJinja2のEnvironmentインスタンス
     """
 
-    def __init__(self, app):
+    def __init__(self, app=None):
         self.app = app
-        self.view = app.view
+        if app:
+            self.view = app.view
 
     @abstractmethod
     def process(self, request: Request, handler):
