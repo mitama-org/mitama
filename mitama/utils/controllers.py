@@ -37,6 +37,8 @@ def static_files(*paths):
                 path_ = req.params["path"]
                 if path_ == "/":
                     path_ = "./"
+                elif path_[0] == "/":
+                    path_ = path_[1:]
                 filename = path / path_
                 if filename.is_file():
                     mime = guess_type(str(filename)) or ("application/octet-stream",)
