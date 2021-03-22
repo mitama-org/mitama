@@ -20,8 +20,8 @@ DatabaseManager({
 })
 
 project = Project(
-    include("mitama.portal", path="/"),
-    include("hello", path="/hel"),
+    include("mitama.portal", path="/portal"),
+    include("hello", path="/"),
     project_dir = project_dir,
     vapid = {
         "public_key": "BBE84JBBsED5HMkkKspKFxf-1UcQfd3VXATjghJD3Gr0u2ewBcxmCpQFuRgs4vQeFknJeoler61xxiOyfXACakQ",

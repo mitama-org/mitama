@@ -102,7 +102,8 @@ def _session_middleware():
     class SessionMiddleware(Middleware):
         fernet_key = session_key
 
-        def __init__(self):
+        def __init__(self, app = None):
+            self.app = app
             secret_key = base64.urlsafe_b64decode(
                 self.fernet_key.encode("utf-8")
             )
