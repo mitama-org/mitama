@@ -65,10 +65,10 @@ class App:
     def __call__(self, request):
         if not isinstance(request, Request):
             request = Request.from_request(request)
+        request.app = self
         result = self.router.match(request)
         if result:
             request, handle, method = result
-            request.app = self
             return handle(request)
         else:
             return self.error(request, 404)

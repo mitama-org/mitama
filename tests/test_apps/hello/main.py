@@ -10,8 +10,6 @@ class App(App):
     description = 'This is my App.'
     router = Router(
         [
-            view("/", WelcomeController),
-            view("/sock", WelcomeController, 'sock'),
-            view("/static/<path:path>", static_files()),
+            view("<path:path>", static_files()),
         ]
     )
