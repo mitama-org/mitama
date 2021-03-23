@@ -110,11 +110,12 @@ class Model:
         cls.event.listen(evt)
 
     @classmethod
-    def list(cls, *args):
-        if len(args) > 0:
-            return cls.query.filter(args).all()
-        else:
-            return cls.query.filter().all()
+    def list(cls, **kwargs):
+        q = cls.query
+        if len(kwargs) > 0:
+            for attr, value in kwargs.items():
+                q = q.filter(getattr(cls, attr) == value)
+        return q.all()
 
     @classmethod
     def retrieve(cls, id=None, **kwargs):
