@@ -3,7 +3,6 @@
     --main-color: #ccc;
 }
 .no-item{
-    color: var(--main-text-lighter);
     font-size: 0.8rem;
     display: flex;
     justify-content: center;
@@ -21,7 +20,6 @@
     .profile{
         display: grid;
         text-decoration: none;
-        color: var(--main-text);
         grid-column: 2/3;
         grid-template-columns: 56px 1fr;
         grid-gap: 16px;
@@ -41,7 +39,6 @@
             }
             .screen-name{ 
                 font-size: 0.75rem;
-                color: var(--main-text-lighter);
             }
         }
     }
@@ -55,7 +52,6 @@
             }
             .screen-name {
                 font-size: 0.9rem;
-                color: #000;
                 font-weight: 600;
             }
             .name { 
@@ -103,7 +99,6 @@
     grid-template-columns: 56px 1fr;
     grid-gap: 16px;
     text-decoration: none;
-    color: var(--main-text);
     .icon {
         display: block;
         width: 56px;
@@ -124,7 +119,6 @@
         }
         .screen-name{ 
             font-size: 0.75rem;
-            color: var(--main-text-lighter);
         }
         .buttons{
             text-align: right;
@@ -150,7 +144,6 @@
         }
         .screen-name {
             font-size: 0.9rem;
-            color: #000;
             font-weight: 600;
         }
         .name { 
@@ -171,7 +164,6 @@
     grid-template-columns: 56px 1fr auto;
     grid-gap: 16px;
     text-decoration: none;
-    color: var(--main-text);
     padding: 8px;
     .icon{
         display: block;
@@ -190,7 +182,6 @@
         }
         .screen-name{ 
             font-size: 0.65rem;
-            color: var(--main-text-lighter);
         }
     }
     .actions{
@@ -209,7 +200,6 @@
             border-radius: 16px;
         }
         .screen-name {
-            color: #000;
             font-weight: 600;
             font-size: 0.9rem;
         }
@@ -228,7 +218,6 @@
 .app-item {
     display: grid;
     text-decoration: none;
-    color: var(--main-text);
     grid-template-columns: 56px 1fr;
     grid-gap: 16px;
     padding: 8px;
