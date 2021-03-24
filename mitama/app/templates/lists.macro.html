@@ -1,15 +1,15 @@
 {% macro userItem(user, id=None, link=None, small=False) -%}
-{% if link != None %}
+{% if link %}
 <a href="{{link}}" class="user-item {% if small %}small{% endif %}" id='{{id}}'>
 {% else %}
-<div href="{{link}}" class="user-item {% if small %}small{% endif %}" id='{{id}}'>
+<div class="user-item {% if small %}small{% endif %}" id='{{id}}'>
 {% endif %}
     <img src='{{ dataurl(user.icon) }}' class='icon' />
     <div class='detail'>
         <div class='name'>{{ user.name }}</div>
         <div class='screen-name'>{{ user.screen_name }}</div>
     </div>
-{% if link != None %}
+{% if link %}
 </a>
 {% else %}
 </div>
@@ -18,13 +18,21 @@
 {% macro groupItem(group, id=None, link=None, tree=False, small=False) -%}
 <div class="group-item {% if small %}small{% endif %}" id='{{id}}'>
     <div class='branch'></div>
-    <a {% if link != None %}href="{{link}}"{% endif %} class='profile'>
+    {% if link %}
+    <a href="{{link}}" class='profile'>
+    {% else %}
+    <div class='profile'>
+    {% endif %}
         <img src='{{ dataurl(group.icon) }}' class='icon' />
         <div class='detail'>
             <div class='name'>{{ group.name }}</div>
             <div class='screen-name'>{{ group.screen_name }}</div>
         </div>
+    {% if link %}
     </a>
+    {% else %}
+    </div>
+    {% endif %}
     {% if tree and group.groups.length != 0 %}
     <div class='children'>
         {{ tree(group.groups) }}
@@ -33,10 +41,10 @@
 </div>
 {%- endmacro %}
 {% macro appItem(app, id=None, link=None, small=False) -%}
-{% if link != None %}
+{% if link %}
 <a href="{{link}}" class="app-item {% if small %}small{% endif %}" id='{{id}}'>
 {% else %}
-<div href="{{link}}" class="app-item {% if small %}small{% endif %}" id='{{id}}'>
+<div class="app-item {% if small %}small{% endif %}" id='{{id}}'>
 {% endif %}
     <img src='{{ dataurl(app.icon) }}' class='icon' />
     <div class='detail'>
@@ -44,7 +52,7 @@
         <div class='screen-name'>{{ app.screen_name }}</div>
         <p class='description'>{{ app.description }}</p>
     </div>
-{% if link != None %}
+{% if link %}
 </a>
 {% else %}
 </div>
