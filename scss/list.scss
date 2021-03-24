@@ -44,10 +44,11 @@
     }
     &.small {
         .profile {
-            grid-template-columns: 32px 1fr;
+            grid-template-columns: 40px 1fr;
+            grid-gap: 8px;
             .icon {
-                width: 32px;
-                height: 32px;
+                width: 40px;
+                height: 40px;
                 border-radius: 16px;
             }
             .screen-name {
