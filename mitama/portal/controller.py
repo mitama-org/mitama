@@ -142,19 +142,6 @@ class RegisterController(Controller):
         if request.method == "POST":
             try:
                 form = SetupForm(request.post())
-                user = UserInvite()
-                user.email = form["email"]
-                user.roles = "owner"
-                user.create()
-                user.mail(
-                    "Mitamaへようこそ",
-                    "下記リンクから、Mitamaに参加しましょう\n{}".format(
-                        self.app.convert_fullurl(
-                            request,
-                            "/signup?token=" + user.token
-                        )
-                    )
-                )
 
                 try:
                     owner = Role()
@@ -199,6 +186,20 @@ class RegisterController(Controller):
                 InnerPermission.accept("remove_user", inner_owner)
                 InnerPermission.accept("add_group", inner_manager)
                 InnerPermission.accept("remove_group", inner_owner)
+
+                user = UserInvite()
+                user.email = form["email"]
+                user.roles = owner._id
+                user.create()
+                user.mail(
+                    "Mitamaへようこそ",
+                    "下記リンクから、Mitamaに参加しましょう\n{}".format(
+                        self.app.convert_fullurl(
+                            request,
+                            "/signup?token=" + user.token
+                        )
+                    )
+                )
 
                 template = self.view.get_template("confirm.html")
                 return Response.render(template)
