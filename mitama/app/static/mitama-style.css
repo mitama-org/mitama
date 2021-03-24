@@ -66,7 +66,7 @@
 .group-item.small .profile .icon {
   width: 40px;
   height: 40px;
-  border-radius: 16px;
+  border-radius: 4px;
 }
 .group-item.small .profile .screen-name {
   font-size: 0.9rem;

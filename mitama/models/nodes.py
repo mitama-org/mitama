@@ -278,6 +278,10 @@ class User(AbstractNode, db.Model):
 
     def mail(self, subject, body, type="html"):
         self._project.send_mail(self.email, subject, body, type)
+        try:
+            self.event["mail"](subject, body, type)
+        except Exception:
+            pass
 
     def get_jwt(self):
         nonce = "".join([str(random.randint(0, 9)) for i in range(16)])
@@ -320,6 +324,14 @@ class User(AbstractNode, db.Model):
     def push(self, data):
         for subscription in self.subscriptions:
             subscription.push(data)
+        try:
+            self.event["push"](data)
+        except Exception:
+            pass
+
+
+User.listen("push")
+
 
 
 class Group(AbstractNode, db.Model):
