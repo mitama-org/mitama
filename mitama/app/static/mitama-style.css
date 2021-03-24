@@ -18,7 +18,6 @@
 }
 
 .no-item {
-  color: var(--main-text-lighter);
   font-size: 0.8rem;
   display: flex;
   justify-content: center;
@@ -37,7 +36,6 @@
 .group-item .profile {
   display: grid;
   text-decoration: none;
-  color: var(--main-text);
   grid-column: 2/3;
   grid-template-columns: 56px 1fr;
   grid-gap: 16px;
@@ -59,19 +57,18 @@
 }
 .group-item .profile .detail .screen-name {
   font-size: 0.75rem;
-  color: var(--main-text-lighter);
 }
 .group-item.small .profile {
-  grid-template-columns: 32px 1fr;
+  grid-template-columns: 40px 1fr;
+  grid-gap: 8px;
 }
 .group-item.small .profile .icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 16px;
 }
 .group-item.small .profile .screen-name {
   font-size: 0.9rem;
-  color: #000;
   font-weight: 600;
 }
 .group-item.small .profile .name {
@@ -114,7 +111,6 @@
   grid-template-columns: 56px 1fr;
   grid-gap: 16px;
   text-decoration: none;
-  color: var(--main-text);
 }
 .user-item .icon,
 .invite-item .icon {
@@ -142,7 +138,6 @@
 .user-item .detail .screen-name,
 .invite-item .detail .screen-name {
   font-size: 0.75rem;
-  color: var(--main-text-lighter);
 }
 .user-item .detail .buttons,
 .invite-item .detail .buttons {
@@ -174,7 +169,6 @@
 .user-item.small .screen-name,
 .invite-item.small .screen-name {
   font-size: 0.9rem;
-  color: #000;
   font-weight: 600;
 }
 .user-item.small .name,
@@ -192,7 +186,6 @@
   grid-template-columns: 56px 1fr auto;
   grid-gap: 16px;
   text-decoration: none;
-  color: var(--main-text);
   padding: 8px;
 }
 .member-control-item .icon {
@@ -213,7 +206,6 @@
 }
 .member-control-item .detail .screen-name {
   font-size: 0.65rem;
-  color: var(--main-text-lighter);
 }
 .member-control-item .actions {
   display: flex;
@@ -232,7 +224,6 @@
   border-radius: 16px;
 }
 .member-control-item.small .screen-name {
-  color: #000;
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -249,7 +240,6 @@
 .app-item {
   display: grid;
   text-decoration: none;
-  color: var(--main-text);
   grid-template-columns: 56px 1fr;
   grid-gap: 16px;
   padding: 8px;

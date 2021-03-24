@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-css": "sass scss/style.scss mitama/portal/static/mitama-style.css",
+    "build-css": "sass scss/style.scss mitama/app/static/mitama-style.css",
     "watch-css": "nodemon -e scss -x \"npm run build-css\""
   },
   "repository": {
