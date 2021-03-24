@@ -50,6 +50,7 @@
 .group-item .profile .detail {
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 .group-item .profile .detail .name {
   font-size: 1rem;
